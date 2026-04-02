@@ -146,7 +146,7 @@ export class EmployeeController {
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL)
   @Render('new-employee')
   async newEmployee(
-    @Req() req, any,
+    @Req() req: any,
     @Query('line') line: string,
     @Query('departement') departement: string,
   ) {
@@ -161,6 +161,15 @@ export class EmployeeController {
       return key;
     });
     return { title: "New Employee", employees, allowedSites, KEYS };
+  }
+
+  @Get('no-manager')
+  async getNoManager(@Req() req: any, @Query('search') search: string) {
+    // const employees = await this.employeeService.getNoManager(req.session.user.site, search);
+    console.log("SEARCH:", search);
+    const employees = await this.employeeService.getNoManager("RABE", search);
+    console.log("EMPLOYEES:", employees);
+    return employees;
   }
 
   @Post('new-employee')

@@ -126,4 +126,8 @@ export class CreateEmployeeDto {
     @IsString()
     @IsNotEmpty()
     type!: string;
+
+    @IsString()
+    @IsOptional()
+    managerId?: string;
 }

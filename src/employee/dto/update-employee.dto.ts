@@ -127,4 +127,8 @@ export class UpdateEmployeeDto extends PartialType(CreateEmployeeDto) {
     @IsString()
     @IsNotEmpty()
     type!: string;
+
+    @IsString()
+    @IsOptional()
+    managerId?: string;
 }

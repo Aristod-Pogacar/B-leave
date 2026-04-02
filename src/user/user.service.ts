@@ -26,6 +26,7 @@ export class UserService {
   async getAdminUser() {
     const user = this.userRepo.create({
       id: 'superadmin',
+      matricule: 'SUPERADMIN',
       firstName: 'Super',
       name: 'Admin',
       phone: "-",

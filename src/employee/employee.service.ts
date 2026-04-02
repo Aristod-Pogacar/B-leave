@@ -3,7 +3,7 @@ import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Employee } from './entities/employee.entity';
-import { Repository } from 'typeorm';
+import { IsNull, Like, Repository } from 'typeorm';
 import * as ExcelJS from 'exceljs';
 import * as XLSX from 'xlsx';
 import { Leave } from 'src/leave/entities/leave.entity';
@@ -38,6 +38,21 @@ export class EmployeeService {
       employee.onehr_password = this.cryptoService.encrypt(data.onehr_password);
       await this.employeeRepository.save(employee);
     }
+  }
+
+  async getNoManager(site: string, search: string = "") {
+    const employees = await this.employeeRepository.find({
+      where: [
+        { manager: IsNull(), site: site, matricule: Like(`%${search}%`) },
+        { manager: IsNull(), site: site, fullname: Like(`%${search}%`) }
+      ],
+      select: [
+        'fullname',
+        'matricule',
+        'id'
+      ]
+    });
+    return employees;
   }
 
   private calculateAccruedLeave(year: number): number {

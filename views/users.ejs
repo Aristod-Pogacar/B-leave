@@ -108,7 +108,7 @@
                                                     <table class="table table-hover mb-0">
                                                         <thead>
                                                             <tr>
-                                                                <th>#</th>
+                                                                <th>Matricule</th>
                                                                 <th>First Name</th>
                                                                 <th>Last Name</th>
                                                                 <th>Site</th>
@@ -167,7 +167,7 @@
                                                                     } %>
                                                                     <tr>
                                                                         <td>
-                                                                            <%= i++ %>
+                                                                            <%= users.matricule %>
                                                                         </td>
                                                                         <td>
                                                                             <div
@@ -213,12 +213,15 @@
                                                                                         title="Edit">
                                                                                         <i class="feather-edit"></i>
                                                                                     </a>
-                                                                                    <a href="/user/delete-user/<%= users.id %>"
-                                                                                        class="avatar-text avatar-md"
-                                                                                        data-bs-toggle="tooltip"
-                                                                                        title="Delete">
-                                                                                        <i class="feather-trash"></i>
-                                                                                    </a>
+                                                                                    <% if(user.id !==users.id ) { %>
+                                                                                        <a href="/user/delete-user/<%= users.id %>"
+                                                                                            class="avatar-text avatar-md"
+                                                                                            data-bs-toggle="tooltip"
+                                                                                            title="Delete">
+                                                                                            <i
+                                                                                                class="feather-trash"></i>
+                                                                                        </a>
+                                                                                        <% } %>
                                                                                 </div>
                                                                                 <% } %>
                                                                         </td>

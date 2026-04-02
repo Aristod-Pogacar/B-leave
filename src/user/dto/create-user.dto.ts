@@ -7,6 +7,10 @@ export class CreateUserDto {
     name: string;
 
     @IsString()
+    @IsNotEmpty()
+    matricule: string;
+
+    @IsString()
     @IsOptional()
     firstName: string;
 

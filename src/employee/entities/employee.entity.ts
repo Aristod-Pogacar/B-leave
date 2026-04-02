@@ -1,5 +1,7 @@
 import { Leave } from 'src/leave/entities/leave.entity';
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { ManagerAssignation } from 'src/manager_assignation/entities/manager_assignation.entity';
+import { User } from 'src/user/entities/user.entity';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, JoinColumn, Index } from 'typeorm';
 
 @Entity('employees')
 export class Employee {
@@ -107,6 +109,11 @@ export class Employee {
 
     @OneToMany(() => Leave, leave => leave.employee)
     leaves: Leave[];
+
+    @Index()
+    @ManyToOne(() => User, user => user.employees, { nullable: true })
+    @JoinColumn({ name: 'manager_id' })
+    manager: User;
 
     @Column()
     app_password!: string;

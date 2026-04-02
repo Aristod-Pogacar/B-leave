@@ -6,9 +6,10 @@ import { Employee } from './entities/employee.entity';
 import { Leave } from 'src/leave/entities/leave.entity';
 import { LeaveService } from "src/leave/leave.service";
 import { CryptoService } from 'src/crypto/crypto.service';
+import { ManagerAssignation } from 'src/manager_assignation/entities/manager_assignation.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Leave, Employee])],
+  imports: [TypeOrmModule.forFeature([Leave, Employee, ManagerAssignation])],
   controllers: [EmployeeController],
   providers: [EmployeeService, LeaveService, CryptoService],
   exports: [EmployeeService, TypeOrmModule, CryptoService],

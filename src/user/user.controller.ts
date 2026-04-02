@@ -95,6 +95,64 @@ export class UserController {
     };
   }
 
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
+  @Post('new-user')
+  async register(@Body() body, @Req() req: any, @Res() res: any) {
+    if (body.password !== body.confirmPassword) {
+      const userSite = req.session.user.site;
+      const sites = this.getAllowedSitesForNewUsers(userSite)
+      const allowedKeys = this.enumAllowed(userSite);
+      return res.render('new-user', {
+        title: 'New user',
+        userRole: UserRole,
+        sites: sites,
+        allowedKeys: allowedKeys,
+        error: 'Passwords do not match'
+      });
+    }
+    if (body.phone == null || body.phone == undefined || body.phone == '') {
+      const userSite = req.session.user.site;
+      const sites = this.getAllowedSitesForNewUsers(userSite)
+      const allowedKeys = this.enumAllowed(userSite);
+      return res.render('new-user', {
+        title: 'New user',
+        userRole: UserRole,
+        sites: sites,
+        allowedKeys: allowedKeys,
+        error: 'Phone number is required'
+      });
+    }
+    if (body.matricule == null || body.matricule == undefined || body.matricule == '') {
+      const userSite = req.session.user.site;
+      const sites = this.getAllowedSitesForNewUsers(userSite)
+      const allowedKeys = this.enumAllowed(userSite);
+      return res.render('new-user', {
+        title: 'New user',
+        userRole: UserRole,
+        sites: sites,
+        allowedKeys: allowedKeys,
+        error: 'Phone number is required'
+      });
+    }
+    const user = await this.userService.create(body);
+
+    if (!user) {
+      const userSite = req.session.user.site;
+      const sites = this.getAllowedSitesForNewUsers(userSite)
+      const allowedKeys = this.enumAllowed(userSite);
+      return res.render('new-user', {
+        title: 'New user',
+        userRole: UserRole,
+        sites: sites,
+        allowedKeys: allowedKeys,
+        error: 'Invalid credentials'
+      });
+    }
+
+    return res.redirect('/user/list');
+  }
+
   @UseGuards(AuthGuard)
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)

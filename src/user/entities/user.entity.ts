@@ -1,4 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Employee } from 'src/employee/entities/employee.entity';
+import { ManagerAssignation } from 'src/manager_assignation/entities/manager_assignation.entity';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 
 export enum UserRole {
     // USER = 'USER',
@@ -23,6 +25,9 @@ export class User {
 
     @PrimaryGeneratedColumn('uuid')
     id: string;
+
+    @Column()
+    matricule: string;
 
     @Column()
     name: string;
@@ -78,4 +83,7 @@ export class User {
 
     @Column({ default: false })
     isArchived: boolean;
+
+    @OneToMany(() => Employee, employee => employee.manager)
+    employees: Employee[];
 }

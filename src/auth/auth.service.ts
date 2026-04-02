@@ -55,6 +55,7 @@ export class AuthService {
             console.log('🔥 SUPERADMIN LOGGED IN 🔥');
             return {
                 id: 'superadmin',
+                matricule: 'SUPERADMIN',
                 firstName: 'Super',
                 name: 'Admin',
                 email: process.env.SUPERADMIN_EMAIL,
@@ -64,8 +65,16 @@ export class AuthService {
             };
         }
 
+        const userLogin = email
+
         // 👇 Sinon vérification normale en base
-        const user = await this.userRepo.findOne({ where: { email } });
+        const user = await this.userRepo.findOne({
+            where: [
+                { email: userLogin },
+                { phone: userLogin },
+                { matricule: userLogin }
+            ]
+        });
 
         if (!user) return null;
 

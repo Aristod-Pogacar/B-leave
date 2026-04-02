@@ -24,6 +24,7 @@ import { PuppeteerManagerService } from './puppeteer-manager/puppeteer-manager.s
 import { ApiLeaveModule } from './api/leave/leave.module';
 import { ManagerAssignationModule } from './manager_assignation/manager_assignation.module';
 import path from 'path';
+import { ManagerAssignation } from './manager_assignation/entities/manager_assignation.entity';
 
 @Module({
   imports: [
@@ -54,7 +55,8 @@ import path from 'path';
       entities: [
         Leave,
         Employee,
-        User
+        User,
+        ManagerAssignation
       ],
       synchronize: true,
     }),

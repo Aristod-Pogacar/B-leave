@@ -40,14 +40,14 @@ export class AppController {
   }
 
   @Post('login')
-  async login(@Body() body, @Req() req: any, @Res() res: any) {
+  async login(@I18n() i18n: I18nContext, @Body() body, @Req() req: any, @Res() res: any) {
     const user = await this.authService.validateUser(
       body.email,
       body.password,
     );
 
     if (!user) {
-      return res.render('login', { error: 'Invalid credentials' });
+      return res.render('login', { error: 'Invalid credentials', t: (key: string) => i18n.t(key), title: 'Login' });
     }
 
     req.session.user = user;
