@@ -1,0 +1,143 @@
+<%- include('partials/head.ejs') %>
+
+    <body>
+        <%- include('partials/sidebar.ejs') %>
+            <%- include('partials/header.ejs') %>
+                <main class="nxl-container">
+                    <div class="nxl-content">
+                        <div class="page-header">
+                            <div class="page-header-left d-flex align-items-center">
+                                <div class="page-header-title">
+                                    <h5 class="m-b-10">Be-Leave</h5>
+                                </div>
+                                <ul class="breadcrumb">
+                                    <li class="breadcrumb-item">Leaves</li>
+                                    <li class="breadcrumb-item">Planning</li>
+                                </ul>
+                            </div>
+                            <div class="page-header-right ms-auto">
+                                <div class="page-header-right-items">
+                                    <div class="d-flex d-md-none">
+                                        <a href="javascript:void(0)" class="page-header-right-close-toggle">
+                                            <i class="feather-arrow-left me-2"></i>
+                                            <span>Back</span>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="d-md-none d-flex align-items-center">
+                                    <a href="javascript:void(0)" class="page-header-right-open-toggle">
+                                        <i class="feather-align-right fs-20"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- [ page-header ] end -->
+                        <div class="bg-white py-3 border-bottom rounded-0 p-md-0 mb-0">
+                            <div class="d-md-none d-flex align-items-center justify-content-between">
+                                <a href="javascript:void(0)" class="page-content-left-open-toggle">
+                                    <i class="feather-align-left fs-20"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <!-- [ Main Content ] start -->
+                        <div class="main-content">
+                            <div class="tab-content">
+                                <div class="tab-pane fade active show" id="overviewTab">
+                                    <div class="row">
+
+                                        <div class="col-xl-12">
+                                            <div class="card stretch stretch-full d-flex">
+                                                <div class="card-header">
+                                                    <div class="row w-100">
+                                                        <div class="col-md-2">
+                                                            <h4 class="header">Leave Plan</h4>
+                                                        </div>
+                                                        <div
+                                                            class="col-10 task-header d-md-flex align-items-center justify-content-between">
+                                                            <div class="me-4 w-75">
+                                                                <div class="d-flex align-items-center">
+                                                                    <label for="departementFilter"
+                                                                        class="form-label ms-3">Departement:</label>
+                                                                    <select class="form-select mx-3"
+                                                                        name="departementFilter" id="departementFilter">
+                                                                        <% departementList.forEach(function(departement)
+                                                                            { %>
+                                                                            <% if(departement==='HR' ) { %>
+                                                                                <option value="<%= departement %>"
+                                                                                    selected>
+                                                                                    <%= departement %>
+                                                                                </option>
+                                                                                <% } else { %>
+                                                                                    <option value="<%= departement %>">
+                                                                                        <%= departement %>
+                                                                                    </option>
+                                                                                    <% } %>
+                                                                                        <% }); %>
+                                                                    </select>
+                                                                    <label for="lineFilter"
+                                                                        class="form-label ms-3">Line:</label>
+                                                                    <select class="form-select mx-3" name="lineFilter"
+                                                                        id="lineFilter">
+                                                                        <% lineList.forEach(line=> { %>
+                                                                            <% if (line==='NULL' ) { %>
+                                                                                <option value="<%= line %>" selected>
+                                                                                    <%= line %>
+                                                                                </option>
+                                                                                <% } else { %>
+                                                                                    <option value="<%= line %>">
+                                                                                        <%= line %>
+                                                                                    </option>
+                                                                                    <% } %>
+                                                                                        <% }) %>
+                                                                    </select>
+                                                                    <label for="siteFilter"
+                                                                        class="form-label ms-3">Site:</label>
+                                                                    <select class="form-select mx-3" name="siteFilter"
+                                                                        id="siteFilter">
+                                                                        <% allowedSites.forEach(function(site) { %>
+                                                                            <% const maValeur=site ; const
+                                                                                index=allowedSites.indexOf(maValeur);
+                                                                                const maCle=(index !==-1) ? KEYS[index]
+                                                                                : "Inconnu" ; %>
+                                                                                <% if(site===user.site) { %>
+                                                                                    <option value="<%= site %>"
+                                                                                        selected>
+                                                                                        <%= maCle %>
+                                                                                    </option>
+                                                                                    <% } else { %>
+                                                                                        <option value="<%= site %>">
+                                                                                            <%= maCle %>
+                                                                                        </option>
+                                                                                        <% } %>
+                                                                                            <% }); %>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            <div class="">
+                                                                <div class="d-flex gap-2">
+                                                                    <% if(user.role !=="USER" ) { %>
+                                                                        <a href="/leave/new-leave"
+                                                                            class="btn btn-primary" title="New leave">
+                                                                            <i class="feather-plus me-2"></i>
+                                                                            <span>New Leave</span>
+                                                                        </a>
+                                                                        <% } %>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="card-body">
+                                                    <%- include('partials/planning-calendar') %>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <%- include('partials/footer.ejs') %>
+    </body>
+
+    </html>

@@ -1,0 +1,215 @@
+<%- include('partials/head.ejs') %>
+
+    <body>
+        <%- include('partials/sidebar.ejs') %>
+            <%- include('partials/header.ejs') %>
+                <main class="nxl-container">
+                    <div class="nxl-content">
+                        <div class="page-header">
+                            <div class="page-header-left d-flex align-items-center">
+                                <div class="page-header-title">
+                                    <h5 class="m-b-10">Be-Leave</h5>
+                                </div>
+                                <ul class="breadcrumb">
+                                    <li class="breadcrumb-item">Leaves</li>
+                                    <li class="breadcrumb-item">Simulate leave</li>
+                                </ul>
+                            </div>
+                            <div class="page-header-right ms-auto">
+                                <div class="page-header-right-items">
+                                    <div class="d-flex d-md-none">
+                                        <a href="javascript:void(0)" class="page-header-right-close-toggle">
+                                            <i class="feather-arrow-left me-2"></i>
+                                            <span>Back</span>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="d-md-none d-flex align-items-center">
+                                    <a href="javascript:void(0)" class="page-header-right-open-toggle">
+                                        <i class="feather-align-right fs-20"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- [ page-header ] end -->
+                        <div class="bg-white py-3 border-bottom rounded-0 p-md-0 mb-0">
+                            <div class="d-md-none d-flex align-items-center justify-content-between">
+                                <a href="javascript:void(0)" class="page-content-left-open-toggle">
+                                    <i class="feather-align-left fs-20"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <!-- [ Main Content ] start -->
+                        <div class="main-content">
+                            <div class="tab-content">
+                                <div class="tab-pane fade active show" id="overviewTab">
+                                    <div class="row">
+
+                                        <div class="col-xl-12">
+                                            <div class="card stretch stretch-full d-flex">
+                                                <div class="card-header">
+                                                    <h4 class="header">Simulate leave</h4>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="d-none" role="alert" id="message1">
+                                                        </div>
+                                                        <!-- ===== LEFT: FORM ===== -->
+                                                        <div class="col-md-6 border-end">
+
+                                                            <!-- Recherche Employé -->
+                                                            <div class="mb-3">
+                                                                <label class="form-label">Employee</label>
+                                                                <input type="text" class="form-control"
+                                                                    id="employeeSearch1" autocomplete="off"
+                                                                    placeholder="Search an employee..." required>
+                                                                <input type="text" class="input" name="employee"
+                                                                    id="employee1" hidden required>
+                                                                <input type="text" class="input" name="matricule"
+                                                                    id="matricule1" hidden required>
+                                                                <ul id="employeeResults1"
+                                                                    class="autocomplete-list ms-1 ps-0"></ul>
+                                                            </div>
+
+                                                            <!-- Type -->
+                                                            <div class="mb-3 d-none">
+                                                                <label class="form-label">Leave type</label>
+                                                                <select class="form-select" name="leave_type"
+                                                                    id="leave_type">
+                                                                    <option value="Local_Leave_AMD" selected>Local
+                                                                        leave
+                                                                    </option>
+                                                                </select>
+                                                            </div>
+
+                                                            <div class="row mb-3">
+                                                                <div class="col-md-8">
+                                                                    <label class="form-label">Date to simulate</label>
+                                                                    <input type="date" class="form-control"
+                                                                        name="simulate_date" id="simulate_date"
+                                                                        required>
+                                                                </div>
+                                                                <div class="col-md-4 pt-md-4 row">
+                                                                    <button type="button" class="btn btn-primary mt-2"
+                                                                        id="simulateButton">
+                                                                        Simulate
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Date début -->
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <label class="form-label">Starting date</label>
+                                                                    <input type="date" class="form-control"
+                                                                        name="start_date" id="startDate1">
+                                                                </div>
+
+                                                                <!-- Date fin -->
+                                                                <div class="col-md-6">
+                                                                    <label class="form-label">Ending date</label>
+                                                                    <input type="date" class="form-control"
+                                                                        name="end_date" id="endDate1">
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Raison -->
+                                                            <div class="mb-3">
+                                                                <label class="form-label">Remarks</label>
+                                                                <textarea class="form-control" name="reason1"
+                                                                    rows="3"></textarea>
+                                                            </div>
+                                                            <!-- <input type="submit" hidden> -->
+
+                                                        </div>
+
+                                                        <!-- ===== RIGHT: INFOS ===== -->
+                                                        <div class="col-md-6 row">
+
+                                                            <div class="card mb-3 shadow-sm col-md-6">
+                                                                <div class="card-header text-center fw-bold">
+                                                                    Actual leave balance
+                                                                </div>
+                                                                <div class="card-body">
+                                                                    <p class="mb-2">
+                                                                        <strong>Starting leave balance :</strong>
+                                                                        <span id="soldeDebut1">-</span>
+                                                                    </p>
+                                                                    <p class="mb-2">
+                                                                        <strong>Cumulated leaves :</strong>
+                                                                        <span id="soldeCumule1">-</span>
+                                                                    </p>
+                                                                    <p class="mb-2">
+                                                                        <strong>Taken leaves :</strong>
+                                                                        <span id="soldePris1">-</span>
+                                                                    </p>
+                                                                    <p class="mb-0">
+                                                                        <strong>Leaves left :</strong>
+                                                                        <span id="soldeRestant1"
+                                                                            class="fw-bold text-primary">-</span>
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="card mb-3 shadow-sm col-md-6">
+                                                                <div class="card-header text-center fw-bold">
+                                                                    Simulated leave balance
+                                                                </div>
+                                                                <div class="card-body">
+                                                                    <p class="mb-2">
+                                                                        <strong>Starting leave balance :</strong>
+                                                                        <span id="soldeDebut2">-</span>
+                                                                    </p>
+                                                                    <p class="mb-2">
+                                                                        <strong>Cumulated leaves :</strong>
+                                                                        <span id="soldeCumule2">-</span>
+                                                                    </p>
+                                                                    <p class="mb-2">
+                                                                        <strong>Taken leaves :</strong>
+                                                                        <span id="soldePris2">-</span>
+                                                                    </p>
+                                                                    <p class="mb-0">
+                                                                        <strong>Leaves left :</strong>
+                                                                        <span id="soldeRestant2"
+                                                                            class="fw-bold text-primary">-</span>
+                                                                    </p>
+                                                                    <% if (user.role !=='USER' ) { %>
+                                                                        <hr>
+                                                                        <div class="d-grid gap-2">
+                                                                            <button type="submit" form="formSimulation"
+                                                                                class="btn btn-success" disabled
+                                                                                id="submit1">
+                                                                                Planify
+                                                                            </button>
+                                                                        </div>
+                                                                        <% } %>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                    <div class="row mt-2">
+                                                        <div class="col-md-12 text-center">
+                                                            <p id="message1" class="fw-bold"></p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <%- include('partials/new-leave-modal-test') %>
+                        <%- include('partials/footer.ejs') %>
+    </body>
+
+    <% if (user.role=='USER' ) { %>
+        <%- include('partials/script-simulate.ejs') %>
+            <% } else { %>
+                <%- include('partials/script-simulate-2.ejs') %>
+                    <% } %>
+
+                        </html>

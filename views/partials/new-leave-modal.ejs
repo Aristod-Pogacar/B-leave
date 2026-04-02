@@ -1,0 +1,413 @@
+<!-- Modal Planifier Congé -->
+<div class="modal fade" id="leaveModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <!-- <div class="modal-dialog modal-fullscreen modal-dialog-centered"> -->
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">New leave</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="row">
+
+                    <!-- ===== LEFT: FORM ===== -->
+                    <div class="col-md-6 border-end">
+                        <form id="leaveForm" method="POST" action="/leave/new-leave">
+
+                            <!-- Recherche Employé -->
+                            <div class="mb-3">
+                                <label class="form-label">Employee</label>
+                                <input type="text" class="form-control" id="employeeSearch" autocomplete="off"
+                                    placeholder="Search an employee...">
+                                <input type="text" class="input" name="employee" id="employee" hidden required>
+                                <ul id="employeeResults" class="autocomplete-list ms-1 ps-0"></ul>
+                            </div>
+
+                            <!-- Type -->
+                            <div class="mb-3">
+                                <label class="form-label">Leave type</label>
+                                <select class="form-select" name="leave_type" id="leave_type">
+                                    <option value="Local_Leave_AMD" selected>Local leave</option>
+                                    <option value="Permission_AMD">Permission</option>
+                                    <option value="Indisponibilite_AMD">Indisponibility</option>
+                                </select>
+                            </div>
+
+                            <!-- Date début -->
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label class="form-label">Starting date</label>
+                                    <input type="date" class="form-control" name="start_date" id="startDate">
+                                </div>
+
+                                <!-- Date fin -->
+                                <div class="col-md-6">
+                                    <label class="form-label">Ending date</label>
+                                    <input type="date" class="form-control" name="end_date" id="endDate">
+                                </div>
+                            </div>
+
+                            <!-- Raison -->
+                            <div class="mb-3">
+                                <label class="form-label">Remarks</label>
+                                <textarea class="form-control" name="reason" rows="3"></textarea>
+                            </div>
+
+                        </form>
+                    </div>
+
+                    <!-- ===== RIGHT: INFOS ===== -->
+                    <div class="col-md-6">
+
+                        <div class="card mb-3 shadow-sm">
+                            <div class="card-header text-center fw-bold">
+                                Employee information
+                            </div>
+                            <div class="card-body">
+                                <p class="mb-2">
+                                    <strong>Fullname :</strong>
+                                    <span id="fullname">-</span>
+                                </p>
+                                <p class="mb-2">
+                                    <strong>Matricule :</strong>
+                                    <span id="matricule">-</span>
+                                </p>
+                                <p class="mb-2">
+                                    <strong>Site :</strong>
+                                    <span id="site">-</span>
+                                </p>
+                                <p class="mb-2">
+                                    <strong>Line :</strong>
+                                    <span id="line">-</span>
+                                </p>
+                                <p class="mb-2">
+                                    <strong>Departement :</strong>
+                                    <span id="departement">-</span>
+                                </p>
+                                <p class="mb-2">
+                                    <strong>Section :</strong>
+                                    <span id="section">-</span>
+                                </p>
+                                <p class="mb-2">
+                                    <strong>Cumulated leave solde :</strong>
+                                    <span id="soldeCumule">-</span>
+                                </p>
+                                <p class="mb-2">
+                                    <strong>Taken leave :</strong>
+                                    <span id="soldePris">-</span>
+                                </p>
+                                <p class="mb-2">
+                                    <strong>Leaves remaining :</strong>
+                                    <span id="soldeRestant" class="fw-bold text-primary">-</span>
+                                </p>
+                                <p class="mb-0">
+                                    <strong>Taken permission :</strong>
+                                    <span id="soldePermission" class="fw-bold text-success">-</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-12 text-center">
+                        <p id="message" class="fw-bold"></p>
+                    </div>
+                </div>
+                <div class="row mt-4">
+                    <div class="col-12 border-top pt-3">
+                        <h5 class="fw-bold mb-3 text-center">Employee Leave History</h5>
+                        <div class="table-responsive" style="max-height: 300px; overflow-y: auto;"
+                            id="leaveHistoryWrapper">
+                            <table class="table table-sm table-hover table-bordered align-middle"
+                                id="leaveHistoryTable">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th>Range</th>
+                                        <th>Start Date</th>
+                                        <th>End Date</th>
+                                        <th>Type</th>
+                                        <th>Duration</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="leaveHistoryBody" class="leave-history-body">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    Cancel
+                </button>
+                <button type="submit" form="leaveForm" class="btn btn-primary" id="submit">
+                    Save
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+<script>
+
+    let skip = 0;
+    const take = 10;
+    let isLoading = false;
+    let hasMore = true;
+    let currentEmployeeId = null;
+
+    var soldePermissionNumber = 0;
+
+    const wrapper = document.getElementById("leaveHistoryWrapper");
+    const tbody = document.getElementById("leaveHistoryBody");
+
+    var message = "";
+
+    const input = document.getElementById('employeeSearch');
+    const results = document.getElementById('employeeResults');
+    const hiddenInput = document.getElementById('employee');
+    const submitButton = document.getElementById('submit');
+    let timeout = null;
+
+    const startDate = document.getElementById('startDate');
+    startDate.value = new Date().toISOString().split("T")[0];
+    const endDate = document.getElementById('endDate');
+    endDate.value = new Date().toISOString().split("T")[0];
+    // const hiddenInput = document.getElementById('employee');
+
+    const leaveType = document.getElementById('leave_type');
+    leaveType.addEventListener('change', () => {
+        if (leaveType.value === 'Local_Leave_AMD') {
+            checkValableLeave()
+        } else {
+            submitButton.disabled = false;
+            message = "";
+            document.getElementById('message').textContent = "";
+        }
+    })
+
+    startDate.addEventListener('change', checkValableLeave);
+    endDate.addEventListener('change', checkValableLeave);
+
+    const fullname = document.getElementById('fullname');
+    const matricule = document.getElementById('matricule');
+    const site = document.getElementById('site');
+    const line = document.getElementById('line');
+    const departement = document.getElementById('departement');
+    const section = document.getElementById('section');
+    const soldeCumule = document.getElementById('soldeCumule');
+    const soldePris = document.getElementById('soldePris');
+    const soldeRestant = document.getElementById('soldeRestant');
+    const soldePermission = document.getElementById('soldePermission');
+
+    input.addEventListener('input', () => {
+        clearTimeout(timeout);
+
+        const query = input.value.trim();
+        if (query.length < 2) {
+            results.innerHTML = '';
+            return;
+        }
+
+        timeout = setTimeout(async () => {
+            try {
+                const res = await fetch(`/employee/finding/search-list?q=${query}`);
+
+                if (!res.ok) {
+                    console.error('HTTP error', res.status);
+                    return;
+                }
+
+                const data = await res.json();
+
+                results.innerHTML = '';
+                data.forEach(emp => {
+                    const li = document.createElement('li');
+                    li.classList.add('list-group-item');
+                    // li.classList.add('autocomplete-list-item');
+                    li.textContent = `${emp.matricule} - ${emp.fullname}`;
+                    li.onclick = async () => {
+                        input.value = li.textContent;
+                        hiddenInput.value = emp.id;
+                        fullname.textContent = emp.fullname;
+                        matricule.textContent = emp.matricule;
+                        site.textContent = emp.site;
+                        line.textContent = emp.line;
+                        departement.textContent = emp.departement;
+                        section.textContent = emp.section;
+                        soldeCumule.textContent = emp.solde_cumul + " day(s)";
+                        soldePris.textContent = emp.solde_pris + " day(s)";
+                        soldeRestant.textContent = emp.solde_restant + " day(s)";
+                        soldePermission.textContent = emp.permissions + " day(s)";
+                        solde = emp.solde_restant;
+                        soldePermissionNumber = emp.permissions;
+                        checkValableLeave();
+                        results.innerHTML = '';
+                        skip = 0;
+                        hasMore = true;
+                        tbody.innerHTML = "";
+                        loadEmployeeLeaves(emp.id);
+                        // const historyResponse = await fetch(`/leave/employee-leaves/paginate/${emp.id}?skip=0&take=10`);
+                        // const historyData = await historyResponse.json();
+                        // console.log("HISTORY DATA:", historyData);
+                    };
+                    results.appendChild(li);
+                });
+
+            } catch (err) {
+                console.error('Autocomplete error:', err);
+            }
+        }, 300);
+    });
+
+    async function loadEmployeeLeaves(employeeId) {
+
+        if (isLoading || !hasMore || !employeeId) return;
+
+        isLoading = true;
+        const url = `/leave/employee-leaves/paginate/${employeeId}?skip=${skip}&take=${take}`;
+        console.log(url);
+
+
+        try {
+            const res = await fetch(url);
+
+            if (!res.ok) return;
+
+            const data = await res.json();
+            console.log("DATA:", data.data);
+
+            if (data.data.length < take) {
+                hasMore = false;
+            }
+
+            appendLeavesToTable(data.data);
+
+            skip += take;
+
+        } catch (err) {
+            console.error("Pagination error:", err);
+        }
+
+        isLoading = false;
+    }
+
+    function formatDate(dateString) {
+        if (!dateString) return "-";
+        return new Date(dateString).toLocaleDateString("fr-FR");
+    }
+
+    function appendLeavesToTable(leaves) {
+        var i = 1;
+
+        leaves.forEach(leave => {
+
+            const row = document.createElement("tr");
+            var status = "waiting";
+            var statusClass = "bg-primary";
+            const today = new Date();
+            const startDate = new Date(leave.start_date);
+            startDate.setHours(0, 0, 0, 0);
+            const endDate = new Date(leave.end_date);
+            endDate.setHours(23, 59, 59, 999);
+
+            if (today >= startDate && today <= endDate) {
+                status = "in progress";
+                statusClass = "bg-success";
+            } else if (today > endDate) {
+                status = "finished";
+                statusClass = "bg-danger";
+            }
+
+            var leaveTypeClass = "";
+            if (leave.leave_type === "Local_Leave_AMD") {
+                leaveTypeClass = "bg-soft-primary text-primary";
+            } else if (leave.leave_type === "Permission_AMD") {
+                leaveTypeClass = "bg-soft-success text-success";
+            } else if (leave.leave_type === "Indisponibilite_AMD") {
+                leaveTypeClass = "bg-soft-danger text-danger";
+            }
+
+            row.innerHTML = `
+                                        <td class="text-center text-muted py-3">${i}
+                                        </td>
+                                        <td class="text-center text-muted py-3">${formatDate(leave.start_date)}
+                                        </td>
+                                        <td class="text-center text-muted py-3">${formatDate(leave.end_date)}
+                                        </td>
+                                        <td class="text-center text-muted py-3">
+                                            <span class="badge ${leaveTypeClass}">${leave.leave_type}</span>
+                                        </td>
+                                        <td class="text-center text-muted py-3">${leave.duration} day(s)
+                                        </td>
+                                        <td class="text-center py-3">
+                                            <span class="badge ${statusClass}">${status}</span>
+                                        </td>
+        `;
+
+            tbody.appendChild(row);
+            i++;
+        });
+    }
+    wrapper.addEventListener("scroll", () => {
+
+        const scrollPosition = wrapper.scrollTop + wrapper.clientHeight;
+        const threshold = wrapper.scrollHeight - 5;
+
+        if (scrollPosition >= threshold) {
+            loadEmployeeLeaves();
+        }
+    });
+    function checkValableLeave() {
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        const messageContainer = document.getElementById('message');
+        // const solde = document.getElementById('soldeRestant').textContent;
+        const numberOfDays = getNumberOfDays(startDate, endDate);
+        console.log("NUMBER OF DAYS:", numberOfDays)
+        if (!checkDate(startDate, endDate) || numberOfDays <= 0) {
+            message = "Invalide date";
+            submitButton.disabled = true;
+            messageContainer.innerHTML = message;
+            messageContainer.style.color = "red";
+        } else if ((solde === null || solde === undefined || solde === "")) {
+            message = "Choose an employee";
+            submitButton.disabled = true;
+            messageContainer.innerHTML = message;
+            messageContainer.style.color = "red";
+        } else if (leaveType.value === 'Local_Leave_AMD' && numberOfDays > solde) {
+            message = "Solde left(" + solde + " days) is not enough for your request(" + numberOfDays + " days)";
+            submitButton.disabled = true;
+            messageContainer.innerHTML = message;
+            messageContainer.style.color = "red";
+        } else if (leaveType.value === 'Permission_AMD' && numberOfDays > soldePermissionNumber) {
+            message = "Solde left(" + soldePermissionNumber + " days) is not enough for your request(" + numberOfDays + " days)";
+            submitButton.disabled = true;
+            messageContainer.innerHTML = message;
+            messageContainer.style.color = "red";
+        } else {
+            submitButton.disabled = false;
+            message = "Your request is possible";
+            messageContainer.style.color = "green";
+            document.getElementById('message').textContent = message;
+        }
+    }
+    function checkDate(startDate, endDate) {
+        // const today = new Date();
+        // today.setHours(0, 0, 0, 0);
+        const startDateObj = new Date(startDate);
+        const endDateObj = new Date(endDate);
+        // if (startDateObj <= endDateObj && startDateObj >= today) {
+        if (startDateObj <= endDateObj) {
+            return true
+        } else {
+            return false
+        }
+    }
+</script>

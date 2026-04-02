@@ -1,0 +1,383 @@
+<%- include('partials/head.ejs') %>
+
+    <body>
+        <%- include('partials/sidebar.ejs') %>
+            <%- include('partials/header.ejs') %>
+                <main class="nxl-container">
+                    <div class="nxl-content">
+                        <div class="page-header">
+                            <div class="page-header-left d-flex align-items-center">
+                                <div class="page-header-title">
+                                    <h5 class="m-b-10">Be-Leave</h5>
+                                </div>
+                                <ul class="breadcrumb">
+                                    <li class="breadcrumb-item">Leaves</li>
+                                    <li class="breadcrumb-item">History</li>
+                                </ul>
+                            </div>
+                            <div class="page-header-right ms-auto">
+                                <div class="page-header-right-items">
+                                    <div class="d-flex d-md-none">
+                                        <a href="javascript:void(0)" class="page-header-right-close-toggle">
+                                            <i class="feather-arrow-left me-2"></i>
+                                            <span>Back</span>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="d-md-none d-flex align-items-center">
+                                    <a href="javascript:void(0)" class="page-header-right-open-toggle">
+                                        <i class="feather-align-right fs-20"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- [ page-header ] end -->
+                        <div class="bg-white py-3 border-bottom rounded-0 p-md-0 mb-0">
+                            <div class="d-md-none d-flex align-items-center justify-content-between">
+                                <a href="javascript:void(0)" class="page-content-left-open-toggle">
+                                    <i class="feather-align-left fs-20"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <!-- [ Main Content ] start -->
+                        <div class="main-content">
+                            <div class="tab-content">
+                                <div class="tab-pane fade active show" id="overviewTab">
+                                    <div class="row">
+
+                                        <div class="col-xl-12">
+                                            <div class="card stretch stretch-full d-flex">
+                                                <div class="card-header">
+                                                    <h4 class="header">Leave history</h4>
+                                                </div>
+                                                <div class="card-body">
+
+                                                    <div class="modal-body">
+                                                        <div class="row">
+
+                                                            <!-- ===== LEFT: FORM ===== -->
+                                                            <div class="col-md-12">
+
+                                                                <!-- Recherche Employé -->
+                                                                <div class="mb-0">
+                                                                    <label class=" form-label">Employee</label>
+                                                                    <input type="text" class="form-control"
+                                                                        id="employeeSearch" autocomplete="off"
+                                                                        placeholder="Search an employee...">
+                                                                    <input type="text" class="input" name="employee"
+                                                                        id="employee" hidden required>
+                                                                    <ul id="employeeResults"
+                                                                        class="autocomplete-list ps-0 w-100 z-200">
+                                                                    </ul>
+                                                                </div>
+
+                                                            </div>
+                                                            <!-- ===== RIGHT: INFOS ===== -->
+                                                            <div class="col-md-6 d-none">
+
+                                                                <div class="card mb-3 shadow-sm">
+                                                                    <div class="card-header text-center fw-bold">
+                                                                        Employee information
+                                                                    </div>
+                                                                    <div class="card-body">
+                                                                        <p class="mb-2">
+                                                                            <strong>Fullname :</strong>
+                                                                            <span id="fullname">-</span>
+                                                                        </p>
+                                                                        <p class="mb-2">
+                                                                            <strong>Matricule :</strong>
+                                                                            <span id="matricule">-</span>
+                                                                        </p>
+                                                                        <p class="mb-2">
+                                                                            <strong>Site :</strong>
+                                                                            <span id="site">-</span>
+                                                                        </p>
+                                                                        <p class="mb-2">
+                                                                            <strong>Line :</strong>
+                                                                            <span id="line">-</span>
+                                                                        </p>
+                                                                        <p class="mb-2">
+                                                                            <strong>Departement :</strong>
+                                                                            <span id="departement">-</span>
+                                                                        </p>
+                                                                        <p class="mb-2">
+                                                                            <strong>Section :</strong>
+                                                                            <span id="section">-</span>
+                                                                        </p>
+                                                                        <p class="mb-2">
+                                                                            <strong>Cumulated leave solde :</strong>
+                                                                            <span id="soldeCumule">-</span>
+                                                                        </p>
+                                                                        <p class="mb-2">
+                                                                            <strong>Taken leave :</strong>
+                                                                            <span id="soldePris">-</span>
+                                                                        </p>
+                                                                        <p class="mb-2">
+                                                                            <strong>Leaves remaining :</strong>
+                                                                            <span id="soldeRestant"
+                                                                                class="fw-bold text-primary">-</span>
+                                                                        </p>
+                                                                        <p class="mb-0">
+                                                                            <strong>Taken permission :</strong>
+                                                                            <span id="soldePermission"
+                                                                                class="fw-bold text-success">-</span>
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+                                                        <div class="row mt-2 d-none">
+                                                            <div class="col-md-12 text-center">
+                                                                <p id="message" class="fw-bold"></p>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row mt-4">
+                                                            <div class="col-12 pt-3">
+                                                                <div class="table-responsive overflow-y-auto"
+                                                                    style="height: 300px;" id="leaveHistoryWrapper">
+                                                                    <table
+                                                                        class="table table-sm table-hover table-bordered align-middle"
+                                                                        id="leaveHistoryTable">
+                                                                        <thead class="table-light z-100 w-100">
+                                                                            <tr>
+                                                                                <th class="text-center">Range</th>
+                                                                                <th class="text-center">Start Date</th>
+                                                                                <th class="text-center">End Date</th>
+                                                                                <th class="text-center">Type</th>
+                                                                                <th class="text-center">Duration</th>
+                                                                                <th class="text-center">Status</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody id="leaveHistoryBody"
+                                                                            class="leave-history-body-2">
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                                <div class="card-footer d-none" id="footer-export">
+                                                    <form action="/leave/export-employee-leaves" method="get">
+                                                        <input type="hidden" name="employeeId" id="exportEmployeeId">
+                                                        <button class="btn btn-primary" type="submit">
+                                                            Export as Excel file
+                                                        </button>
+                                                    </form>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <%- include('partials/footer.ejs') %>
+    </body>
+    <script>
+
+        let skip = 0;
+        const take = 10;
+        let isLoading = false;
+        let hasMore = true;
+        let currentEmployeeId = null;
+        let solde = 0;
+
+        var soldePermissionNumber = 0;
+
+        const wrapper = document.getElementById("leaveHistoryWrapper");
+        const tbody = document.getElementById("leaveHistoryBody");
+        const footer = document.getElementById("footer-export");
+        // const exportBTN = document.getElementById("export-btn");
+        const exportEmployeeId = document.getElementById("exportEmployeeId");
+
+        var message = "";
+
+        const input = document.getElementById('employeeSearch');
+        const results = document.getElementById('employeeResults');
+        const hiddenInput = document.getElementById('employee');
+        let timeout = null;
+
+        // const startDate = document.getElementById('startDate');
+        // startDate.value = new Date().toISOString().split("T")[0];
+        // const endDate = document.getElementById('endDate');
+        // endDate.value = new Date().toISOString().split("T")[0];
+        // const hiddenInput = document.getElementById('employee');
+
+        const fullname = document.getElementById('fullname');
+        const matricule = document.getElementById('matricule');
+        const site = document.getElementById('site');
+        const line = document.getElementById('line');
+        const departement = document.getElementById('departement');
+        const section = document.getElementById('section');
+        const soldeCumule = document.getElementById('soldeCumule');
+        const soldePris = document.getElementById('soldePris');
+        const soldeRestant = document.getElementById('soldeRestant');
+        const soldePermission = document.getElementById('soldePermission');
+
+        input.addEventListener('input', () => {
+            clearTimeout(timeout);
+
+            const query = input.value.trim();
+            if (query.length < 2) {
+                results.innerHTML = '';
+                return;
+            }
+
+            timeout = setTimeout(async () => {
+                try {
+                    const res = await fetch(`/employee/finding/search-list?q=${query}`);
+
+                    if (!res.ok) {
+                        console.error('HTTP error', res.status);
+                        return;
+                    }
+
+                    const data = await res.json();
+
+                    results.innerHTML = '';
+                    data.forEach(emp => {
+                        const li = document.createElement('li');
+                        li.classList.add('list-group-item');
+                        // li.classList.add('autocomplete-list-item');
+                        li.textContent = `${emp.matricule} - ${emp.fullname}`;
+                        li.onclick = async () => {
+                            console.log("EMP:", emp);
+                            input.value = li.textContent;
+                            hiddenInput.value = emp.id;
+                            fullname.textContent = emp.fullname;
+                            matricule.textContent = emp.matricule;
+                            site.textContent = emp.site;
+                            line.textContent = emp.line;
+                            departement.textContent = emp.departement;
+                            section.textContent = emp.section;
+                            soldeCumule.textContent = emp.solde_cumul + " day(s)";
+                            soldePris.textContent = emp.solde_pris + " day(s)";
+                            soldeRestant.textContent = emp.solde_restant + " day(s)";
+                            soldePermission.textContent = emp.permissions + " day(s)";
+                            solde = emp.solde_restant;
+                            soldePermissionNumber = emp.permissions;
+                            results.innerHTML = '';
+                            skip = 0;
+                            hasMore = true;
+                            tbody.innerHTML = "";
+                            loadEmployeeLeaves(emp.id);
+                            footer.className = "card-footer";
+                            exportEmployeeId.value = emp.id;
+                            // const historyResponse = await fetch(`/leave/employee-leaves/paginate/${emp.id}?skip=0&take=10`);
+                            // const historyData = await historyResponse.json();
+                            console.log("soldePermissionNumber:", soldePermissionNumber);
+                        };
+                        results.appendChild(li);
+                    });
+
+                } catch (err) {
+                    console.error('Autocomplete error:', err);
+                }
+            }, 300);
+        });
+
+        async function loadEmployeeLeaves(employeeId) {
+
+            if (isLoading || !hasMore || !employeeId) return;
+
+            isLoading = true;
+            const url = `/leave/employee-leaves/paginate/${employeeId}?skip=${skip}&take=${take}`;
+            console.log(url);
+
+
+            try {
+                const res = await fetch(url);
+
+                if (!res.ok) return;
+
+                const data = await res.json();
+                console.log("DATA:", data.data);
+
+                if (data.data.length < take) {
+                    hasMore = false;
+                }
+
+                appendLeavesToTable(data.data);
+
+                skip += take;
+
+            } catch (err) {
+                console.error("Pagination error:", err);
+            }
+
+            isLoading = false;
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return "-";
+            return new Date(dateString).toLocaleDateString("fr-FR");
+        }
+
+        function appendLeavesToTable(leaves) {
+            var i = 1;
+
+            leaves.forEach(leave => {
+
+                const row = document.createElement("tr");
+                var status = "waiting";
+                var statusClass = "bg-primary";
+                const today = new Date();
+                const startDate = new Date(leave.start_date);
+                startDate.setHours(0, 0, 0, 0);
+                const endDate = new Date(leave.end_date);
+                endDate.setHours(23, 59, 59, 999);
+
+                if (today >= startDate && today <= endDate) {
+                    status = "in progress";
+                    statusClass = "bg-success";
+                } else if (today > endDate) {
+                    status = "finished";
+                    statusClass = "bg-danger";
+                }
+
+                var leaveTypeClass = "";
+                if (leave.leave_type === "Local_Leave_AMD") {
+                    leaveTypeClass = "bg-soft-primary text-primary";
+                } else if (leave.leave_type === "Permission_AMD") {
+                    leaveTypeClass = "bg-soft-success text-success";
+                } else if (leave.leave_type === "Indisponibilite_AMD") {
+                    leaveTypeClass = "bg-soft-danger text-danger";
+                }
+
+                row.innerHTML = `
+                                        <td class="text-center text-muted py-3">${i}
+                                        </td>
+                                        <td class="text-center text-muted py-3">${formatDate(leave.start_date)}
+                                        </td>
+                                        <td class="text-center text-muted py-3">${formatDate(leave.end_date)}
+                                        </td>
+                                        <td class="text-center text-muted py-3">
+                                            <span class="badge ${leaveTypeClass}">${leave.leave_type}</span>
+                                        </td>
+                                        <td class="text-center text-muted py-3">${leave.duration} day(s)
+                                        </td>
+                                        <td class="text-center py-3">
+                                            <span class="badge ${statusClass}">${status}</span>
+                                        </td>
+        `;
+
+                tbody.appendChild(row);
+                i++;
+            });
+        }
+        wrapper.addEventListener("scroll", () => {
+
+            const scrollPosition = wrapper.scrollTop + wrapper.clientHeight;
+            const threshold = wrapper.scrollHeight - 5;
+
+            if (scrollPosition >= threshold) {
+                loadEmployeeLeaves();
+            }
+        });
+    </script>
+
+    </html>
