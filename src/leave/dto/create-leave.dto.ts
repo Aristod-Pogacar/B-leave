@@ -1,3 +1,4 @@
+import { Type } from "class-transformer";
 import { IsDate, IsNotEmpty, IsOptional, IsString } from "class-validator";
 
 export class CreateLeaveDto {
@@ -6,11 +7,13 @@ export class CreateLeaveDto {
     employee: string;
 
     @IsNotEmpty()
-    @IsDate()
+    // @IsDate()
+    @Type(() => Date)
     start_date: Date;
 
     @IsNotEmpty()
-    @IsDate()
+    // @IsDate()
+    @Type(() => Date)
     end_date: Date;
 
     @IsNotEmpty()

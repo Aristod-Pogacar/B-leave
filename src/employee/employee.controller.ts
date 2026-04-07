@@ -120,7 +120,7 @@ export class EmployeeController {
     // const test = await this.employeeService.getEmployeeSolde("10784", new Date("2017-12-31"))
     // console.log("TEST 10784 2017-01-10:", test);
 
-    const employees = await this.employeeService.getEmployeesWithBalances(line, departement, site, +skip, +take, +year);
+    const employees = await this.employeeService.getEmployeesWithBalances(line, departement, site, +skip, +take, +year, req.session.user);
     // console.log("employees", employees);
     // console.log("SESSION:", req.session.user);
     return employees;
@@ -137,7 +137,7 @@ export class EmployeeController {
     @Query('take') take: number = 50,
     @Query('year') year: number = new Date().getFullYear(),
   ) {
-    const employees = await this.employeeService.getEmployeesWithBalances(line, departement, site, +skip, +take, +year);
+    const employees = await this.employeeService.getEmployeesWithBalances(line, departement, site, +skip, +take, +year, req.session.user);
     console.log("employees", employees);
     return employees;
     // return this.employeeService.findAllByLineAndDepartement(line, departement, +skip, +take, year);
@@ -176,7 +176,7 @@ export class EmployeeController {
 
   @Get('assign-manager')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER)
   // @Render('test')
   @Render('employee-assign')
   async assignManager(@Req() req: any) {
@@ -187,7 +187,7 @@ export class EmployeeController {
 
   @Post('assign-manager')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER)
   async assignManagerPost(@Body() body: any, @Res() res: express.Response) {
     console.log("BODY:", body);
     await this.employeeService.assignManager(body.managerId, body.employeeIds);

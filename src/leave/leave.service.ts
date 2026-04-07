@@ -2,12 +2,13 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateLeaveDto } from './dto/create-leave.dto';
 import { UpdateLeaveDto } from './dto/update-leave.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Leave } from './entities/leave.entity';
-import { Between, Repository } from 'typeorm';
+import { Leave, LeaveStatus } from './entities/leave.entity';
+import { Between, In, IsNull, Repository } from 'typeorm';
 import { Employee } from 'src/employee/entities/employee.entity';
 import * as express from 'express';
 import * as ExcelJS from 'exceljs';
 import * as XLSX from 'xlsx';
+import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class LeaveService {
@@ -17,14 +18,35 @@ export class LeaveService {
     private readonly leaveRepository: Repository<Leave>,
     @InjectRepository(Employee)
     private readonly employeeRepository: Repository<Employee>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) { }
 
+  async getNonApprouvedLeaves(id: string) {
+    return this.leaveRepository.find({ where: { employee: { manager: { id } }, status: LeaveStatus.PENDING }, relations: ['employee'], order: { start_date: 'ASC' } });
+  }
+
+  async approveLeave(leaveId: string, id: string) {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    const leave = await this.leaveRepository.findOne({ where: { id: leaveId } });
+    if (!leave) {
+      throw new NotFoundException('Leave not found');
+    }
+    leave.approver = user;
+    leave.approved_date = new Date();
+    leave.status = LeaveStatus.APPROVED;
+    return this.leaveRepository.save(leave);
+  }
+
   getLeavesByRange(year: number, startMonth: number, endMonth: number, line: string, departement: string, site: string) {
-    return this.leaveRepository.find({ where: { start_date: Between(new Date(year, startMonth, 1), new Date(year, endMonth, 1)), employee: { line, departement, site } }, relations: ['employee'] });
+    return this.leaveRepository.find({ where: { start_date: Between(new Date(year, startMonth, 1), new Date(year, endMonth, 1)), employee: { line, departement, site }, status: In([LeaveStatus.APPROVED, LeaveStatus.PENDING]) }, relations: ['employee'] });
   }
 
   getLeavesByMonthAndLineAndDepartement(year: number, month: number, line: string, departement: string, site: string) {
-    return this.leaveRepository.find({ where: { start_date: Between(new Date(year, month, 1), new Date(year, month, 31)), employee: { line, departement, site } }, relations: ['employee'] });
+    return this.leaveRepository.find({ where: { start_date: Between(new Date(year, month, 1), new Date(year, month, 31)), employee: { line, departement, site }, status: In([LeaveStatus.APPROVED, LeaveStatus.PENDING]) }, relations: ['employee'] });
   }
 
   async create(createLeaveDto: CreateLeaveDto, res: express.Response) {
@@ -170,6 +192,7 @@ export class LeaveService {
         'daysTaken'
       )
       .where('employee.id IN (:...employeeIds)', { employeeIds: [employeeId] })
+      .andWhere('leave.status = :status', { status: LeaveStatus.APPROVED })
       .andWhere('leave.leave_type = :type', { type: 'Local_Leave_AMD' })
       .andWhere('YEAR(leave.start_date) = :year', { year: date.getFullYear() })
       .andWhere('leave.start_date <= :date', { date: date.toISOString() })
@@ -251,6 +274,7 @@ export class LeaveService {
         'daysTaken'
       )
       .where('employee.id = :employeeId', { employeeId: employee.id })
+      .andWhere('leave.status = :status', { status: LeaveStatus.APPROVED })
       .andWhere('leave.leave_type = :type', { type: 'Local_Leave_AMD' })
       .andWhere('YEAR(leave.start_date) = :year', { year })
       .andWhere('leave.start_date <= :at', { at })
@@ -358,6 +382,7 @@ export class LeaveService {
     const [data, count] = await this.leaveRepository.findAndCount({
       where: { employee: { id: employeeId } },
       order: { start_date: 'DESC' },
+      relations: ['approver'],
       skip,
       take,
     });
@@ -434,7 +459,8 @@ export class LeaveService {
       AND leave.end_date >= :startDate
       `,
         { startDate, endDate },
-      );
+      )
+      .andWhere('leave.status != :status', { status: LeaveStatus.REJECTED });
 
     if (line) {
       query.andWhere('employee.line = :line', { line });
@@ -493,7 +519,8 @@ export class LeaveService {
     const leaves = await this.leaveRepository.find({
       where: {
         start_date: Between(new Date(startDate), new Date(endDate)),
-        employee: { line, departement }
+        employee: { line, departement },
+        status: LeaveStatus.APPROVED
       },
       relations: ['employee']
     });
@@ -678,7 +705,7 @@ export class LeaveService {
   }
 
   async exportEmployeeLeaves(employee: Employee) {
-    const leaves = await this.leaveRepository.find({ where: { employee: { id: employee.id } }, order: { start_date: 'DESC' }, relations: ['employee'] })
+    const leaves = await this.leaveRepository.find({ where: { employee: { id: employee.id }, status: LeaveStatus.APPROVED }, order: { start_date: 'DESC' }, relations: ['employee'] })
     console.log("Leaves:", leaves);
 
     const workbook = new ExcelJS.Workbook();

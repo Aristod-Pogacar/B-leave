@@ -13,6 +13,7 @@ import { memoryStorage } from 'multer';
 
 @Controller('leave')
 export class LeaveController {
+
   constructor(
     private readonly leaveService: LeaveService,
     private readonly employeeService: EmployeeService
@@ -33,7 +34,7 @@ export class LeaveController {
 
   @Get('new-leave')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER)
   @Render('new-leave')
   async newLeave(@Query() query: any, @Query() error?: string) {
     return { title: "New Leave", error: error ? error : null };
@@ -41,18 +42,40 @@ export class LeaveController {
 
   @Post('new-leave')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER)
   async createNewLeave(@Body() createLeaveDto: CreateLeaveDto, @Res() res: express.Response) {
+    // async createNewLeave(@Body() createLeaveDto: any, @Res() res: express.Response) {
+    console.log("BODY:", createLeaveDto);
+    console.log("TYPE OF STARTING DATE:", typeof createLeaveDto.start_date);
+    console.log("TYPE OF ENDING DATE:", typeof createLeaveDto.end_date);
     const leave = await this.leaveService.create(createLeaveDto, res);
     // res.redirect('/leave/new-leave');
   }
 
   @Get('leave-history')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER)
   @Render('leave-history')
   async leaveHistory(@Query() query: any, @Query() error?: string) {
     return { title: "Leave History", error: error ? error : null };
+  }
+
+  @Get('approuve-leaves')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER)
+  @Render('approuve-leaves')
+  async approuveLeaves(@Req() req: any, @Query() error?: string) {
+    const leaves = await this.leaveService.getNonApprouvedLeaves(req.session.user.id);
+    console.log("LEAVES:", leaves);
+    return { title: "Approuve Leaves", error: error ? error : null, leaves: leaves };
+  }
+
+  @Post('approve-leave/:leaveId')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER)
+  async approveLeave(@Param('leaveId') leaveId: string, @Res() res: express.Response, @Req() req: any) {
+    await this.leaveService.approveLeave(leaveId, req.session.user.id);
+    res.redirect('/leave/approuve-leaves');
   }
 
   @Get('employee-leaves/paginate/:employeeId')
@@ -143,7 +166,7 @@ export class LeaveController {
   }
 
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER)
   @Get('import-leaves')
   @Render('import-leaves')
   async importLeavesView(@Req() req: any) {
@@ -151,7 +174,7 @@ export class LeaveController {
   }
 
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER)
   @Post('import-leaves')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -172,7 +195,7 @@ export class LeaveController {
   }
 
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER)
   @Get('export')
   @Render('export')
   async exportView() {
@@ -182,7 +205,7 @@ export class LeaveController {
   }
 
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER)
   @Post('export-planning')
   async exportPlanningPost(
     @Body('startDate') startDate: Date,
@@ -212,7 +235,7 @@ export class LeaveController {
   }
 
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER)
   @Get('export-employee-leaves')
   async exportEmployeeLeaves(
     @Query('employeeId') employeeId: string,
@@ -244,7 +267,7 @@ export class LeaveController {
   }
 
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER)
   @Get('planning-view')
   @Render('leave-planning')
   async planningView(@Req() req: any) {
@@ -270,34 +293,34 @@ export class LeaveController {
   }
 
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER)
   @Get('simulate-leave')
   @Render('simulate-leave')
   async simulateLeave() {
     return { title: "Simulate leave", userRole: UserRole };
   }
 
-  @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
-  @Post()
-  create(@Body() createLeaveDto: CreateLeaveDto, @Res() res: express.Response) {
-    return this.leaveService.create(createLeaveDto, res);
-  }
+  // @UseGuards(RolesGuard)
+  // @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
+  // @Post()
+  // create(@Body() createLeaveDto: CreateLeaveDto, @Res() res: express.Response) {
+  //   return this.leaveService.create(createLeaveDto, res);
+  // }
 
-  @Get()
-  findAll() {
-    return this.leaveService.findAll();
-  }
+  // @Get()
+  // findAll() {
+  //   return this.leaveService.findAll();
+  // }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.leaveService.findOne(id);
-  }
+  // @Get(':id')
+  // findOne(@Param('id') id: string) {
+  //   return this.leaveService.findOne(id);
+  // }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateLeaveDto: UpdateLeaveDto) {
-    return this.leaveService.update(id, updateLeaveDto);
-  }
+  // @Patch(':id')
+  // update(@Param('id') id: string, @Body() updateLeaveDto: UpdateLeaveDto) {
+  //   return this.leaveService.update(id, updateLeaveDto);
+  // }
 
   @Delete(':id')
   remove(@Param('id') id: string) {

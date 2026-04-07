@@ -6,8 +6,8 @@ import { Employee } from './entities/employee.entity';
 import { In, IsNull, Like, Repository } from 'typeorm';
 import * as ExcelJS from 'exceljs';
 import * as XLSX from 'xlsx';
-import { Leave } from 'src/leave/entities/leave.entity';
-import { Site, User } from 'src/user/entities/user.entity';
+import { Leave, LeaveStatus } from 'src/leave/entities/leave.entity';
+import { Site, User, UserRole } from 'src/user/entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { CryptoService } from 'src/crypto/crypto.service';
 
@@ -131,15 +131,34 @@ export class EmployeeService {
     skip: number,
     take: number,
     year: number,
+    user: any
   ) {
 
-    // 1️⃣ Récupérer les employés
-    const [employees, total] = await this.employeeRepository.findAndCount({
-      where: { line, departement, site },
-      order: { matricule: 'ASC' },
-      skip,
-      take,
-    });
+    let employees: Employee[];
+    let total: number;
+
+    if (user.role === UserRole.MANAGER) {
+
+      // 1️⃣ Récupérer les employés
+      [employees, total] = await this.employeeRepository.findAndCount({
+        where: { manager: { id: user.id }, line, departement, site },
+        order: { matricule: 'ASC' },
+        skip,
+        take,
+      });
+
+    } else {
+
+      // 1️⃣ Récupérer les employés
+      [employees, total] = await this.employeeRepository.findAndCount({
+        where: { line, departement, site },
+        order: { matricule: 'ASC' },
+        skip,
+        take,
+      });
+
+
+    }
 
     if (employees.length === 0) {
       return { data: [], total };
@@ -161,6 +180,7 @@ export class EmployeeService {
         'daysTaken'
       )
       .where('employee.id IN (:...employeeIds)', { employeeIds })
+      .andWhere('leave.status = :status', { status: LeaveStatus.APPROVED })
       .andWhere('leave.leave_type = :type', { type: 'Local_Leave_AMD' })
       .andWhere('YEAR(leave.start_date) = :year', { year })
       .andWhere('leave.start_date <= :today', { today })
@@ -179,6 +199,7 @@ export class EmployeeService {
         'daysTaken'
       )
       .where('employee.id IN (:...employeeIds)', { employeeIds })
+      .andWhere('leave.status = :status', { status: LeaveStatus.APPROVED })
       .andWhere('leave.leave_type = :type', { type: 'Permission_AMD' })
       .andWhere('YEAR(leave.start_date) = :year', { year })
       .andWhere('leave.start_date <= :today', { today })
@@ -489,6 +510,7 @@ export class EmployeeService {
         'daysTaken'
       )
       .where('employee.id = :employeeId', { employeeId: employee.id })
+      .andWhere('leave.status = :status', { status: LeaveStatus.APPROVED })
       .andWhere('leave.leave_type = :type', { type: 'Local_Leave_AMD' })
       .andWhere('YEAR(leave.start_date) = :year', { year })
       .andWhere('leave.start_date <= :at', { at })
@@ -588,6 +610,7 @@ export class EmployeeService {
         'daysTaken'
       )
       .where('employee.id IN (:...employeeIds)', { employeeIds: data.map((e) => e.id) })
+      .andWhere('leave.status = :status', { status: LeaveStatus.APPROVED })
       .andWhere('leave.leave_type = :type', { type: 'Local_Leave_AMD' })
       .andWhere('YEAR(leave.start_date) = :year', { year })
       .andWhere('leave.start_date <= :today', { today })
@@ -604,6 +627,7 @@ export class EmployeeService {
         'daysTaken'
       )
       .where('employee.id IN (:...employeeIds)', { employeeIds: data.map((e) => e.id) })
+      .andWhere('leave.status = :status', { status: LeaveStatus.APPROVED })
       .andWhere('leave.leave_type = :type', { type: 'Permission_AMD' })
       .andWhere('YEAR(leave.start_date) = :year', { year })
       .andWhere('leave.start_date <= :today', { today })

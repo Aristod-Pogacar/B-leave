@@ -141,12 +141,20 @@
                                                                         id="leaveHistoryTable">
                                                                         <thead class="table-light z-100 w-100">
                                                                             <tr>
-                                                                                <th class="text-center">Range</th>
-                                                                                <th class="text-center">Start Date</th>
-                                                                                <th class="text-center">End Date</th>
-                                                                                <th class="text-center">Type</th>
-                                                                                <th class="text-center">Duration</th>
-                                                                                <th class="text-center">Status</th>
+                                                                                <th class="text-center px-1"
+                                                                                    style="width: 5%;">Range</th>
+                                                                                <th class="text-center px-1"
+                                                                                    style="width: 10%;">Start Date</th>
+                                                                                <th class="text-center px-1"
+                                                                                    style="width: 10%;">End Date</th>
+                                                                                <th class="text-center px-1"
+                                                                                    style="width: 10%;">Type</th>
+                                                                                <th class="text-center px-1"
+                                                                                    style="width: 5%;">Duration</th>
+                                                                                <th class="text-center px-1"
+                                                                                    style="width: 5%;">Status</th>
+                                                                                <th class="text-center px-1"
+                                                                                    style="width: 30%;">Approved by</th>
                                                                             </tr>
                                                                         </thead>
                                                                         <tbody id="leaveHistoryBody"
@@ -321,6 +329,7 @@
             var i = 1;
 
             leaves.forEach(leave => {
+                console.log("LEAVE:", leave);
 
                 const row = document.createElement("tr");
                 var status = "waiting";
@@ -331,11 +340,14 @@
                 const endDate = new Date(leave.end_date);
                 endDate.setHours(23, 59, 59, 999);
 
-                if (today >= startDate && today <= endDate) {
-                    status = "in progress";
+                if (leave.status == "pending") {
+                    status = "pending";
+                    statusClass = "bg-warning";
+                } else if (leave.status == "approved") {
+                    status = "approved";
                     statusClass = "bg-success";
-                } else if (today > endDate) {
-                    status = "finished";
+                } else if (leave.status == "rejected") {
+                    status = "rejected";
                     statusClass = "bg-danger";
                 }
 
@@ -348,21 +360,24 @@
                     leaveTypeClass = "bg-soft-danger text-danger";
                 }
 
+                const approver = leave.approver ? leave.approver.firstName : "-";
+
                 row.innerHTML = `
-                                        <td class="text-center text-muted py-3">${i}
+                                        <td class="text-center text-muted py-3 px-1" style="width: 5%;">${i}
                                         </td>
-                                        <td class="text-center text-muted py-3">${formatDate(leave.start_date)}
+                                        <td class="text-center text-muted py-3 px-1" style="width: 10%;">${formatDate(leave.start_date)}
                                         </td>
-                                        <td class="text-center text-muted py-3">${formatDate(leave.end_date)}
+                                        <td class="text-center text-muted py-3 px-1" style="width: 10%;">${formatDate(leave.end_date)}
                                         </td>
-                                        <td class="text-center text-muted py-3">
+                                        <td class="text-center text-muted py-3 px-1" style="width: 10%;">
                                             <span class="badge ${leaveTypeClass}">${leave.leave_type}</span>
                                         </td>
-                                        <td class="text-center text-muted py-3">${leave.duration} day(s)
+                                        <td class="text-center text-muted py-3 px-1" style="width: 5%;">${leave.duration} day(s)
                                         </td>
-                                        <td class="text-center py-3">
+                                        <td class="text-center py-3 px-1" style="width: 5%;">
                                             <span class="badge ${statusClass}">${status}</span>
                                         </td>
+                                        <td class="text-center text-muted py-3 px-1" style="width: 30%;">${approver}</td>
         `;
 
                 tbody.appendChild(row);

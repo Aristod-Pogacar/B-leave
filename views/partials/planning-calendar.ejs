@@ -60,13 +60,29 @@
             departementElement.value = defaultDepartement;
         }
 
-        const year = 2026;
-        const startMonth = 1;
-        const endMonth = 3;
+        const dDay = new Date();
+        console.log("dDay:", dDay);
+        const startD = new Date(dDay);
+        startD.setDate(startD.getDate() - 15);
+        console.log("startD:", startD);
+        const endD = new Date(dDay);
+        endD.setDate(endD.getDate() + 60);
+        console.log("endD:", endD);
+        if (dDay.getMonth() === 0) {
+            startD = new Date(dDay.getFullYear(), 0, 1);
+        }
+        if (dDay.getMonth() === 11) {
+            endD = new Date(dDay.getFullYear(), 11, 31);
+        }
+
+        const year = startD.getFullYear();
+        const startMonth = startD.getMonth();
+        const endMonth = endD.getMonth();
         const skip = 0;
         const take = 1000;
 
         const employeeUrl = `/employee/find-all?line=${line}&departement=${departement}&site=${site}&skip=${skip}&take=${take}`;
+        console.log("EMPLOYEE URL:", employeeUrl);
 
         const res = await fetch(employeeUrl);
 
@@ -75,14 +91,15 @@
             return;
         }
 
-        const userSession = sessionStorage;
-        console.log("userSession:", userSession);
+        // const userSession = sessionStorage;
+        // console.log("userSession:", userSession);
 
         const data = await res.json();
 
         employees = data.data;
 
         const leaveUrl = `/leave/range?year=${year}&startMonth=${startMonth}&endMonth=${endMonth}&line=${line}&departement=${departement}&site=${site}`;
+        console.log("LEAVE URL:", leaveUrl);
 
         const resLeave = await fetch(leaveUrl);
 
@@ -187,6 +204,7 @@
 
                 const cell = document.createElement("div");
                 leaves.forEach(leave => {
+                    console.log("leave:", leave);
                     const start_date = new Date(leave.start_date);
                     const end_date = new Date(leave.start_date);
                     const start_date_1 = new Date(start_date);
@@ -196,6 +214,9 @@
                     cell.classList.add("day-cell");
                     if (leave.employee.id == emp.id && day >= start_date_1 && day <= end_date && leave.leave_type != "Medical_Leave_AMD") {
                         cell.classList.add("leave-" + leave.leave_type.replace(/\s+/g, "_"));
+                        if (leave.approved_date == null) {
+                            cell.classList.add("not-approved");
+                        }
                         const numberOfDays = getNumberOfDays(leave.start_date, leave.end_date);
                         const widthPerDay = 40;
                         cell.style.width = (numberOfDays * widthPerDay) + 'px';

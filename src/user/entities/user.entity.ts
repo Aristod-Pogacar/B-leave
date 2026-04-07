@@ -1,4 +1,5 @@
 import { Employee } from 'src/employee/entities/employee.entity';
+import { Leave } from 'src/leave/entities/leave.entity';
 import { ManagerAssignation } from 'src/manager_assignation/entities/manager_assignation.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 
@@ -86,4 +87,7 @@ export class User {
 
     @OneToMany(() => Employee, employee => employee.manager)
     employees: Employee[];
+
+    @OneToMany(() => Leave, leave => leave.approver)
+    leaves: Leave[];
 }

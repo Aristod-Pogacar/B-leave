@@ -1,5 +1,12 @@
 import { Employee } from 'src/employee/entities/employee.entity';
+import { User } from 'src/user/entities/user.entity';
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+
+export enum LeaveStatus {
+    PENDING = 'pending',
+    APPROVED = 'approved',
+    REJECTED = 'rejected'
+}
 
 @Entity('leaves')
 export class Leave {
@@ -22,8 +29,8 @@ export class Leave {
     @Column()
     duration!: number;
 
-    @Column({ default: false })
-    status: boolean;
+    @Column({ default: LeaveStatus.PENDING })
+    status: LeaveStatus;
 
     @Column({ nullable: true })
     reason?: string;
@@ -31,8 +38,9 @@ export class Leave {
     @Column({ type: 'date', nullable: true })
     approved_date?: Date;
 
-    @Column({ nullable: true })
-    approver_id?: string;
+    @ManyToOne(() => User, user => user.leaves)
+    @JoinColumn({ name: 'approver_id' })
+    approver?: User;
 
     @Column({ default: () => "CURRENT_TIMESTAMP" })
     created_at?: Date;
