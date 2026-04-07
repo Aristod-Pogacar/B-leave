@@ -3,12 +3,13 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Site, User, UserRole } from './entities/user.entity';
-import { Repository } from 'typeorm';
+import { In, Like, Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
+
   constructor(
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
@@ -21,6 +22,38 @@ export class UserService {
       password: hashedPassword,
     });
     return user;
+  }
+
+  async searchManager(site: any, search: string) {
+    const allowedSites = this.getAllowedSites(site);
+    console.log("ALLOWED SITES:", allowedSites);
+    const result = await this.userRepo.find({
+      where: [{ site: In(allowedSites), role: UserRole.MANAGER, name: Like(`%${search}%`) }, { site: In(allowedSites), role: UserRole.MANAGER, firstName: Like(`%${search}%`) }, { site: In(allowedSites), role: UserRole.MANAGER, matricule: Like(`%${search}%`) }],
+      select: ['name', 'firstName', 'site', 'id', 'matricule']
+    });
+    console.log("RESULT:", result);
+    return result;
+  }
+
+  private getAllowedSites(userSite: string): string[] {
+    if (userSite === Site.MADA) {
+      return [Site.ABE1, Site.ABE2, Site.TANA];
+    } else if (userSite === Site.ANTSIRABE) {
+      return [Site.ABE1, Site.ABE2];
+    } else if (userSite === Site.TANA) {
+      return [Site.TANA];
+    } else if (userSite === Site.ABE1) {
+      return [Site.ABE1];
+    } else if (userSite === Site.ABE2) {
+      return [Site.ABE2];
+    } else {
+      return [];
+    }
+  }
+
+  async findAllManagers(site: any) {
+    const allowedSites = this.getAllowedSites(site);
+    return await this.userRepo.find({ where: { site: In(allowedSites), role: UserRole.MANAGER } });
   }
 
   async getAdminUser() {

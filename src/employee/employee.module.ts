@@ -7,11 +7,14 @@ import { Leave } from 'src/leave/entities/leave.entity';
 import { LeaveService } from "src/leave/leave.service";
 import { CryptoService } from 'src/crypto/crypto.service';
 import { ManagerAssignation } from 'src/manager_assignation/entities/manager_assignation.entity';
+import { UserService } from 'src/user/user.service';
+import { JwtService } from '@nestjs/jwt';
+import { User } from 'src/user/entities/user.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Leave, Employee, ManagerAssignation])],
+  imports: [TypeOrmModule.forFeature([Leave, Employee, ManagerAssignation, User])],
   controllers: [EmployeeController],
-  providers: [EmployeeService, LeaveService, CryptoService],
-  exports: [EmployeeService, TypeOrmModule, CryptoService],
+  providers: [EmployeeService, LeaveService, CryptoService, UserService, JwtService],
+  exports: [EmployeeService, TypeOrmModule, CryptoService, UserService, JwtService],
 })
 export class EmployeeModule { }

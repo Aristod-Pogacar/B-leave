@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Render, UseGuards, Res, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Render, UseGuards, Res, Req, Query } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -45,6 +45,24 @@ export class UserController {
       return key!; // Le '!' indique à TS qu'on est sûr de trouver la clé
     });
   }
+
+  @Get('get-all-managers')
+  @UseGuards(AuthGuard)
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL)
+  async getAllManagers(@Req() req: any) {
+    return this.userService.findAllManagers(req.session.user.site);
+  }
+
+  @Get('search-manager')
+  // @UseGuards(AuthGuard)
+  // @UseGuards(RolesGuard)
+  // @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL)
+  async searchManager(@Req() req: any, @Query('search') search: string) {
+    // return await this.userService.searchManager(Site.MADA, search);
+    return await this.userService.searchManager(req.session.user.site, search);
+  }
+
   @UseGuards(AuthGuard)
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL)

@@ -1,0 +1,401 @@
+<%- include('partials/head.ejs') %>
+
+    <body>
+        <%- include('partials/sidebar.ejs') %>
+            <%- include('partials/header.ejs') %>
+                <main class="nxl-container">
+                    <div class="nxl-content">
+                        <div class="page-header">
+                            <div class="page-header-left d-flex align-items-center">
+                                <div class="page-header-title">
+                                    <h5 class="m-b-10">Be-Leave</h5>
+                                </div>
+                                <ul class="breadcrumb">
+                                    <li class="breadcrumb-item">Employee</li>
+                                    <li class="breadcrumb-item">Assign Manager</li>
+                                </ul>
+                            </div>
+                            <div class="page-header-right ms-auto">
+                                <div class="page-header-right-items">
+                                    <div class="d-flex d-md-none">
+                                        <a href="javascript:void(0)" class="page-header-right-close-toggle">
+                                            <i class="feather-arrow-left me-2"></i>
+                                            <span>Back</span>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="d-md-none d-flex align-items-center">
+                                    <a href="javascript:void(0)" class="page-header-right-open-toggle">
+                                        <i class="feather-align-right fs-20"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- [ page-header ] end -->
+                        <div class="bg-white py-3 border-bottom rounded-0 p-md-0 mb-0">
+                            <div class="d-md-none d-flex align-items-center justify-content-between">
+                                <a href="javascript:void(0)" class="page-content-left-open-toggle">
+                                    <i class="feather-align-left fs-20"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <!-- [ Main Content ] start -->
+                        <div class="main-content">
+                            <div class="tab-content">
+                                <div class="tab-pane fade active show" id="overviewTab">
+                                    <div class="row">
+
+                                        <div class="col-xl-12">
+                                            <div class="card stretch stretch-full d-flex">
+                                                <div class="card-header">
+                                                    <h4 class="header">Assign Manager</h4>
+                                                </div>
+                                                <div class="card-body">
+
+                                                    <div class="modal-body">
+                                                        <div class="row">
+
+                                                            <!-- ===== LEFT: FORM ===== -->
+                                                            <div class="col-md-12">
+
+                                                                <!-- Recherche Manager -->
+                                                                <div class="row">
+                                                                    <div class="col-12 mb-3">
+                                                                        <label class=" form-label">Manager</label>
+                                                                        <input type="text" class="form-control"
+                                                                            id="managerSearch" autocomplete="off"
+                                                                            placeholder="Search a manager...">
+                                                                        <input type="text" class="input" name="manager"
+                                                                            id="manager" hidden required>
+                                                                        <ul id="managerResults"
+                                                                            class="autocomplete-list ps-0 w-100 z-200">
+                                                                        </ul>
+                                                                    </div>
+                                                                    <div class="row mt-2 d-none">
+                                                                        <div class="col-md-12 text-center">
+                                                                            <p id="message" class="fw-bold"></p>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div class="col-md-6 border-end">
+                                                                        <div class="card-header text-center fw-bold">
+                                                                            Add employee
+                                                                        </div>
+                                                                        <!-- Recherche Employé -->
+                                                                        <div class="mb-0" id="employeeSearchContainer">
+                                                                            <input type="text" class="form-control"
+                                                                                id="employeeSearch" autocomplete="off"
+                                                                                placeholder="Search an employee..."
+                                                                                disabled>
+                                                                        </div>
+                                                                        <div class="row mt-4">
+                                                                            <div class="col-12 pt-3">
+                                                                                <div class="table-responsive overflow-y-auto"
+                                                                                    style="max-height: 500px;"
+                                                                                    id="employeeList">
+                                                                                    <table
+                                                                                        class="table table-sm table-hover table-bordered align-middle"
+                                                                                        id="leaveHistoryTable">
+                                                                                        <thead
+                                                                                            class="table-light z-100 w-100">
+                                                                                            <tr>
+                                                                                                <th class="text-center px-0"
+                                                                                                    style="width: 5%;">#
+                                                                                                </th>
+                                                                                                <th style="width: 15%;">
+                                                                                                    Matricule</th>
+                                                                                                <th style="width: 80%;">
+                                                                                                    Fullname</th>
+                                                                                            </tr>
+                                                                                        </thead>
+                                                                                        <tbody id="employeeListBody"
+                                                                                            class="employee-list-body-2">
+                                                                                        </tbody>
+                                                                                    </table>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+
+                                                                    </div>
+                                                                    <div class="col-md-6">
+                                                                        <div class="row">
+                                                                            <div class="col-12">
+                                                                                <div
+                                                                                    class="card-header text-center fw-bold">
+                                                                                    Actual team
+                                                                                </div>
+                                                                                <div class="mb-0"
+                                                                                    id="employeeSearchContainer">
+                                                                                    <input type="text"
+                                                                                        id="actualTeamSearch"
+                                                                                        class="form-control"
+                                                                                        autocomplete="off"
+                                                                                        placeholder="Search an employee...">
+                                                                                </div>
+                                                                                <div class="row mt-4">
+                                                                                    <div class="col-12 pt-3">
+                                                                                        <div class="table-responsive overflow-y-auto"
+                                                                                            style="max-height: 500px;"
+                                                                                            id="">
+                                                                                            <table
+                                                                                                class="table table-sm table-hover table-bordered align-middle"
+                                                                                                id="">
+                                                                                                <thead
+                                                                                                    class="table-light z-100 w-100">
+                                                                                                    <tr>
+                                                                                                        <th
+                                                                                                            style="width: 20%;">
+                                                                                                            Matricule
+                                                                                                        </th>
+                                                                                                        <th
+                                                                                                            style="width: 80%;">
+                                                                                                            Fullname
+                                                                                                        </th>
+                                                                                                    </tr>
+                                                                                                </thead>
+                                                                                                <tbody
+                                                                                                    id="assignedEmployeesList"
+                                                                                                    class="employee-list-body-2">
+                                                                                                </tbody>
+                                                                                            </table>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+
+                                                                    </div>
+                                                                </div>
+
+                                                            </div>
+
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                                <div class="card-footer d-none" id="footer-export">
+                                                    <button class="btn btn-primary" type="button" id="saveBtn" disabled>
+                                                        Save
+                                                    </button>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <%- include('partials/footer.ejs') %>
+    </body>
+    <script>
+        let selectedEmployees = new Map();
+        let skip = 0;
+        const take = 10;
+        let isLoading = false;
+        let hasMore = true;
+        let currentEmployeeId = null;
+        let solde = 0;
+        const wrapper = document.getElementById("employeeList");
+        const footer = document.getElementById("footer-export");
+        const employeeSearchContainer = document.getElementById("employeeSearchContainer");
+        const assignedEmployeesList = document.getElementById("assignedEmployeesList");
+        const saveBtn = document.getElementById("saveBtn");
+
+        var message = "";
+
+        const actualTeamSearch = document.getElementById('actualTeamSearch');
+
+        const employeeSearch = document.getElementById('employeeSearch');
+        let employeeTimeout = null;
+
+        const input = document.getElementById('managerSearch');
+        const results = document.getElementById('managerResults');
+        const hiddenInput = document.getElementById('manager');
+        let timeout = null;
+
+        const employeeListBody = document.getElementById('employeeListBody');
+
+
+        input.addEventListener('input', () => {
+            clearTimeout(timeout);
+
+            const query = input.value.trim();
+            if (query.length < 2) {
+                results.innerHTML = '';
+                return;
+            }
+
+            timeout = setTimeout(async () => {
+                try {
+                    const res = await fetch(`/user/search-manager?search=${query}`);
+
+                    if (!res.ok) {
+                        console.error('HTTP error', res.status);
+                        return;
+                    }
+
+                    const data = await res.json();
+
+
+                    results.innerHTML = '';
+                    data.forEach(manager => {
+                        const li = document.createElement('li');
+                        li.classList.add('list-group-item');
+                        li.textContent = `${manager.matricule} - ${manager.firstName} ${manager.name}`;
+                        li.onclick = async () => {
+                            input.value = li.textContent;
+                            console.log("MANAGER ID:", manager.id);
+                            hiddenInput.value = manager.id;
+                            results.innerHTML = '';
+                            skip = 0;
+                            hasMore = true;
+                            footer.className = "card-footer";
+                            employeeSearch.disabled = false;
+                            const assignedEmployeesRes = await fetch(`/employee/assigned-employees/${manager.id}`);
+                            const assignedEmployees = await assignedEmployeesRes.json();
+                            console.log("ASSIGNED EMPLOYEES:", assignedEmployees);
+                            assignedEmployeesList.innerHTML = '';
+                            assignedEmployees.forEach(emp => {
+                                const tr = document.createElement('tr');
+                                tr.innerHTML = `
+                                    <td style="width: 20%;">${emp.matricule}</td>
+                                    <td style="width: 80%;">${emp.fullname}</td>
+                                `;
+                                assignedEmployeesList.appendChild(tr);
+                            });
+                        };
+                        results.appendChild(li);
+                    });
+
+                } catch (err) {
+                    console.error('Autocomplete error:', err);
+                }
+            }, 300);
+        });
+
+        document.addEventListener('change', function (e) {
+            if (e.target.name === "employeeIds") {
+                const id = e.target.value;
+                const row = e.target.closest('tr');
+
+                if (selectedEmployees.size > 0) {
+                    saveBtn.disabled = false;
+                } else {
+                    saveBtn.disabled = true;
+                }
+
+                const emp = {
+                    id: id,
+                    matricule: row.children[1].innerText,
+                    fullname: row.children[2].innerText,
+                };
+
+                if (e.target.checked) {
+                    selectedEmployees.set(id, emp);
+                } else {
+                    selectedEmployees.delete(id);
+                }
+            }
+
+        });
+
+        employeeSearch.addEventListener('input', () => {
+            clearTimeout(employeeTimeout);
+
+            const query = employeeSearch.value.trim();
+            if (query.length < 2) {
+                employeeListBody.innerHTML = '';
+
+                // 🔥 garder les sélectionnés visibles même sans recherche
+                selectedEmployees.forEach(emp => {
+                    employeeListBody.appendChild(createRow(emp));
+                });
+
+                return;
+            }
+            employeeTimeout = setTimeout(async () => {
+                try {
+                    const res = await fetch(`/employee/no-manager?search=${query}`);
+
+                    if (!res.ok) {
+                        console.error('HTTP error', res.status);
+                        return;
+                    }
+
+                    const data = await res.json();
+
+                    employeeListBody.innerHTML = '';
+
+                    const selectedList = Array.from(selectedEmployees.values());
+
+                    // 🔝 1. Toujours afficher les sélectionnés en premier
+                    selectedList.forEach(emp => {
+                        employeeListBody.appendChild(createRow(emp));
+                    });
+
+                    // 📄 2. Ajouter les résultats de recherche NON sélectionnés
+                    data.forEach(emp => {
+                        if (!selectedEmployees.has(emp.id.toString())) {
+                            employeeListBody.appendChild(createRow(emp));
+                        }
+                    });
+                } catch (err) {
+                    console.error('Autocomplete error:', err);
+                }
+            }, 300);
+        });
+
+        function createRow(emp) {
+            const tr = document.createElement('tr');
+
+            const isChecked = selectedEmployees.has(emp.id.toString());
+
+            tr.innerHTML = `
+                <td class="text-center px-0" style="width: 5%;">
+                    <input type="checkbox" name="employeeIds" value="${emp.id}" ${isChecked ? 'checked' : ''}>
+                </td>
+                <td style="width: 15%;">${emp.matricule}</td>
+                <td style="width: 80%;">${emp.fullname}</td>
+            `;
+            if (isChecked) {
+                tr.style.backgroundColor = "#dff7fc";
+            }
+            return tr;
+        }
+
+        wrapper.addEventListener("scroll", () => {
+            const scrollPosition = wrapper.scrollTop + wrapper.clientHeight;
+            const threshold = wrapper.scrollHeight - 5;
+        });
+
+        saveBtn.addEventListener('click', async () => {
+            try {
+                const selected = Array.from(selectedEmployees.values().map(emp => emp.id));
+                console.log(selected);
+                const managerId = hiddenInput.value;
+                const response = await fetch('/employee/assign-manager', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        managerId: managerId,
+                        employeeIds: selected
+                    })
+                });
+
+                const result = await response;
+                console.log(result);
+
+                alert('Assignation réussie !');
+                location.reload();
+
+            } catch (error) {
+                console.error(error);
+                alert('Erreur lors de l\'assignation');
+            }
+        });
+    </script>
+
+    </html>

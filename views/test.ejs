@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Assign Manager</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+        }
+
+        .search-box {
+            margin-bottom: 10px;
+        }
+
+        input,
+        select,
+        button {
+            padding: 8px;
+            margin: 5px 0;
+            width: 100%;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f4f4f4;
+        }
+
+        .actions {
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <h2>Assignation des Employees à un Manager</h2>
+
+        <!-- 🔽 Selection Manager -->
+        <label>Choisir un Manager :</label>
+        <select id="managerSelect">
+            <option value="">-- Sélectionner un manager --</option>
+            <% managers.forEach(manager=> { %>
+                <option value="<%= manager.id %>">
+                    <%= manager.matricule %> - <%= manager.firstName %>
+                            <%= manager.lastName %>
+                </option>
+                <% }) %>
+        </select>
+
+        <!-- 🔍 Recherche Employee -->
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Rechercher un employee...">
+        </div>
+
+        <!-- 📋 Table Employees -->
+        <table id="employeeTable">
+            <thead>
+                <tr>
+                    <th>
+                        <input type="checkbox" id="selectAll">
+                    </th>
+                    <th>Matricule</th>
+                    <th>Fullname</th>
+                    <th>Line</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% employees.forEach(emp=> { %>
+                    <tr>
+                        <td>
+                            <input type="checkbox" class="employeeCheckbox" value="<%= emp.id %>" name="employeeIds">
+                        </td>
+                        <td class="lastName">
+                            <%= emp.matricule %>
+                        </td>
+                        <td class="firstName">
+                            <%= emp.fullname %>
+                        </td>
+                        <td>
+                            <%= emp.line %>
+                        </td>
+                    </tr>
+                    <% }) %>
+            </tbody>
+        </table>
+
+        <!-- 💾 Bouton -->
+        <div class="actions">
+            <button onclick="submitAssign()">Enregistrer</button>
+        </div>
+
+    </div>
+
+    <script>
+        // 🔍 Recherche dynamique
+        document.getElementById('searchInput').addEventListener('keyup', function () {
+            const value = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#employeeTable tbody tr');
+
+            rows.forEach(row => {
+                const firstName = row.querySelector('.firstName').innerText.toLowerCase();
+                const lastName = row.querySelector('.lastName').innerText.toLowerCase();
+
+                if (firstName.includes(value) || lastName.includes(value)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+
+        // ✅ Select all
+        document.getElementById('selectAll').addEventListener('change', function () {
+            const checked = this.checked;
+            document.querySelectorAll('.employeeCheckbox').forEach(cb => {
+                if (cb.closest('tr').style.display !== 'none') {
+                    cb.checked = checked;
+                }
+            });
+        });
+
+        // 🚀 Submit
+        async function submitAssign() {
+            const managerId = document.getElementById('managerSelect').value;
+
+            if (!managerId) {
+                alert('Veuillez choisir un manager');
+                return;
+            }
+
+            const selected = [];
+            document.querySelectorAll('.employeeCheckbox:checked').forEach(cb => {
+                selected.push(parseInt(cb.value));
+            });
+
+            if (selected.length === 0) {
+                alert('Veuillez sélectionner au moins un employee');
+                return;
+            }
+
+            try {
+                const response = await fetch('/employee/assign-manager', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        managerId: parseInt(managerId),
+                        employeeIds: selected
+                    })
+                });
+
+                const result = await response.json();
+
+                alert('Assignation réussie !');
+                location.reload();
+
+            } catch (error) {
+                console.error(error);
+                alert('Erreur lors de l\'assignation');
+            }
+        }
+    </script>
+
+</body>
+
+</html>

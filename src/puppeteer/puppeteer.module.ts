@@ -9,11 +9,12 @@ import { PuppeteerManagerService } from 'src/puppeteer-manager/puppeteer-manager
 import { EmployeeService } from 'src/employee/employee.service';
 import { LeaveService } from 'src/leave/leave.service';
 import { CryptoService } from 'src/crypto/crypto.service';
+import { User } from 'src/user/entities/user.entity';
 
 @Module({
     imports: [
         ConfigModule.forRoot({ isGlobal: true }),
-        TypeOrmModule.forFeature([Employee, Leave]),
+        TypeOrmModule.forFeature([Employee, Leave, User]),
     ],
     controllers: [PuppeteerController],
     providers: [

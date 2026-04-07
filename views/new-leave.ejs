@@ -123,8 +123,10 @@
                                                             <!-- ===== RIGHT: INFOS ===== -->
                                                             <div class="col-md-6">
 
-                                                                <div class="card mb-3 shadow-sm">
+                                                                <!-- <div class="card mb-3 shadow-sm"> -->
+                                                                <div class="mb-3">
                                                                     <div class="card-header text-center fw-bold">
+                                                                        <!-- <div class="text-center fw-bold"> -->
                                                                         Employee information
                                                                     </div>
                                                                     <div class="card-body">
@@ -208,9 +210,6 @@
 
         var soldePermissionNumber = 0;
 
-        // const wrapper = document.getElementById("leaveHistoryWrapper");
-        // const tbody = document.getElementById("leaveHistoryBody");
-
         var message = "";
 
         const input = document.getElementById('employeeSearch');
@@ -221,22 +220,10 @@
         let timeout = null;
 
         const startDate = document.getElementById('startDate');
-        // startDate.value = new Date().toISOString().split("T")[0];
         const endDate = document.getElementById('endDate');
-        // endDate.value = new Date().toISOString().split("T")[0];
-        // const hiddenInput = document.getElementById('employee');
 
         const leaveType = document.getElementById('leave_type');
         leaveType.addEventListener('change', checkValableLeave);
-        // leaveType.addEventListener('change', () => {
-        //     if (leaveType.value === 'Local_Leave_AMD') {
-        //         checkValableLeave()
-        //     } else {
-        //         submitButton.disabled = false;
-        //         message = "";
-        //         document.getElementById('message').textContent = "";
-        //     }
-        // })
 
         startDate.addEventListener('change', checkValableLeave);
         endDate.addEventListener('change', checkValableLeave);
@@ -306,10 +293,6 @@
                             results.innerHTML = '';
                             skip = 0;
                             hasMore = true;
-                            // tbody.innerHTML = "";
-                            // loadEmployeeLeaves(emp.id);
-                            // const historyResponse = await fetch(`/leave/employee-leaves/paginate/${emp.id}?skip=0&take=10`);
-                            // const historyData = await historyResponse.json();
                             console.log("soldePermissionNumber:", soldePermissionNumber);
                         };
                         results.appendChild(li);
@@ -341,8 +324,6 @@
                 if (data.data.length < take) {
                     hasMore = false;
                 }
-
-                // appendLeavesToTable(data.data);
 
                 skip += take;
 
@@ -414,11 +395,8 @@
             return diffDays + 1;
         }
         function checkDate(startDate, endDate) {
-            // const today = new Date();
-            // today.setHours(0, 0, 0, 0);
             const startDateObj = new Date(startDate);
             const endDateObj = new Date(endDate);
-            // if (startDateObj <= endDateObj && startDateObj >= today) {
             if (startDateObj <= endDateObj) {
                 return true
             } else {

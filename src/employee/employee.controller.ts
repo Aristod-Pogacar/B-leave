@@ -9,11 +9,13 @@ import { RolesGuard } from 'src/user/role.guard';
 import { Roles } from 'src/user/role.decorator';
 import { Site, UserRole } from 'src/user/entities/user.entity';
 import * as XLSX from 'xlsx';
+import { UserService } from 'src/user/user.service';
 
 @Controller('employee')
 export class EmployeeController {
   constructor(
-    private readonly employeeService: EmployeeService
+    private readonly employeeService: EmployeeService,
+    private readonly userService: UserService,
   ) { }
 
   private getAllowedSites(userSite: string): string[] {
@@ -167,7 +169,34 @@ export class EmployeeController {
   async getNoManager(@Req() req: any, @Query('search') search: string) {
     // const employees = await this.employeeService.getNoManager(req.session.user.site, search);
     console.log("SEARCH:", search);
-    const employees = await this.employeeService.getNoManager("RABE", search);
+    const employees = await this.employeeService.getNoManager(req.session.user.site, search);
+    console.log("EMPLOYEES:", employees);
+    return employees;
+  }
+
+  @Get('assign-manager')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL)
+  // @Render('test')
+  @Render('employee-assign')
+  async assignManager(@Req() req: any) {
+    const employees = await this.employeeService.getNoManager(req.session.user.site, "");
+    const managers = await this.userService.findAllManagers(req.session.user.site);
+    return { title: "Assign Manager", employees, managers };
+  }
+
+  @Post('assign-manager')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL)
+  async assignManagerPost(@Body() body: any, @Res() res: express.Response) {
+    console.log("BODY:", body);
+    await this.employeeService.assignManager(body.managerId, body.employeeIds);
+    return res.redirect('/employee/assign-manager');
+  }
+
+  @Get('assigned-employees/:managerId')
+  async getAssignedEmployees(@Req() req: any, @Param('managerId') managerId: string) {
+    const employees = await this.employeeService.getAssignedEmployees(managerId);
     console.log("EMPLOYEES:", employees);
     return employees;
   }

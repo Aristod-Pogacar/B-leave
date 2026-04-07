@@ -1,24 +1,32 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Employee } from './entities/employee.entity';
-import { IsNull, Like, Repository } from 'typeorm';
+import { In, IsNull, Like, Repository } from 'typeorm';
 import * as ExcelJS from 'exceljs';
 import * as XLSX from 'xlsx';
 import { Leave } from 'src/leave/entities/leave.entity';
-import { Site } from 'src/user/entities/user.entity';
+import { Site, User } from 'src/user/entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { CryptoService } from 'src/crypto/crypto.service';
 
 @Injectable()
 export class EmployeeService {
+  async getAssignedEmployees(managerId: string) {
+    return this.employeeRepository.find({
+      where: { manager: { id: managerId } },
+      select: ['fullname', 'matricule', 'id', 'section', 'line']
+    });
+  }
 
   constructor(
     @InjectRepository(Employee)
     private readonly employeeRepository: Repository<Employee>,
     @InjectRepository(Leave)
     private readonly leaveRepository: Repository<Leave>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
     private readonly cryptoService: CryptoService
   ) { }
 
@@ -40,16 +48,42 @@ export class EmployeeService {
     }
   }
 
+  async assignManager(managerId: string, employeeIds: string[]) {
+    const manager = await this.userRepository.findOne({
+      where: { id: managerId },
+    });
+
+    if (!manager) {
+      throw new Error('Manager introuvable');
+    }
+
+    // ⚡ Bulk update
+    await this.employeeRepository.update(
+      { id: In(employeeIds) },
+      { manager: manager },
+    );
+
+    return {
+      message: `${employeeIds.length} employees assignés`,
+    };
+  }
+
   async getNoManager(site: string, search: string = "") {
+    if (!site) {
+      throw new BadRequestException("Site is required");
+    }
+    const allowedSites = this.getAllowedSites(site);
     const employees = await this.employeeRepository.find({
       where: [
-        { manager: IsNull(), site: site, matricule: Like(`%${search}%`) },
-        { manager: IsNull(), site: site, fullname: Like(`%${search}%`) }
+        { manager: IsNull(), site: In(allowedSites), matricule: Like(`%${search}%`) },
+        { manager: IsNull(), site: In(allowedSites), fullname: Like(`%${search}%`) }
       ],
       select: [
         'fullname',
         'matricule',
-        'id'
+        'id',
+        'section',
+        'line'
       ]
     });
     return employees;
