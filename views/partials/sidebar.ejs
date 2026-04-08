@@ -57,6 +57,22 @@
                 </li>
                 <li class="nxl-item nxl-hasmenu">
                     <a href="javascript:void(0);" class="nxl-link">
+                        <span class="nxl-micon"><i class="feather-plus-square"></i></span>
+                        <span class="nxl-mtext">Medical service</span><span class="nxl-arrow"><i
+                                class="feather-chevron-right"></i></span>
+                    </a>
+                    <ul class="nxl-submenu">
+                        <li class="nxl-item"><a class="nxl-link" href="/medical-service/list">Medical service list</a>
+                        </li>
+                        <% if(user.role !=="PAYROLL" ) { %>
+                            <li class="nxl-item"><a class="nxl-link" href="/medical-service/new-medical-service">New
+                                    medical
+                                    service</a></li>
+                            <% } %>
+                    </ul>
+                </li>
+                <li class="nxl-item nxl-hasmenu">
+                    <a href="javascript:void(0);" class="nxl-link">
                         <span class="nxl-micon"><i class="feather-at-sign"></i></span>
                         <span class="nxl-mtext">Users</span><span class="nxl-arrow"><i
                                 class="feather-chevron-right"></i></span>

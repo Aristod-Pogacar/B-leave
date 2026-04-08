@@ -25,6 +25,11 @@ import { ApiLeaveModule } from './api/leave/leave.module';
 import { ManagerAssignationModule } from './manager_assignation/manager_assignation.module';
 import path from 'path';
 import { ManagerAssignation } from './manager_assignation/entities/manager_assignation.entity';
+import { Permission2hModule } from './permission2h/permission2h.module';
+import { Permission2h } from './permission2h/entities/permission2h.entity';
+import { MedicalServiceModule } from './medical_service/medical_service.module';
+import { MedicalService } from './medical_service/entities/medical_service.entity';
+import { MedicalServiceService } from './medical_service/medical_service.service';
 
 @Module({
   imports: [
@@ -56,7 +61,9 @@ import { ManagerAssignation } from './manager_assignation/entities/manager_assig
         Leave,
         Employee,
         User,
-        ManagerAssignation
+        ManagerAssignation,
+        Permission2h,
+        MedicalService
       ],
       synchronize: true,
     }),
@@ -73,6 +80,8 @@ import { ManagerAssignation } from './manager_assignation/entities/manager_assig
     PuppeteerModule,
     ApiLeaveModule,
     ManagerAssignationModule,
+    Permission2hModule,
+    MedicalServiceModule,
   ],
   controllers: [AppController, PuppeteerController],
   providers: [AppService, MailService, AuthService, JwtService, EmployeeService, PuppeteerService, CryptoService, PuppeteerManagerService],

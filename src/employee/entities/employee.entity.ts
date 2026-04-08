@@ -1,5 +1,6 @@
 import { Leave } from 'src/leave/entities/leave.entity';
 import { ManagerAssignation } from 'src/manager_assignation/entities/manager_assignation.entity';
+import { Permission2h } from 'src/permission2h/entities/permission2h.entity';
 import { User } from 'src/user/entities/user.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, JoinColumn, Index } from 'typeorm';
 
@@ -109,6 +110,9 @@ export class Employee {
 
     @OneToMany(() => Leave, leave => leave.employee)
     leaves: Leave[];
+
+    @OneToMany(() => Permission2h, permission2h => permission2h.employee)
+    permission2h: Permission2h[];
 
     @Index()
     @ManyToOne(() => User, user => user.employees, { nullable: true })
