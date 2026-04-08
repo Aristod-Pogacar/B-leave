@@ -61,13 +61,10 @@
         }
 
         const dDay = new Date();
-        console.log("dDay:", dDay);
         const startD = new Date(dDay);
         startD.setDate(startD.getDate() - 15);
-        console.log("startD:", startD);
         const endD = new Date(dDay);
         endD.setDate(endD.getDate() + 60);
-        console.log("endD:", endD);
         if (dDay.getMonth() === 0) {
             startD = new Date(dDay.getFullYear(), 0, 1);
         }
@@ -82,7 +79,6 @@
         const take = 1000;
 
         const employeeUrl = `/employee/find-all?line=${line}&departement=${departement}&site=${site}&skip=${skip}&take=${take}`;
-        console.log("EMPLOYEE URL:", employeeUrl);
 
         const res = await fetch(employeeUrl);
 
@@ -91,15 +87,11 @@
             return;
         }
 
-        // const userSession = sessionStorage;
-        // console.log("userSession:", userSession);
-
         const data = await res.json();
 
         employees = data.data;
 
         const leaveUrl = `/leave/range?year=${year}&startMonth=${startMonth}&endMonth=${endMonth}&line=${line}&departement=${departement}&site=${site}`;
-        console.log("LEAVE URL:", leaveUrl);
 
         const resLeave = await fetch(leaveUrl);
 
@@ -119,10 +111,10 @@
         employeeColumn.innerHTML += `
   <div class="employee-row header-row">
     <div class="header-cell">EMPLOYEES</div>
-    <div class="header-cell">START</div>
-    <div class="header-cell">CUMUL</div>
     <div class="header-cell">TAKEN</div>
     <div class="header-cell">LEFT</div>
+    <div class="header-cell">CUMUL</div>
+    <div class="header-cell">START</div>
   </div>
 `;
 
@@ -136,10 +128,10 @@
             employeeColumn.innerHTML += `
     <div class="employee-row">
       <div class="employee-cell leave-bar-text">${emp.matricule} - ${emp.fullname}</div>
-      <div class="employee-cell text-center">${emp.solde_debut}</div>
-      <div class="employee-cell text-center">${cumule}</div>
       <div class="employee-cell text-center">${prises}</div>
       <div class="employee-cell text-center">${restant}</div>
+      <div class="employee-cell text-center">${cumule}</div>
+      <div class="employee-cell text-center">${emp.solde_debut}</div>
     </div>
   `;
         });
@@ -204,7 +196,6 @@
 
                 const cell = document.createElement("div");
                 leaves.forEach(leave => {
-                    console.log("leave:", leave);
                     const start_date = new Date(leave.start_date);
                     const end_date = new Date(leave.start_date);
                     const start_date_1 = new Date(start_date);
@@ -246,6 +237,10 @@
                         wrapper.setAttribute("data-bs-toggle", "popover");
                         wrapper.setAttribute("data-bs-title", emp.fullname);
                         wrapper.setAttribute("data-bs-html", "true");
+                        var approver = "-";
+                        if (leave.approver) {
+                            approver = `${leave.approver.firstName}`;
+                        }
                         wrapper.setAttribute("data-bs-content", `<b>Matricule:</b> ${emp.matricule}<br><b>Leave Type:</b> ${leave.leave_type}
                             <br><b>Start Date:</b> ${start_date.toLocaleDateString('fr-FR', {
                             day: '2-digit',
@@ -256,7 +251,7 @@
                             month: '2-digit',
                             year: 'numeric'
                         })}
-                            <br>`);
+                            <br><b>Approver:</b> ${approver}<br>`);
                         wrapper.setAttribute("data-bs-placement", "top");
                         wrapper.classList.add("leave-bar-text");
                         new bootstrap.Popover(wrapper, {

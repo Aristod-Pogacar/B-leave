@@ -8,7 +8,7 @@ import { Employee } from 'src/employee/entities/employee.entity';
 import * as express from 'express';
 import * as ExcelJS from 'exceljs';
 import * as XLSX from 'xlsx';
-import { User } from 'src/user/entities/user.entity';
+import { Site, User, UserRole } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class LeaveService {
@@ -41,12 +41,27 @@ export class LeaveService {
     return this.leaveRepository.save(leave);
   }
 
+  async rejectLeave(leaveId: string, id: string) {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    const leave = await this.leaveRepository.findOne({ where: { id: leaveId } });
+    if (!leave) {
+      throw new NotFoundException('Leave not found');
+    }
+    leave.approver = user;
+    leave.approved_date = new Date();
+    leave.status = LeaveStatus.REJECTED;
+    return this.leaveRepository.save(leave);
+  }
+
   getLeavesByRange(year: number, startMonth: number, endMonth: number, line: string, departement: string, site: string) {
-    return this.leaveRepository.find({ where: { start_date: Between(new Date(year, startMonth, 1), new Date(year, endMonth, 1)), employee: { line, departement, site }, status: In([LeaveStatus.APPROVED, LeaveStatus.PENDING]) }, relations: ['employee'] });
+    return this.leaveRepository.find({ where: { start_date: Between(new Date(year, startMonth, 1), new Date(year, endMonth, 1)), employee: { line, departement, site }, status: In([LeaveStatus.APPROVED, LeaveStatus.PENDING]) }, relations: ['employee', 'approver'] });
   }
 
   getLeavesByMonthAndLineAndDepartement(year: number, month: number, line: string, departement: string, site: string) {
-    return this.leaveRepository.find({ where: { start_date: Between(new Date(year, month, 1), new Date(year, month, 31)), employee: { line, departement, site }, status: In([LeaveStatus.APPROVED, LeaveStatus.PENDING]) }, relations: ['employee'] });
+    return this.leaveRepository.find({ where: { start_date: Between(new Date(year, month, 1), new Date(year, month, 31)), employee: { line, departement, site }, status: In([LeaveStatus.APPROVED, LeaveStatus.PENDING]) }, relations: ['employee', 'approver'] });
   }
 
   async create(createLeaveDto: CreateLeaveDto, res: express.Response) {
@@ -479,6 +494,8 @@ export class LeaveService {
   }
 
   getDatesBetween(startDate: Date, endDate: Date) {
+    console.log("startDate:", startDate);
+    console.log("endDate:", endDate);
 
     const dates: Date[] = [];
 
@@ -492,12 +509,12 @@ export class LeaveService {
     let current = new Date(sy, sm, sd);
     const end = new Date(ey, em, ed);
 
-    console.log("start year:", sy);
-    console.log("start month:", sm);
-    console.log("start date:", sd);
-    console.log("end year:", ey);
-    console.log("end month:", em);
-    console.log("end date:", ed);
+    // console.log("start year:", sy);
+    // console.log("start month:", sm);
+    // console.log("start date:", sd);
+    // console.log("end year:", ey);
+    // console.log("end month:", em);
+    // console.log("end date:", ed);
 
     console.log("current:", current);
     console.log("end:", end);
@@ -507,28 +524,54 @@ export class LeaveService {
       current.setDate(current.getDate() + 1);
     }
 
-    console.log(dates.length);
+    console.log(dates);
 
     return dates;
   }
 
-  async exportLeavePlanning(startDate: Date, endDate: Date, line?: string, departement?: string) {
+  async exportLeavePlanning(user: any, startDate: Date, endDate: Date, line?: string, departement?: string) {
+    console.log("USER:", user)
+    let leaves: Leave[];
+    let employees: Employee[];
 
-    const employees = await this.employeeRepository.find({ where: { line, departement }, order: { matricule: 'ASC' } });
 
-    const leaves = await this.leaveRepository.find({
-      where: {
-        start_date: Between(new Date(startDate), new Date(endDate)),
-        employee: { line, departement },
-        status: LeaveStatus.APPROVED
-      },
-      relations: ['employee']
-    });
+    const dates = this.getDatesBetween(startDate, endDate);
+
+    if (user && user.role === UserRole.MANAGER) {
+      employees = await this.employeeRepository.find({ where: { line, departement, manager: { id: user.id } }, order: { matricule: 'ASC' } });
+      leaves = await this.leaveRepository.find({
+        where: [{
+          start_date: In(dates),
+          employee: { line, departement, manager: { id: user.id } },
+          status: LeaveStatus.APPROVED
+        }, {
+          end_date: In(dates),
+          employee: { line, departement, manager: { id: user.id } },
+          status: LeaveStatus.APPROVED
+        }],
+        relations: ['employee']
+      });
+    } else {
+      employees = await this.employeeRepository.find({ where: { line, departement }, order: { matricule: 'ASC' } });
+      leaves = await this.leaveRepository.find({
+        where: [{
+          start_date: In(dates),
+          employee: { line, departement },
+          status: LeaveStatus.APPROVED
+        }, {
+          end_date: In(dates),
+          employee: { line, departement },
+          status: LeaveStatus.APPROVED
+        }],
+        relations: ['employee']
+      });
+    }
+
+
+    console.log("LEAVES:", leaves);
 
     const workbook = new ExcelJS.Workbook();
     const sheet = workbook.addWorksheet("Leave Planning");
-
-    const dates = this.getDatesBetween(startDate, endDate);
 
     const header = [
       "Matricule",
@@ -543,7 +586,7 @@ export class LeaveService {
       // "Solde pris",
       // "Solde cumul",
       // "Solde restant",
-      ...dates.map(d => d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" }))
+      ...dates.map(d => d.toLocaleDateString("en-US", { day: "numeric", month: "short" }))
     ];
 
     sheet.addRow(header);
@@ -590,6 +633,9 @@ export class LeaveService {
 
       let current = new Date(l.start_date);
       const end = new Date(l.end_date);
+      console.log("Leaves:", "" + current + "-" + end);
+      current.setDate(current.getDate() - 1);
+      end.setDate(end.getDate() - 1);
 
       while (current <= end) {
 
@@ -759,6 +805,22 @@ export class LeaveService {
     });
 
     return workbook;
+  }
+
+  private getAllowedSites(userSite: string): string[] {
+    if (userSite === Site.MADA) {
+      return [Site.ABE1, Site.ABE2, Site.TANA];
+    } else if (userSite === Site.ANTSIRABE) {
+      return [Site.ABE1, Site.ABE2];
+    } else if (userSite === Site.TANA) {
+      return [Site.TANA];
+    } else if (userSite === Site.ABE1) {
+      return [Site.ABE1];
+    } else if (userSite === Site.ABE2) {
+      return [Site.ABE2];
+    } else {
+      return [];
+    }
   }
 
 }

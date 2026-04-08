@@ -78,6 +78,14 @@ export class LeaveController {
     res.redirect('/leave/approuve-leaves');
   }
 
+  @Post('reject-leave/:leaveId')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER)
+  async rejectLeave(@Param('leaveId') leaveId: string, @Res() res: express.Response, @Req() req: any) {
+    await this.leaveService.rejectLeave(leaveId, req.session.user.id);
+    res.redirect('/leave/approuve-leaves');
+  }
+
   @Get('employee-leaves/paginate/:employeeId')
   async getEmployeeLeaves(@Param('employeeId') employeeId: string, @Query('skip') skip: number, @Query('take') take: number) {
     return this.leaveService.getPaginateEmployeeLeaves(employeeId, skip, take);
@@ -212,12 +220,13 @@ export class LeaveController {
     @Body('endDate') endDate: Date,
     @Body('line') line: string,
     @Body('departement') departement: string,
+    @Req() req: any,
     @Res() res: express.Response
   ) {
     const start = new Date(startDate);
     const end = new Date(endDate);
 
-    const workbook = await this.leaveService.exportLeavePlanning(start, end, line, departement);
+    const workbook = await this.leaveService.exportLeavePlanning(req.session.user, start, end, line, departement);
 
     res.setHeader(
       'Content-Type',

@@ -107,7 +107,7 @@
                                                                 <th>End date</th>
                                                                 <th>Duration</th>
                                                                 <th>Type</th>
-                                                                <th class="text-center">Action</th>
+                                                                <th class="text-end">Action</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
@@ -131,12 +131,21 @@
                                                                     <td>
                                                                         <%= leave.leave_type %>
                                                                     </td>
-                                                                    <td class="text-center">
+                                                                    <td class="text-end d-flex gap-2">
                                                                         <form
                                                                             action="/leave/approve-leave/<%= leave.id %>"
                                                                             method="post">
                                                                             <button type="submit"
-                                                                                class="btn btn-primary">Approve</button>
+                                                                                class="btn btn-success"
+                                                                                title="Approve"><i
+                                                                                    class="feather-check"></i></button>
+                                                                        </form>
+                                                                        <form
+                                                                            action="/leave/reject-leave/<%= leave.id %>"
+                                                                            method="post">
+                                                                            <button type="submit" class="btn btn-danger"
+                                                                                title="Reject"><i
+                                                                                    class="feather-x"></i></button>
                                                                         </form>
                                                                     </td>
                                                                 </tr>
