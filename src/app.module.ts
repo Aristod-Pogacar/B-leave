@@ -30,6 +30,8 @@ import { Permission2h } from './permission2h/entities/permission2h.entity';
 import { MedicalServiceModule } from './medical_service/medical_service.module';
 import { MedicalService } from './medical_service/entities/medical_service.entity';
 import { MedicalServiceService } from './medical_service/medical_service.service';
+import { SmiaOstieModule } from './smia_ostie/smia_ostie.module';
+import { SmiaOstie } from './smia_ostie/entities/smia_ostie.entity';
 
 @Module({
   imports: [
@@ -63,7 +65,8 @@ import { MedicalServiceService } from './medical_service/medical_service.service
         User,
         ManagerAssignation,
         Permission2h,
-        MedicalService
+        MedicalService,
+        SmiaOstie
       ],
       synchronize: true,
     }),
@@ -82,6 +85,7 @@ import { MedicalServiceService } from './medical_service/medical_service.service
     ManagerAssignationModule,
     Permission2hModule,
     MedicalServiceModule,
+    SmiaOstieModule,
   ],
   controllers: [AppController, PuppeteerController],
   providers: [AppService, MailService, AuthService, JwtService, EmployeeService, PuppeteerService, CryptoService, PuppeteerManagerService],

@@ -174,7 +174,7 @@
                                                     </div>
                                                 </div>
                                                 <div class="card-footer d-none" id="footer-export">
-                                                    <button class="btn btn-primary" type="button" id="saveBtn" disabled>
+                                                    <button class="btn btn-primary" type="button" id="saveBtn">
                                                         Save
                                                     </button>
                                                 </div>
@@ -279,11 +279,11 @@
                 const id = e.target.value;
                 const row = e.target.closest('tr');
 
-                if (selectedEmployees.size > 0) {
-                    saveBtn.disabled = false;
-                } else {
-                    saveBtn.disabled = true;
-                }
+                // if (selectedEmployees.size > 0) {
+                //     saveBtn.disabled = false;
+                // } else {
+                //     saveBtn.disabled = true;
+                // }
 
                 const emp = {
                     id: id,

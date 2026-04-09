@@ -5,7 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Response } from 'express';
 import { Repository } from 'typeorm';
 import { Employee } from 'src/employee/entities/employee.entity';
-import { Leave } from 'src/leave/entities/leave.entity';
+import { Leave, LeaveStatus } from 'src/leave/entities/leave.entity';
 
 @Injectable()
 export class LeaveService {
@@ -38,6 +38,7 @@ export class LeaveService {
         { date1, date2 },
       )
       .andWhere('leave.employee = :employeeId', { employeeId: employee.id })
+      .andWhere('leave.status = :status', { status: LeaveStatus.APPROVED })
       .getMany();
     console.log("OVERLAPPING LEAVE:", overlappingLeave);
 

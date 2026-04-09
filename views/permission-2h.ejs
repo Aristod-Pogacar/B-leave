@@ -48,8 +48,8 @@
                                 <h5 class="m-b-10">B-Leave</h5>
                             </div>
                             <ul class="breadcrumb">
-                                <li class="breadcrumb-item">Leaves</li>
-                                <li class="breadcrumb-item">Approve leaves</li>
+                                <li class="breadcrumb-item">Permission 2h</li>
+                                <li class="breadcrumb-item">List</li>
                             </ul>
                         </div>
                         <div class="page-header-right ms-auto">
@@ -85,7 +85,7 @@
                                     <div class="col-12">
                                         <div class="card stretch stretch-full">
                                             <div class="card-header">
-                                                <h5 class="card-title">Approve leaves</h5>
+                                                <h5 class="card-title">Permission 2h list</h5>
                                                 <div
                                                     class="col-10 task-header d-md-flex align-items-center justify-content-between">
                                                     <div class="me-4 w-75">
@@ -103,50 +103,24 @@
                                                             <tr>
                                                                 <th>Matricule</th>
                                                                 <th>Fullname</th>
-                                                                <th>Start date</th>
-                                                                <th>End date</th>
-                                                                <th>Duration</th>
-                                                                <th>Type</th>
-                                                                <th class="text-center">Action</th>
+                                                                <th>Start time</th>
+                                                                <th>End time</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            <% leaves.forEach(leave=> { %>
+                                                            <% data.forEach(d=> { %>
                                                                 <tr>
                                                                     <td>
-                                                                        <%= leave.employee.matricule %>
+                                                                        <%= d.employee.matricule %>
                                                                     </td>
                                                                     <td>
-                                                                        <%= leave.employee.fullname %>
+                                                                        <%= d.employee.fullname %>
                                                                     </td>
                                                                     <td>
-                                                                        <%= leave.start_date %>
+                                                                        <%= d.expectedStartTime %>
                                                                     </td>
                                                                     <td>
-                                                                        <%= leave.end_date %>
-                                                                    </td>
-                                                                    <td>
-                                                                        <%= leave.duration %>
-                                                                    </td>
-                                                                    <td>
-                                                                        <%= leave.leave_type %>
-                                                                    </td>
-                                                                    <td class="justify-content-center d-flex gap-2">
-                                                                        <form
-                                                                            action="/leave/approve-leave/<%= leave.id %>"
-                                                                            method="post">
-                                                                            <button type="submit"
-                                                                                class="btn btn-success"
-                                                                                title="Approve"><i
-                                                                                    class="feather-check"></i></button>
-                                                                        </form>
-                                                                        <form
-                                                                            action="/leave/reject-leave/<%= leave.id %>"
-                                                                            method="post">
-                                                                            <button type="submit" class="btn btn-danger"
-                                                                                title="Reject"><i
-                                                                                    class="feather-x"></i></button>
-                                                                        </form>
+                                                                        <%= d.expectedEndTime %>
                                                                     </td>
                                                                 </tr>
                                                                 <% }) %>

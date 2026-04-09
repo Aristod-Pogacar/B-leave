@@ -82,8 +82,8 @@ export class AppController {
   }
 
   @UseGuards(AuthGuard)
-  @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL)
+  // @UseGuards(RolesGuard)
+  // @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL)
   @Get('logout')
   async logout(@Req() req: any, @Res() res: any) {
     req.session.destroy();

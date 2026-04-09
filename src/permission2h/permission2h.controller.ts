@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Res, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Res, Query, Render, Req } from '@nestjs/common';
 import { Permission2hService } from './permission2h.service';
 import { CreatePermission2hDto } from './dto/create-permission2h.dto';
 import { UpdatePermission2hDto } from './dto/update-permission2h.dto';
@@ -23,6 +23,45 @@ export class Permission2hController {
     console.log('DATA:', data);
 
     await this.permission2hService.exportPermission2hToExcel(data, res, date);
+  }
+
+  @Get('list')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER)
+  @Render('permission-2h')
+  async permission2h(@Req() req, @Query('page') page = 1, @Query('search') search = '', @Query('date') date = '') {
+    const limit = 20;
+
+    const { data, total, totalPages } =
+      await this.permission2hService.paginatePermission2h(search, Number(page), limit, date, req.session.user);
+
+    const currentPage = Number(page);
+    const maxButtons = 7;
+
+    console.log("DATA:", data);
+    let title = 'Permission 2h';
+
+    let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+    let endPage = startPage + maxButtons - 1;
+
+    if (endPage > totalPages) {
+      endPage = totalPages;
+      startPage = Math.max(1, endPage - maxButtons + 1);
+    }
+
+    return {
+      totalPermissions: total,
+      currentPage,
+      totalPages,
+      startPage,
+      endPage,
+      data,
+      total,
+      search,
+      site: '',
+      title: title,
+      user: req.session.user
+    }
   }
 
   @Post()

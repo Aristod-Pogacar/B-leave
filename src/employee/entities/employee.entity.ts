@@ -1,6 +1,7 @@
 import { Leave } from 'src/leave/entities/leave.entity';
 import { ManagerAssignation } from 'src/manager_assignation/entities/manager_assignation.entity';
 import { Permission2h } from 'src/permission2h/entities/permission2h.entity';
+import { SmiaOstie } from 'src/smia_ostie/entities/smia_ostie.entity';
 import { User } from 'src/user/entities/user.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, JoinColumn, Index } from 'typeorm';
 
@@ -113,6 +114,9 @@ export class Employee {
 
     @OneToMany(() => Permission2h, permission2h => permission2h.employee)
     permission2h: Permission2h[];
+
+    @OneToMany(() => SmiaOstie, smia_ostie => smia_ostie.employee)
+    smia_ostie: SmiaOstie[];
 
     @Index()
     @ManyToOne(() => User, user => user.employees, { nullable: true })

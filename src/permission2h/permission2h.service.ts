@@ -107,16 +107,23 @@ export class Permission2hService {
     page: number,
     limit: number,
     date: string,
+    user: any,
   ) {
     const skip = (page - 1) * limit;
 
-    const query = this.permission2hRepository
+    let query;
+
+    query = this.permission2hRepository
       .createQueryBuilder('p')
       .leftJoinAndSelect('p.employee', 'employee');
 
+    if (user.role == UserRole.MANAGER) {
+      query.andWhere('employee.manager = :manager', { manager: user.id });
+    }
+
     // ✅ Recherche multi-champs sécurisée
     if (search) {
-      query.where(
+      query.andWhere(
         `
         employee.matricule LIKE :search
         OR employee.fullname LIKE :search

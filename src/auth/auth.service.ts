@@ -44,6 +44,28 @@ export class AuthService {
         return res.status(200).redirect('/auth/login?message=checkYourEmailForVerificationCode');
     }
 
+    async getEmailOrMatricule(login: any) {
+        if (
+            login === process.env.SUPERADMIN_EMAIL
+        ) {
+            console.log('🔥 SUPERADMIN LOGGED IN 🔥');
+            return {
+                id: 'superadmin',
+                matricule: 'SUPERADMIN',
+                firstName: 'Super',
+                name: 'Admin',
+                email: process.env.SUPERADMIN_EMAIL,
+                role: UserRole.SUPERADMIN,
+                isSuperAdmin: true,
+                site: Site.MADA,
+            };
+        }
+        const user = await this.userRepo.findOne({
+            where: [{ email: login }, { matricule: login }]
+        });
+        return user;
+    }
+
     async validateUser(email: string, password: string) {
 
         const isSuperAdmin = await bcrypt.compare(password, process.env.SUPERADMIN_PASSWORD);

@@ -6,10 +6,14 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { UserRole, Site, User } from './entities/user.entity';
 import { RolesGuard } from './role.guard';
 import { Roles } from './role.decorator';
+import { AuthService } from 'src/auth/auth.service';
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) { }
+  constructor(
+    private readonly userService: UserService,
+    private readonly authService: AuthService,
+  ) { }
 
   private getAllowedSitesForNewUsers(userSite: string): string[] {
 
@@ -44,6 +48,38 @@ export class UserController {
       );
       return key!; // Le '!' indique à TS qu'on est sûr de trouver la clé
     });
+  }
+
+  @Post('connect-admin-user')
+  async connectAdminUser(@Req() req: any, @Res() res: any, @Body() body: any) {
+    const user = await this.authService.validateUser(
+      body.email,
+      body.password,
+    );
+    // console.log("USER", user)
+
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    req.session.user = user;
+
+    return res.status(200).json({ success: true });
+  }
+
+  @Post('get-login-admin')
+  async getLoginAdmin(@Res() res: any, @Body() body: any) {
+    console.log("BODY", body)
+    const user = await this.authService.getEmailOrMatricule(
+      body.login,
+    );
+    console.log("USER", user)
+
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    return res.status(200).json({ success: true });
   }
 
   @Get('get-all-managers')

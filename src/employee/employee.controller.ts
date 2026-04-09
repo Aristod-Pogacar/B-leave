@@ -31,6 +31,11 @@ export class EmployeeController {
     return [userSite];
   }
 
+  @Post('compare')
+  compare(@Body() data: any) {
+    return this.employeeService.compare(data);
+  }
+
   @Get('import-password')
   @Render('import-password')
   @UseGuards(RolesGuard)
@@ -257,9 +262,11 @@ export class EmployeeController {
     return this.employeeService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.employeeService.findOne(id);
+  @Get(':matricule')
+  findOne(@Param('matricule') matricule: string) {
+    console.log("MATRICULE:", matricule);
+
+    return this.employeeService.findOneByMatricule(matricule);
   }
 
   @UseGuards(RolesGuard)

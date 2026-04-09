@@ -10,15 +10,10 @@ import { Leave, LeaveStatus } from 'src/leave/entities/leave.entity';
 import { Site, User, UserRole } from 'src/user/entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { CryptoService } from 'src/crypto/crypto.service';
+import { CompareAdminDto } from './dto/compare-admin.dto';
 
 @Injectable()
 export class EmployeeService {
-  async getAssignedEmployees(managerId: string) {
-    return this.employeeRepository.find({
-      where: { manager: { id: managerId } },
-      select: ['fullname', 'matricule', 'id', 'section', 'line']
-    });
-  }
 
   constructor(
     @InjectRepository(Employee)
@@ -29,6 +24,22 @@ export class EmployeeService {
     private readonly userRepository: Repository<User>,
     private readonly cryptoService: CryptoService
   ) { }
+
+  async getAssignedEmployees(managerId: string) {
+    return this.employeeRepository.find({
+      where: { manager: { id: managerId } },
+      select: ['fullname', 'matricule', 'id', 'section', 'line']
+    });
+  }
+
+  async compare(compareAdminDto: CompareAdminDto) {
+    const employee = await this.employeeRepository.findOne({ where: { matricule: compareAdminDto.matricule } })
+    if (!employee) {
+      throw new BadRequestException("Employee not found");
+    }
+    const compare = await bcrypt.compare(compareAdminDto.password, employee.app_password);
+    return { "isEmployee": compare }
+  }
 
   create(createEmployeeDto: CreateEmployeeDto) {
     return this.employeeRepository.save(createEmployeeDto);
