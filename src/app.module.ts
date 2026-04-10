@@ -32,6 +32,8 @@ import { MedicalService } from './medical_service/entities/medical_service.entit
 import { MedicalServiceService } from './medical_service/medical_service.service';
 import { SmiaOstieModule } from './smia_ostie/smia_ostie.module';
 import { SmiaOstie } from './smia_ostie/entities/smia_ostie.entity';
+import { TaskModule } from './task/task.module';
+import { TaskService } from './task/task.service';
 
 @Module({
   imports: [
@@ -86,9 +88,10 @@ import { SmiaOstie } from './smia_ostie/entities/smia_ostie.entity';
     Permission2hModule,
     MedicalServiceModule,
     SmiaOstieModule,
+    TaskModule,
   ],
   controllers: [AppController, PuppeteerController],
-  providers: [AppService, MailService, AuthService, JwtService, EmployeeService, PuppeteerService, CryptoService, PuppeteerManagerService],
+  providers: [AppService, MailService, AuthService, JwtService, EmployeeService, PuppeteerService, CryptoService, PuppeteerManagerService, TaskService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

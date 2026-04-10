@@ -22,6 +22,15 @@ export class LeaveService {
     private readonly userRepository: Repository<User>,
   ) { }
 
+  async findLeavesNotDone(limit?: number) {
+    return this.leaveRepository.find({ where: { onehr_status: false }, relations: ['employee'], order: { start_date: 'ASC' }, take: limit });
+  }
+
+  async doneLeave(leave: Leave) {
+    leave.onehr_status = true;
+    return this.leaveRepository.save(leave);
+  }
+
   async getNonApprouvedLeaves(id: string) {
     return this.leaveRepository.find({ where: { employee: { manager: { id } }, status: LeaveStatus.PENDING }, relations: ['employee'], order: { start_date: 'ASC' } });
   }
