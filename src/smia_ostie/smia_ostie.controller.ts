@@ -1,8 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, Res } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, Res, Req, Render } from '@nestjs/common';
 import { SmiaOstieService } from './smia_ostie.service';
 import { CreateSmiaOstieDto } from './dto/create-smia_ostie.dto';
 import { UpdateSmiaOstieDto } from './dto/update-smia_ostie.dto';
 import { Response } from 'express';
+import { RolesGuard } from 'src/user/role.guard';
+import { UserRole } from 'src/user/entities/user.entity';
+import { Roles } from 'src/user/role.decorator';
 
 @Controller('smia-ostie')
 export class SmiaOstieController {
@@ -21,6 +24,39 @@ export class SmiaOstieController {
 
   //   await this.smiaOstieService.exportSmiaOstieToExcel(data, res, date);
   // }
+
+  @Get('list')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HEAD_HR, UserRole.HR_ADMIN)
+  @Render('medical-service')
+  async getMedicalService(@Req() req, @Query('search') search: string = '', @Query('page') page: number = 1) {
+    const limit = 20;
+    const { data, total, totalPages } = await this.smiaOstieService.paginateMedicalService(search, Number(page), limit);
+    // console.log("DATA:", data);
+
+    const currentPage = Number(page);
+    const maxButtons = 7;
+    let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+    let endPage = startPage + maxButtons - 1;
+
+    console.log("DATA:", data);
+
+    if (endPage > totalPages) {
+      endPage = totalPages;
+      startPage = Math.max(1, endPage - maxButtons + 1);
+    }
+    return {
+      title: 'Medical Service',
+      data,
+      search,
+      total,
+      totalPages,
+      startPage,
+      endPage,
+      currentPage,
+      user: req.session.user,
+    };
+  }
 
   @Post()
   create(@Body() createSmiaOstieDto: CreateSmiaOstieDto) {

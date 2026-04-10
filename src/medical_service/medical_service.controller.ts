@@ -12,8 +12,8 @@ export class MedicalServiceController {
 
   @Get('list')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER)
-  @Render('medical-service')
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HEAD_HR, UserRole.HR_ADMIN)
+  @Render('medical-service-setting')
   async getMedicalService(@Req() req, @Query('search') search: string = '', @Query('page') page: number = 1) {
     const limit = 20;
     const { data, total, totalPages } = await this.medicalServiceService.paginateMedicalService(search, Number(page), limit);
@@ -29,7 +29,7 @@ export class MedicalServiceController {
       startPage = Math.max(1, endPage - maxButtons + 1);
     }
     return {
-      title: 'Medical Service',
+      title: 'Medical Service Setting',
       data,
       search,
       total,

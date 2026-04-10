@@ -82,8 +82,6 @@ export class AppController {
   }
 
   @UseGuards(AuthGuard)
-  // @UseGuards(RolesGuard)
-  // @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL)
   @Get('logout')
   async logout(@Req() req: any, @Res() res: any) {
     req.session.destroy();
@@ -92,8 +90,6 @@ export class AppController {
 
   @Get("test")
   async test(@Req() req: any, @Res() res: any) {
-    // const departementList = await this.employeeService.findAllDepartments()
-    // const lineList = await this.employeeService.findAllLines()
     return res.render('import-test', { title: 'Test' });
   }
 }

@@ -13,7 +13,7 @@ export class Permission2hController {
 
   @Get('export')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER, UserRole.HEAD_HR, UserRole.HR_ADMIN)
   async export(
     @Res() res: Response,
     @Query('date') date: string,
@@ -27,7 +27,7 @@ export class Permission2hController {
 
   @Get('list')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER, UserRole.HEAD_HR, UserRole.HR_ADMIN)
   @Render('permission-2h')
   async permission2h(@Req() req, @Query('page') page = 1, @Query('search') search = '', @Query('date') date = '') {
     const limit = 20;

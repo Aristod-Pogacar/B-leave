@@ -38,6 +38,37 @@ export class SmiaOstieService {
     return { monday, sunday };
   }
 
+  async paginateMedicalService(
+    search: string,
+    page: number,
+    limit: number,
+  ) {
+
+    const skip = (page - 1) * limit;
+
+    const query = this.SmiaOstieRepo
+      .createQueryBuilder('m')
+      .leftJoinAndSelect('m.employee', 'e');
+
+    // 🔍 Filtre si un search est présent
+    if (search && search.trim() !== '') {
+      query.where('m.name LIKE :search', { search: `%${search}%` });
+    }
+
+    const [data, total] = await query
+      .orderBy('m.id', 'DESC')
+      .skip(skip)
+      .take(limit)
+      .getManyAndCount();
+
+    return {
+      data,
+      total,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page
+    };
+  }
+
   async countByDayForCurrentWeek(site: string) {
     const { monday, sunday } = this.getWeekRange();
 

@@ -20,20 +20,26 @@
                     </a>
                     <ul class="nxl-submenu">
                         <li class="nxl-item"><a class="nxl-link" href="/leave/planning-view">Planning</a></li>
-                        <% if(user.role !=="USER" ) { %>
+                        <% if(user.role=="SUPERADMIN" ) { %>
                             <li class="nxl-item"><a class="nxl-link" href="/leave/new-leave">New leave</a></li>
                             <% } %>
                                 <li class="nxl-item"><a class="nxl-link" href="/leave/simulate-leave">Simulation</a>
                                 </li>
-                                <li class="nxl-item"><a class="nxl-link" href="/leave/approuve-leaves">Leave
-                                        approval</a>
-                                </li>
-                                <li class="nxl-item"><a class="nxl-link" href="/leave/leave-history">Leave history</a>
-                                </li>
-                                <li class="nxl-item"><a class="nxl-link" href="/leave/export">Export</a>
-                                </li>
-                                <li class="nxl-item"><a class="nxl-link" href="/leave/import-leaves">Import leaves</a>
-                                </li>
+                                <% if(user.role=="SUPERADMIN" || user.role=="MANAGER" ) { %>
+                                    <li class="nxl-item"><a class="nxl-link" href="/leave/approuve-leaves">Leave
+                                            approval</a>
+                                    </li>
+                                    <% } %>
+                                        <li class="nxl-item"><a class="nxl-link" href="/leave/leave-history">Leave
+                                                history</a>
+                                        </li>
+                                        <li class="nxl-item"><a class="nxl-link" href="/leave/export">Export</a>
+                                        </li>
+                                        <% if(user.role=="SUPERADMIN" || user.role=="PAYROLL" ) { %>
+                                            <li class="nxl-item"><a class="nxl-link" href="/leave/import-leaves">Import
+                                                    leaves</a>
+                                            </li>
+                                            <% } %>
                     </ul>
                 </li>
                 <li class="nxl-item nxl-hasmenu">
@@ -43,16 +49,31 @@
                                 class="feather-chevron-right"></i></span>
                     </a>
                     <ul class="nxl-submenu">
-                        <li class="nxl-item"><a class="nxl-link" href="/employee/import-master-file">Import list from
-                                Master
-                                File</a>
-                        </li>
-                        <li class="nxl-item"><a class="nxl-link" href="/employee/import-password">Import passwords</a>
-                        </li>
-                        <li class="nxl-item"><a class="nxl-link" href="/employee/new-employee">New employee</a>
-                        </li>
-                        <li class="nxl-item"><a class="nxl-link" href="/employee/assign-manager">Assign manager</a>
-                        </li>
+                        <% if(user.role=="SUPERADMIN" || user.role=="ADMIN" || user.role=="HR_ADMIN" ) { %>
+                            <li class="nxl-item"><a class="nxl-link" href="/employee/import-master-file">Import list
+                                    from
+                                    Master
+                                    File</a>
+                            </li>
+                            <% } %>
+                                <% if(user.role=="SUPERADMIN" || user.role=="ADMIN" ) { %>
+                                    <li class="nxl-item"><a class="nxl-link" href="/employee/import-password">Import
+                                            passwords</a>
+                                    </li>
+                                    <% } %>
+                                        <% if(user.role=="SUPERADMIN" || user.role=="ADMIN" || user.role=="HR_ADMIN" ) {
+                                            %>
+                                            <li class="nxl-item"><a class="nxl-link" href="/employee/new-employee">New
+                                                    employee</a>
+                                            </li>
+                                            <% } %>
+                                                <% if(user.role=="SUPERADMIN" || user.role=="ADMIN" ||
+                                                    user.role=="HR_ADMIN" || user.role=="HEAD_HR" ) { %>
+                                                    <li class="nxl-item"><a class="nxl-link"
+                                                            href="/employee/assign-manager">Assign
+                                                            manager</a>
+                                                    </li>
+                                                    <% } %>
                     </ul>
                 </li>
                 <li class="nxl-item nxl-hasmenu">
@@ -68,17 +89,43 @@
                 </li>
                 <li class="nxl-item nxl-hasmenu">
                     <a href="javascript:void(0);" class="nxl-link">
+                        <span class="nxl-mtext">Medical Service</span><span class="nxl-arrow"><i
+                                class="feather-chevron-right"></i></span>
+                    </a>
+                    <ul class="nxl-submenu">
+                        <li class="nxl-item"><a class="nxl-link" href="/smia-ostie/list">Medical Service list</a></li>
+                        <% if(user.role=="SUPERADMIN" || user.role=="ADMIN" || user.role=="HR_ADMIN" ||
+                            user.role=="HEAD_HR" ) { %>
+                            <li class="nxl-item"><a class="nxl-link" href="/smia-ostie/new-medical-service">New Medical
+                                    Service</a></li>
+                            <% } %>
+                    </ul>
+                </li>
+                <li class="nxl-item nxl-hasmenu">
+                    <a href="javascript:void(0);" class="nxl-link">
                         <span class="nxl-micon"><i class="feather-plus-square"></i></span>
                         <span class="nxl-mtext">Medical service</span><span class="nxl-arrow"><i
                                 class="feather-chevron-right"></i></span>
                     </a>
                     <ul class="nxl-submenu">
-                        <li class="nxl-item"><a class="nxl-link" href="/medical-service/list">Medical service list</a>
+                        <li class="nxl-item"><a class="nxl-link" href="/smia-ostie/list">Employee in medical
+                                service</a>
                         </li>
-                        <% if(user.role !=="PAYROLL" ) { %>
-                            <li class="nxl-item"><a class="nxl-link" href="/medical-service/new-medical-service">New
-                                    medical
-                                    service</a></li>
+                        <% if(user.role=="SUPERADMIN" || user.role=="ADMIN" || user.role=="HR_ADMIN" ||
+                            user.role=="HEAD_HR" ) { %>
+                            <li class="nxl-item nxl-hasmenu">
+                                <a href="javascript:void(0);" class="nxl-link">
+                                    <span class="nxl-mtext">Medical Service setting</span><span class="nxl-arrow"><i
+                                            class="feather-chevron-right"></i></span>
+                                </a>
+                                <ul class="nxl-submenu">
+                                    <li class="nxl-item"><a class="nxl-link" href="/medical-service/list">Service
+                                            list</a></li>
+                                    <li class="nxl-item"><a class="nxl-link"
+                                            href="/medical-service/new-medical-service">New
+                                            service</a></li>
+                                </ul>
+                            </li>
                             <% } %>
                     </ul>
                 </li>
@@ -90,7 +137,8 @@
                     </a>
                     <ul class="nxl-submenu">
                         <li class="nxl-item"><a class="nxl-link" href="/user/list">User list</a></li>
-                        <% if(user.role !=="PAYROLL" ) { %>
+                        <% if(user.role=="SUPERADMIN" || user.role=="ADMIN" || user.role=="HR_ADMIN" ||
+                            user.role=="HEAD_HR" ) { %>
                             <li class="nxl-item"><a class="nxl-link" href="/user/new-user">New user</a></li>
                             <% } %>
                     </ul>

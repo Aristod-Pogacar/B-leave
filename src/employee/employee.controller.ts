@@ -39,14 +39,14 @@ export class EmployeeController {
   @Get('import-password')
   @Render('import-password')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL)
+  @Roles(UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.HR_ADMIN)
   async getImportPassword(@Req() req: any) {
     return { title: "Import Password", error: req.query.error };
   }
 
   @Post('import-password')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL)
+  @Roles(UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.HR_ADMIN)
   @UseInterceptors(FileInterceptor('file'))
   async importFromPassword(
     @Body() body: any,
@@ -150,7 +150,7 @@ export class EmployeeController {
 
   @Get('new-employee')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HR_ADMIN)
   @Render('new-employee')
   async newEmployee(
     @Req() req: any,
@@ -181,7 +181,7 @@ export class EmployeeController {
 
   @Get('assign-manager')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER)
+  @Roles(UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.HEAD_HR, UserRole.HR_ADMIN)
   // @Render('test')
   @Render('employee-assign')
   async assignManager(@Req() req: any) {
@@ -192,7 +192,7 @@ export class EmployeeController {
 
   @Post('assign-manager')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HR_ADMIN, UserRole.HEAD_HR)
   async assignManagerPost(@Body() body: any, @Res() res: express.Response) {
     console.log("BODY:", body);
     await this.employeeService.assignManager(body.managerId, body.employeeIds);
@@ -208,7 +208,7 @@ export class EmployeeController {
 
   @Post('new-employee')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HEAD_HR, UserRole.HR_ADMIN)
   async newEmployeePost(@Body() body: any, @Res() res: express.Response) {
     console.log("BODY:", body);
     await this.employeeService.create(body);
@@ -217,7 +217,7 @@ export class EmployeeController {
 
   @Get('import-master-file')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HEAD_HR, UserRole.HR_ADMIN)
   @Render('import-master-file')
   async importMasterFile(@Req() req: any) {
     return { title: "Import Master File", error: req.query.error };
@@ -225,7 +225,7 @@ export class EmployeeController {
 
   @Post('import-master-file')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HEAD_HR, UserRole.HR_ADMIN)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),
@@ -251,7 +251,7 @@ export class EmployeeController {
   }
 
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HEAD_HR, UserRole.HR_ADMIN)
   @Post()
   create(@Body() createEmployeeDto: CreateEmployeeDto) {
     return this.employeeService.create(createEmployeeDto);
@@ -270,14 +270,14 @@ export class EmployeeController {
   }
 
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HEAD_HR, UserRole.HR_ADMIN)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateEmployeeDto: UpdateEmployeeDto) {
     return this.employeeService.update(id, updateEmployeeDto);
   }
 
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HEAD_HR, UserRole.HR_ADMIN)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.employeeService.remove(id);

@@ -10,8 +10,6 @@ export class LeaveController {
 
   @Post()
   create(@Body() createLeaveDto: CreateLeaveDto, @Res() res: any) {
-    console.log("APPLYING LEAVE");
-    console.log("LEAVE DTO:", createLeaveDto);
     return this.leaveService.create(createLeaveDto, res);
   }
 

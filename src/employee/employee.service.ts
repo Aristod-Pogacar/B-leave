@@ -86,8 +86,8 @@ export class EmployeeService {
     const allowedSites = this.getAllowedSites(site);
     const employees = await this.employeeRepository.find({
       where: [
-        { manager: IsNull(), site: In(allowedSites), matricule: Like(`%${search}%`) },
-        { manager: IsNull(), site: In(allowedSites), fullname: Like(`%${search}%`) }
+        { site: In(allowedSites), matricule: Like(`%${search}%`) },
+        { site: In(allowedSites), fullname: Like(`%${search}%`) }
       ],
       select: [
         'fullname',

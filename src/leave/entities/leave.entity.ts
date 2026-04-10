@@ -32,6 +32,9 @@ export class Leave {
     @Column({ default: LeaveStatus.PENDING })
     status: LeaveStatus;
 
+    @Column({ default: false })
+    onehr_status: boolean;
+
     @Column({ nullable: true })
     reason?: string;
 
