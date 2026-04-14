@@ -11,6 +11,33 @@ import { RolesGuard } from 'src/user/role.guard';
 export class Permission2hController {
   constructor(private readonly permission2hService: Permission2hService) { }
 
+  @Get('approuve-permission-2h')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER)
+  @Render('approuve-permission-2h')
+  async approuveLeaves(@Req() req: any, @Query() error?: string) {
+    const permissions = await this.permission2hService.getNonApprouvedLeaves(req.session.user.id);
+    return { title: "Approuve Permission 2h", error: error ? error : null, permissions: permissions };
+  }
+
+  @Post('approve-permission-2h/:permissionId')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER)
+  async approveLeave(@Param('permissionId') permissionId: string, @Res() res: Response, @Req() req: any) {
+    console.log("PERMISSION ID:", permissionId);
+    console.log("USER ID:", req.session.user.id);
+    await this.permission2hService.approveLeave(permissionId, req.session.user.id);
+    res.redirect('/permission2h/approuve-permission-2h');
+  }
+
+  @Post('reject-permission-2h/:permissionId')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER)
+  async rejectLeave(@Param('permissionId') permissionId: string, @Res() res: Response, @Req() req: any) {
+    await this.permission2hService.rejectLeave(permissionId, req.session.user.id);
+    res.redirect('/permission2h/approuve-permission-2h');
+  }
+
   @Get('export')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER, UserRole.HEAD_HR, UserRole.HR_ADMIN)
@@ -38,7 +65,6 @@ export class Permission2hController {
     const currentPage = Number(page);
     const maxButtons = 7;
 
-    console.log("DATA:", data);
     let title = 'Permission 2h';
 
     let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));

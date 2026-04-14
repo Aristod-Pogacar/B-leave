@@ -12,7 +12,7 @@
                                 </div>
                                 <ul class="breadcrumb">
                                     <li class="breadcrumb-item">Permission 2h</li>
-                                    <li class="breadcrumb-item">List</li>
+                                    <li class="breadcrumb-item">Approve permission 2h</li>
                                 </ul>
                             </div>
                             <div class="page-header-right ms-auto">
@@ -48,7 +48,7 @@
                                         <div class="col-12">
                                             <div class="card stretch stretch-full">
                                                 <div class="card-header">
-                                                    <h5 class="card-title">Permission 2h list</h5>
+                                                    <h5 class="card-title">Approve leaves</h5>
                                                     <div
                                                         class="col-10 task-header d-md-flex align-items-center justify-content-between">
                                                         <div class="me-4 w-75">
@@ -69,21 +69,11 @@
                                                                     <th style="width: 10%;">Date</th>
                                                                     <th style="width: 10%;">Start time</th>
                                                                     <th style="width: 10%;">End time</th>
-                                                                    <th style="width: 10%;">Status</th>
+                                                                    <th class="text-center">Action</th>
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
-                                                                <% data.forEach(d=> {
-
-                                                                    var leaveTypeClass = "";
-                                                                    if (d.status === "pending") {
-                                                                    leaveTypeClass = "bg-soft-primary text-primary";
-                                                                    } else if (d.status === "approved") {
-                                                                    leaveTypeClass = "bg-soft-success text-success";
-                                                                    } else if (d.status === "rejected") {
-                                                                    leaveTypeClass = "bg-soft-danger text-danger";
-                                                                    }
-                                                                    %>
+                                                                <% permissions.forEach(d=> { %>
                                                                     <tr>
                                                                         <td style="width: 10%;">
                                                                             <%= d.employee.matricule %>
@@ -100,10 +90,23 @@
                                                                         <td style="width: 10%;">
                                                                             <%= d.expectedEndTime %>
                                                                         </td>
-                                                                        <td style="width: 10%;">
-                                                                            <span class="badge <%= leaveTypeClass %>">
-                                                                                <%= d.status %>
-                                                                            </span>
+                                                                        <td class="justify-content-center d-flex gap-2">
+                                                                            <form
+                                                                                action="/permission2h/approve-permission-2h/<%= d.id %>"
+                                                                                method="post">
+                                                                                <button type="submit"
+                                                                                    class="btn btn-success"
+                                                                                    title="Approve"><i
+                                                                                        class="feather-check"></i></button>
+                                                                            </form>
+                                                                            <form
+                                                                                action="/permission2h/reject-permission-2h/<%= d.id %>"
+                                                                                method="post">
+                                                                                <button type="submit"
+                                                                                    class="btn btn-danger"
+                                                                                    title="Reject"><i
+                                                                                        class="feather-x"></i></button>
+                                                                            </form>
                                                                         </td>
                                                                     </tr>
                                                                     <% }) %>

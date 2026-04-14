@@ -25,6 +25,25 @@ export class EmployeeService {
     private readonly cryptoService: CryptoService
   ) { }
 
+  async getMyTeam(user: any) {
+    return this.employeeRepository.find({
+      where: { manager: { id: user.id } },
+      select: ['fullname', 'matricule', 'id', 'section', 'line'],
+      order: { matricule: 'ASC' }
+    });
+  }
+
+  async updateManager(data: { matricule: any; manager: any; }) {
+    const employee = await this.employeeRepository.findOne({ where: { matricule: data.matricule } });
+    if (employee) {
+      const manager = await this.userRepository.findOne({ where: { matricule: data.manager } });
+      if (manager) {
+        employee.manager = manager;
+        await this.employeeRepository.save(employee);
+      }
+    }
+  }
+
   async getAssignedEmployees(managerId: string) {
     return this.employeeRepository.find({
       where: { manager: { id: managerId } },
@@ -41,8 +60,13 @@ export class EmployeeService {
     return { "isEmployee": compare }
   }
 
-  create(createEmployeeDto: CreateEmployeeDto) {
-    return this.employeeRepository.save(createEmployeeDto);
+  async create(createEmployeeDto: CreateEmployeeDto, res: any) {
+    try {
+      await this.employeeRepository.save(createEmployeeDto);
+      return res.redirect('/');
+    } catch (error) {
+      return res.redirect('/employee/new-employee?error=' + error.message);
+    }
   }
 
   findAllByLineAndDepartement(line: string | undefined, departement: string | undefined, skip: number, take: number, year: number) {

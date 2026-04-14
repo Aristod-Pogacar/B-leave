@@ -117,7 +117,7 @@
                 submitButton1.disabled = true;
                 messageContainer.innerHTML = "Veuillez choisir un employé";
                 messageContainer.style.color = "red";
-            } else if (leaveType.value === 'Local_Leave_AMD' && numberOfDays >= solde_simulate) {
+            } else if (leaveType.value === 'Local_Leave_AMD' && numberOfDays > solde_simulate) {
                 submitButton1.disabled = true;
                 messageContainer.innerHTML = "Solde de congé: " + solde_simulate + " jours. Insuffisant pour cette demande (" + numberOfDays + " jours)";
                 messageContainer.style.color = "red";

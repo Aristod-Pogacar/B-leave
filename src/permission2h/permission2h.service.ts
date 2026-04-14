@@ -13,6 +13,7 @@ import * as nodemailer from 'nodemailer';
 import { UserService } from 'src/user/user.service';
 import { ConfigService } from '@nestjs/config';
 import { UserRole } from 'src/user/entities/user.entity';
+import { LeaveStatus } from 'src/leave/entities/leave.entity';
 // import { Payroll } from 'src/payroll/entities/payroll.entity';
 // import { ConfigService } from '@nestjs/config';
 // import { UserRole } from 'src/users/entities/user.entity';
@@ -101,6 +102,39 @@ export class Permission2hService {
   // async sendEmail(employee: Employee) {
   //   return await envoyerEmail(employee);
   // }
+  async rejectLeave(permissionId: string, userId: string) {
+    const permission = await this.permission2hRepository.findOne({ where: { id: permissionId } });
+    if (!permission) {
+      throw new Error('Permission not found');
+    }
+    const user = await this.userService.findOne(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    permission.status = LeaveStatus.REJECTED;
+    permission.approver = user;
+    permission.approved_date = new Date();
+    return this.permission2hRepository.save(permission);
+  }
+
+  async approveLeave(permissionId: string, userId: string) {
+    const permission = await this.permission2hRepository.findOne({ where: { id: permissionId } });
+    if (!permission) {
+      throw new Error('Permission not found');
+    }
+    const user = await this.userService.findOne(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    permission.status = LeaveStatus.APPROVED;
+    permission.approver = user;
+    permission.approved_date = new Date();
+    return this.permission2hRepository.save(permission);
+  }
+
+  async getNonApprouvedLeaves(id: any) {
+    return this.permission2hRepository.find({ where: { employee: { manager: { id } }, status: LeaveStatus.PENDING }, relations: ['employee'], order: { date: 'ASC' } });
+  }
 
   async paginatePermission2h(
     search: string,

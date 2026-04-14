@@ -81,6 +81,50 @@ export class EmployeeController {
     }
   }
 
+  @Get('import-manager')
+  @Render('import-manager')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.HR_ADMIN)
+  async getImportManager(@Req() req: any) {
+    return { title: "Import Manager", error: req.query.error };
+  }
+
+  @Post('import-manager')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.HR_ADMIN)
+  @UseInterceptors(FileInterceptor('file'))
+  async importFromManager(
+    @Body() body: any,
+    @UploadedFile() file: Express.Multer.File,
+    @Res() res: any,
+  ) {
+
+    if (file) {
+      const workbook = XLSX.read(file.buffer, { type: 'buffer' });
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+
+      const rows: any[] = XLSX.utils.sheet_to_json(worksheet);
+
+      // 🎯 Sélectionner uniquement certains champs
+      const filtered = rows.map(row => ({
+        matricule: row['matricule'],
+        manager: row['manager']
+      }));
+
+      // ❗ ignorer lignes vides
+      const cleanData = filtered.filter(x => x.matricule);
+
+      for (const data of cleanData) {
+        console.log("DATA:", data);
+
+        await this.employeeService.updateManager(data);
+      }
+      return res.redirect('/');
+    } else {
+      throw new BadRequestException('Aucun fichier reçu');
+    }
+  }
+
   @Get('finding/search-list')
   async search(@Query('q') q: string, @Req() req: any) {
     return this.employeeService.search(q, req.session.user.site);
@@ -156,6 +200,7 @@ export class EmployeeController {
     @Req() req: any,
     @Query('line') line: string,
     @Query('departement') departement: string,
+    @Query('error') error: string = '',
   ) {
     const allowedSites = this.getAllowedSites(req.session.user.site);
     console.log("ALLOWERD SITES:", allowedSites);
@@ -167,7 +212,19 @@ export class EmployeeController {
       );
       return key;
     });
-    return { title: "New Employee", employees, allowedSites, KEYS };
+    return { title: "New Employee", employees, allowedSites, KEYS, error };
+  }
+
+  @Get('my-team')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER)
+  @Render('my-team')
+  async getMyTeam(@Req() req: any, @Query('search') search: string) {
+    // const employees = await this.employeeService.getNoManager(req.session.user.site, search);
+    console.log("SEARCH:", search);
+    const employees = await this.employeeService.getMyTeam(req.session.user);
+    console.log("EMPLOYEES:", employees);
+    return { title: "My Team", employees };
   }
 
   @Get('no-manager')
@@ -211,8 +268,7 @@ export class EmployeeController {
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HEAD_HR, UserRole.HR_ADMIN)
   async newEmployeePost(@Body() body: any, @Res() res: express.Response) {
     console.log("BODY:", body);
-    await this.employeeService.create(body);
-    return res.redirect('/');
+    await this.employeeService.create(body, res);
   }
 
   @Get('import-master-file')
@@ -250,12 +306,12 @@ export class EmployeeController {
     }
   }
 
-  @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HEAD_HR, UserRole.HR_ADMIN)
-  @Post()
-  create(@Body() createEmployeeDto: CreateEmployeeDto) {
-    return this.employeeService.create(createEmployeeDto);
-  }
+  // @UseGuards(RolesGuard)
+  // @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HEAD_HR, UserRole.HR_ADMIN)
+  // @Post()
+  // create(@Body() createEmployeeDto: CreateEmployeeDto) {
+  //   return this.employeeService.create(createEmployeeDto);
+  // }
 
   @Get()
   findAll() {

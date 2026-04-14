@@ -128,7 +128,7 @@
             } else if ((solde === null || solde === undefined || solde === "")) {
                 messageContainer.innerHTML = "Choose an employee";
                 styleAlert = "danger";
-            } else if (leaveType.value === 'Local_Leave_AMD' && numberOfDays >= solde_simulate) {
+            } else if (leaveType.value === 'Local_Leave_AMD' && numberOfDays > solde_simulate) {
                 messageContainer.innerHTML = "Leave balance: " + solde_simulate + " days. Insufficient for this request (" + numberOfDays + " days)";
                 styleAlert = "danger";
             } else {

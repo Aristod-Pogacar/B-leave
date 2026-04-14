@@ -44,6 +44,24 @@
                 </li>
                 <li class="nxl-item nxl-hasmenu">
                     <a href="javascript:void(0);" class="nxl-link">
+                        <span class="nxl-micon"><i class="feather-clock"></i></span>
+                        <span class="nxl-mtext">Permission 2h</span><span class="nxl-arrow"><i
+                                class="feather-chevron-right"></i></span>
+                    </a>
+                    <ul class="nxl-submenu">
+                        <li class="nxl-item"><a class="nxl-link" href="/permission2h/list">Permission 2h list</a>
+                        </li>
+                        <% if(user.role=="SUPERADMIN" || user.role=="MANAGER" ) { %>
+                            <li class="nxl-item"><a class="nxl-link"
+                                    href="/permission2h/approuve-permission-2h">Permission
+                                    2h
+                                    approval</a>
+                            </li>
+                            <% } %>
+                    </ul>
+                </li>
+                <li class="nxl-item nxl-hasmenu">
+                    <a href="javascript:void(0);" class="nxl-link">
                         <span class="nxl-micon"><i class="feather-users"></i></span>
                         <span class="nxl-mtext">Employees</span><span class="nxl-arrow"><i
                                 class="feather-chevron-right"></i></span>
@@ -56,49 +74,38 @@
                                     File</a>
                             </li>
                             <% } %>
-                                <% if(user.role=="SUPERADMIN" || user.role=="ADMIN" ) { %>
+                                <% if(user.role=="SUPERADMIN" || user.role=="ADMIN" || user.role=="HR_ADMIN" ) { %>
                                     <li class="nxl-item"><a class="nxl-link" href="/employee/import-password">Import
                                             passwords</a>
                                     </li>
                                     <% } %>
                                         <% if(user.role=="SUPERADMIN" || user.role=="ADMIN" || user.role=="HR_ADMIN" ) {
                                             %>
-                                            <li class="nxl-item"><a class="nxl-link" href="/employee/new-employee">New
-                                                    employee</a>
+                                            <li class="nxl-item"><a class="nxl-link"
+                                                    href="/employee/import-manager">Import
+                                                    managers</a>
                                             </li>
                                             <% } %>
                                                 <% if(user.role=="SUPERADMIN" || user.role=="ADMIN" ||
-                                                    user.role=="HR_ADMIN" || user.role=="HEAD_HR" ) { %>
+                                                    user.role=="HR_ADMIN" ) { %>
                                                     <li class="nxl-item"><a class="nxl-link"
-                                                            href="/employee/assign-manager">Assign
-                                                            manager</a>
+                                                            href="/employee/new-employee">New
+                                                            employee</a>
                                                     </li>
                                                     <% } %>
-                    </ul>
-                </li>
-                <li class="nxl-item nxl-hasmenu">
-                    <a href="javascript:void(0);" class="nxl-link">
-                        <span class="nxl-micon"><i class="feather-clock"></i></span>
-                        <span class="nxl-mtext">Permission 2h</span><span class="nxl-arrow"><i
-                                class="feather-chevron-right"></i></span>
-                    </a>
-                    <ul class="nxl-submenu">
-                        <li class="nxl-item"><a class="nxl-link" href="/permission2h/list">Permission 2h list</a>
-                        </li>
-                    </ul>
-                </li>
-                <li class="nxl-item nxl-hasmenu">
-                    <a href="javascript:void(0);" class="nxl-link">
-                        <span class="nxl-mtext">Medical Service</span><span class="nxl-arrow"><i
-                                class="feather-chevron-right"></i></span>
-                    </a>
-                    <ul class="nxl-submenu">
-                        <li class="nxl-item"><a class="nxl-link" href="/smia-ostie/list">Medical Service list</a></li>
-                        <% if(user.role=="SUPERADMIN" || user.role=="ADMIN" || user.role=="HR_ADMIN" ||
-                            user.role=="HEAD_HR" ) { %>
-                            <li class="nxl-item"><a class="nxl-link" href="/smia-ostie/new-medical-service">New Medical
-                                    Service</a></li>
-                            <% } %>
+                                                        <% if(user.role=="SUPERADMIN" || user.role=="ADMIN" ||
+                                                            user.role=="HR_ADMIN" || user.role=="HEAD_HR" ) { %>
+                                                            <li class="nxl-item"><a class="nxl-link"
+                                                                    href="/employee/assign-manager">Assign
+                                                                    manager</a>
+                                                            </li>
+                                                            <% } %>
+                                                                <% if(user.role=="SUPERADMIN" || user.role=="MANAGER" )
+                                                                    { %>
+                                                                    <li class="nxl-item"><a class="nxl-link"
+                                                                            href="/employee/my-team">My team</a>
+                                                                    </li>
+                                                                    <% } %>
                     </ul>
                 </li>
                 <li class="nxl-item nxl-hasmenu">

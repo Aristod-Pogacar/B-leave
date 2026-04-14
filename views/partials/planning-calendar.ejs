@@ -17,7 +17,28 @@
     const datesContainer = document.getElementById("datesContainer");
     const datesGrid = document.getElementById("datesGrid");
 
+    const dDay = new Date();
+    const startD = new Date(dDay);
+    startD.setDate(startD.getDate() - 15);
+    const endD = new Date(dDay);
+    endD.setDate(endD.getDate() + 60);
+    if (dDay.getMonth() === 0) {
+        startD = new Date(dDay.getFullYear(), 0, 1);
+    }
+    if (dDay.getMonth() === 11) {
+        endD = new Date(dDay.getFullYear(), 11, 31);
+    }
+
+    const startDateFilter = document.getElementById("startDateFilter");
+    const endDateFilter = document.getElementById("endDateFilter");
+
     let solde = 0;
+
+    startDateFilter.value = startD.toISOString().split("T")[0];
+    endDateFilter.value = endD.toISOString().split("T")[0];
+
+    startDateFilter.addEventListener("change", loadPlanning);
+    endDateFilter.addEventListener("change", loadPlanning);
 
     const query = new URLSearchParams(window.location.search);
 
@@ -58,18 +79,6 @@
             firstTime = false;
             lineElement.value = defaultLine;
             departementElement.value = defaultDepartement;
-        }
-
-        const dDay = new Date();
-        const startD = new Date(dDay);
-        startD.setDate(startD.getDate() - 15);
-        const endD = new Date(dDay);
-        endD.setDate(endD.getDate() + 60);
-        if (dDay.getMonth() === 0) {
-            startD = new Date(dDay.getFullYear(), 0, 1);
-        }
-        if (dDay.getMonth() === 11) {
-            endD = new Date(dDay.getFullYear(), 11, 31);
         }
 
         const year = startD.getFullYear();
@@ -138,6 +147,9 @@
     }
 
     function renderCalendar() {
+
+        currentStartDate = new Date(startDateFilter.value);
+        currentEndDate = new Date(endDateFilter.value);
 
         datesGrid.innerHTML = "";
 
@@ -237,6 +249,12 @@
                         wrapper.setAttribute("data-bs-toggle", "popover");
                         wrapper.setAttribute("data-bs-title", emp.fullname);
                         wrapper.setAttribute("data-bs-html", "true");
+                        var onehr_status = "NOT SENT";
+                        var onehr_status_class = "text-danger";
+                        if (leave.onehr_status) {
+                            onehr_status = `SENT`;
+                            onehr_status_class = "text-success";
+                        }
                         var approver = "-";
                         if (leave.approver) {
                             approver = `${leave.approver.firstName}`;
@@ -251,7 +269,8 @@
                             month: '2-digit',
                             year: 'numeric'
                         })}
-                            <br><b>Approver:</b> ${approver}<br>`);
+                            <br><b>Approver:</b> ${approver}
+                            <br><b>OneHR:</b> <span class="${onehr_status_class}">${onehr_status}</span><br>`);
                         wrapper.setAttribute("data-bs-placement", "top");
                         wrapper.classList.add("leave-bar-text");
                         new bootstrap.Popover(wrapper, {
@@ -335,23 +354,23 @@
         const diffDays = diffTime / (1000 * 60 * 60 * 24);
         return diffDays + 1;
     }
-    datesContainer.addEventListener("scroll", () => {
+    // datesContainer.addEventListener("scroll", () => {
 
-        const scrollLeft = datesContainer.scrollLeft;
-        const maxScroll = datesContainer.scrollWidth - datesContainer.clientWidth;
+    //     const scrollLeft = datesContainer.scrollLeft;
+    //     const maxScroll = datesContainer.scrollWidth - datesContainer.clientWidth;
 
-        employeeColumn.scrollTop = datesContainer.scrollTop;
+    //     employeeColumn.scrollTop = datesContainer.scrollTop;
 
-        // 👉 Si on arrive à droite
-        if (scrollLeft >= maxScroll - 5) {
-            addNextMonth();
-        }
+    //     // 👉 Si on arrive à droite
+    //     if (scrollLeft >= maxScroll - 5) {
+    //         addNextMonth();
+    //     }
 
-        // 👉 Si on arrive à gauche
-        if (scrollLeft <= 5) {
-            addPreviousMonth();
-        }
-    });
+    //     // 👉 Si on arrive à gauche
+    //     if (scrollLeft <= 5) {
+    //         addPreviousMonth();
+    //     }
+    // });
 
     employeeColumn.addEventListener("scroll", () => {
         datesContainer.scrollTop = employeeColumn.scrollTop;

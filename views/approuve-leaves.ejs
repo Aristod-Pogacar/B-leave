@@ -60,63 +60,77 @@
                                                     </div>
                                                 </div>
                                                 <div class="card-body custom-card-action p-0">
-                                                    <div class="table-responsive mb-3">
-                                                        <table class="table table-hover mb-0">
-                                                            <thead>
-                                                                <tr>
-                                                                    <th>Matricule</th>
-                                                                    <th>Fullname</th>
-                                                                    <th>Start date</th>
-                                                                    <th>End date</th>
-                                                                    <th>Duration</th>
-                                                                    <th>Type</th>
-                                                                    <th class="text-center">Action</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                <% leaves.forEach(leave=> { %>
-                                                                    <tr>
-                                                                        <td>
-                                                                            <%= leave.employee.matricule %>
-                                                                        </td>
-                                                                        <td>
-                                                                            <%= leave.employee.fullname %>
-                                                                        </td>
-                                                                        <td>
-                                                                            <%= leave.start_date %>
-                                                                        </td>
-                                                                        <td>
-                                                                            <%= leave.end_date %>
-                                                                        </td>
-                                                                        <td>
-                                                                            <%= leave.duration %>
-                                                                        </td>
-                                                                        <td>
-                                                                            <%= leave.leave_type %>
-                                                                        </td>
-                                                                        <td class="justify-content-center d-flex gap-2">
-                                                                            <form
-                                                                                action="/leave/approve-leave/<%= leave.id %>"
-                                                                                method="post">
-                                                                                <button type="submit"
-                                                                                    class="btn btn-success"
-                                                                                    title="Approve"><i
-                                                                                        class="feather-check"></i></button>
-                                                                            </form>
-                                                                            <form
-                                                                                action="/leave/reject-leave/<%= leave.id %>"
-                                                                                method="post">
-                                                                                <button type="submit"
-                                                                                    class="btn btn-danger"
-                                                                                    title="Reject"><i
-                                                                                        class="feather-x"></i></button>
-                                                                            </form>
-                                                                        </td>
-                                                                    </tr>
-                                                                    <% }) %>
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
+                                                    <% if (locals.error) { %>
+                                                        <div class="alert alert-danger" role="alert" id="message">
+                                                            <%= error %>
+                                                        </div>
+                                                        <% } %>
+                                                            <% if (locals.message) { %>
+                                                                <div class="alert alert-success" role="alert"
+                                                                    id="message">
+                                                                    <%= message %>
+                                                                </div>
+                                                                <% } %>
+                                                                    <div class="table-responsive mb-3">
+                                                                        <table class="table table-hover mb-0">
+                                                                            <thead>
+                                                                                <tr>
+                                                                                    <th>Matricule</th>
+                                                                                    <th>Fullname</th>
+                                                                                    <th>Start date</th>
+                                                                                    <th>End date</th>
+                                                                                    <th>Duration</th>
+                                                                                    <th>Type</th>
+                                                                                    <th class="text-center">Action</th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                                <% leaves.forEach(leave=> { %>
+                                                                                    <tr>
+                                                                                        <td>
+                                                                                            <%= leave.employee.matricule
+                                                                                                %>
+                                                                                        </td>
+                                                                                        <td>
+                                                                                            <%= leave.employee.fullname
+                                                                                                %>
+                                                                                        </td>
+                                                                                        <td>
+                                                                                            <%= leave.start_date %>
+                                                                                        </td>
+                                                                                        <td>
+                                                                                            <%= leave.end_date %>
+                                                                                        </td>
+                                                                                        <td>
+                                                                                            <%= leave.duration %>
+                                                                                        </td>
+                                                                                        <td>
+                                                                                            <%= leave.leave_type %>
+                                                                                        </td>
+                                                                                        <td
+                                                                                            class="justify-content-center d-flex gap-2">
+                                                                                            <form
+                                                                                                action="/leave/approve-leave/<%= leave.id %>"
+                                                                                                method="post">
+                                                                                                <button type="submit"
+                                                                                                    class="btn btn-success"
+                                                                                                    title="Approve"><i
+                                                                                                        class="feather-check"></i></button>
+                                                                                            </form>
+                                                                                            <form
+                                                                                                action="/leave/reject-leave/<%= leave.id %>"
+                                                                                                method="post">
+                                                                                                <button type="submit"
+                                                                                                    class="btn btn-danger"
+                                                                                                    title="Reject"><i
+                                                                                                        class="feather-x"></i></button>
+                                                                                            </form>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                    <% }) %>
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
                                                 </div>
                                             </div>
                                         </div>

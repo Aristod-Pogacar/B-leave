@@ -9,6 +9,7 @@ import * as express from 'express';
 import * as ExcelJS from 'exceljs';
 import * as XLSX from 'xlsx';
 import { Site, User, UserRole } from 'src/user/entities/user.entity';
+import { EmployeeService } from 'src/employee/employee.service';
 
 @Injectable()
 export class LeaveService {
@@ -20,6 +21,7 @@ export class LeaveService {
     private readonly employeeRepository: Repository<Employee>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly employeeService: EmployeeService,
   ) { }
 
   async findLeavesNotDone(limit?: number) {
@@ -402,14 +404,16 @@ export class LeaveService {
     return this.leaveRepository.delete(id);
   }
 
-  async getPaginateEmployeeLeaves(employeeId: string, skip: number = 0, take: number = 10) {
+  async getPaginateEmployeeLeaves(employeeId: string, skip: number = 0, take: number = 10, startDate: Date, endDate: Date, status: string) {
     const [data, count] = await this.leaveRepository.findAndCount({
-      where: { employee: { id: employeeId } },
+      where: { employee: { id: employeeId }, start_date: Between(startDate, endDate), status: In(this.getLeavesByStatus(status)) },
       order: { start_date: 'DESC' },
       relations: ['approver'],
-      skip,
-      take,
+      // skip,
+      // take,
     });
+    console.log("Data:", data);
+    console.log("Count:", count);
     return { data, count };
   }
 
@@ -538,11 +542,25 @@ export class LeaveService {
     return dates;
   }
 
-  async exportLeavePlanning(user: any, startDate: Date, endDate: Date, line?: string, departement?: string) {
+  getLeavesByStatus(status: string) {
+    switch (status) {
+      case "pending":
+        return [LeaveStatus.PENDING]
+      case "approved":
+        return [LeaveStatus.APPROVED]
+      case "rejected":
+        return [LeaveStatus.REJECTED]
+      default:
+        return [LeaveStatus.REJECTED, LeaveStatus.PENDING, LeaveStatus.APPROVED]
+    }
+  }
+
+  async exportLeavePlanning(user: any, startDate: Date, endDate: Date, line?: string, departement?: string, status: string = 'all') {
     console.log("USER:", user)
     let leaves: Leave[];
     let employees: Employee[];
 
+    let leaveEx: string[] = this.getLeavesByStatus(status);
 
     const dates = this.getDatesBetween(startDate, endDate);
 
@@ -552,11 +570,11 @@ export class LeaveService {
         where: [{
           start_date: In(dates),
           employee: { line, departement, manager: { id: user.id } },
-          status: LeaveStatus.APPROVED
+          status: In(leaveEx)
         }, {
           end_date: In(dates),
           employee: { line, departement, manager: { id: user.id } },
-          status: LeaveStatus.APPROVED
+          status: In(leaveEx)
         }],
         relations: ['employee']
       });
@@ -566,11 +584,11 @@ export class LeaveService {
         where: [{
           start_date: In(dates),
           employee: { line, departement },
-          status: LeaveStatus.APPROVED
+          status: In(leaveEx)
         }, {
           end_date: In(dates),
           employee: { line, departement },
-          status: LeaveStatus.APPROVED
+          status: In(leaveEx)
         }],
         relations: ['employee']
       });
@@ -759,8 +777,16 @@ export class LeaveService {
     return workbook;
   }
 
-  async exportEmployeeLeaves(employee: Employee) {
-    const leaves = await this.leaveRepository.find({ where: { employee: { id: employee.id }, status: LeaveStatus.APPROVED }, order: { start_date: 'DESC' }, relations: ['employee'] })
+  async exportEmployeeLeaves(employee: Employee, startDate: Date, endDate: Date, status: string) {
+    const leaves = await this.leaveRepository.find({
+      where: {
+        employee: { id: employee.id },
+        start_date: Between(startDate, endDate),
+        status: In(this.getLeavesByStatus(status))
+      },
+      order: { start_date: 'DESC' },
+      relations: ['employee', 'approver']
+    })
     console.log("Leaves:", leaves);
 
     const workbook = new ExcelJS.Workbook();
@@ -775,7 +801,11 @@ export class LeaveService {
       "Start Date",
       "End Date",
       "Leave Type",
-      "Duration"
+      "Duration",
+      "Status",
+      "Reason",
+      "Approved/Rejected Date",
+      "Approved/Rejected By"
     ];
 
     sheet.addRow(header);
@@ -794,6 +824,8 @@ export class LeaveService {
     });
 
     leaves.forEach(leave => {
+      const approver = leave.approver ? leave.approver.firstName : ""
+      const approvedDate = leave.approved_date ? new Date(leave.approved_date).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" }) : ""
       const rowData = [
         leave.employee.matricule,
         leave.employee.fullname,
@@ -803,7 +835,11 @@ export class LeaveService {
         leave.start_date,
         leave.end_date,
         leave.leave_type,
-        leave.duration
+        leave.duration,
+        leave.status,
+        leave.reason,
+        approvedDate,
+        approver
       ];
 
       sheet.addRow(rowData);

@@ -63,7 +63,7 @@
                                                                     <!-- Recherche Employé -->
                                                                     <div class="">
                                                                         <div class="row">
-                                                                            <div class="col-md-6 mb-3">
+                                                                            <div class="col-md-4 mb-3">
                                                                                 <label
                                                                                     class="form-label">Departement</label>
                                                                                 <select class="form-select"
@@ -86,7 +86,7 @@
                                                                                                     <% }); %>
                                                                                 </select>
                                                                             </div>
-                                                                            <div class="col-md-6 mb-3">
+                                                                            <div class="col-md-4 mb-3">
                                                                                 <label class="form-label">Line</label>
                                                                                 <select class="form-select" name="line"
                                                                                     id="lineFilter">
@@ -103,6 +103,20 @@
                                                                                                 </option>
                                                                                                 <% } %>
                                                                                                     <% }) %>
+                                                                                </select>
+                                                                            </div>
+                                                                            <div class="col-md-4">
+                                                                                <label for="status"
+                                                                                    class="form-label">Status</label>
+                                                                                <select name="status" id="status"
+                                                                                    class="form-select">
+                                                                                    <option value="all">ALL</option>
+                                                                                    <option value="pending">Pending
+                                                                                    </option>
+                                                                                    <option value="approved">Approuved
+                                                                                    </option>
+                                                                                    <option value="rejected">Rejected
+                                                                                    </option>
                                                                                 </select>
                                                                             </div>
                                                                         </div>

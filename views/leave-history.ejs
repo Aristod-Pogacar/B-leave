@@ -60,15 +60,46 @@
 
                                                                 <!-- Recherche Employé -->
                                                                 <div class="mb-0">
-                                                                    <label class=" form-label">Employee</label>
-                                                                    <input type="text" class="form-control"
-                                                                        id="employeeSearch" autocomplete="off"
-                                                                        placeholder="Search an employee...">
-                                                                    <input type="text" class="input" name="employee"
-                                                                        id="employee" hidden required>
-                                                                    <ul id="employeeResults"
-                                                                        class="autocomplete-list ps-0 w-100 z-200">
-                                                                    </ul>
+                                                                    <div class="row">
+                                                                        <div class="col-md-12 mb-3">
+                                                                            <label class=" form-label">Employee</label>
+                                                                            <input type="text" class="form-control"
+                                                                                id="employeeSearch" autocomplete="off"
+                                                                                placeholder="Search an employee...">
+                                                                            <input type="text" class="input"
+                                                                                name="employee" id="employee" hidden
+                                                                                required>
+                                                                            <ul id="employeeResults"
+                                                                                class="autocomplete-list ps-0 w-100 z-200">
+                                                                            </ul>
+                                                                        </div>
+                                                                        <div class="col-md-4">
+                                                                            <label for="status"
+                                                                                class="form-label">Start</label>
+                                                                            <input type="date" class="form-control"
+                                                                                id="startDate" name="startDate">
+                                                                        </div>
+                                                                        <div class="col-md-4">
+                                                                            <label for="status"
+                                                                                class="form-label">End</label>
+                                                                            <input type="date" class="form-control"
+                                                                                id="endDate" name="endDate">
+                                                                        </div>
+                                                                        <div class="col-md-4">
+                                                                            <label for="status"
+                                                                                class="form-label">Status</label>
+                                                                            <select name="status" id="status"
+                                                                                class="form-select">
+                                                                                <option value="all">ALL</option>
+                                                                                <option value="pending">Pending
+                                                                                </option>
+                                                                                <option value="approved">Approuved
+                                                                                </option>
+                                                                                <option value="rejected">Rejected
+                                                                                </option>
+                                                                            </select>
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
 
                                                             </div>
@@ -170,6 +201,10 @@
                                                 <div class="card-footer d-none" id="footer-export">
                                                     <form action="/leave/export-employee-leaves" method="get">
                                                         <input type="hidden" name="employeeId" id="exportEmployeeId">
+                                                        <input type="hidden" name="start" id="exportStartDate">
+                                                        <input type="hidden" name="end" id="exportEndDate">
+                                                        <input type="hidden" name="status" id="exportStatus"
+                                                            value="all">
                                                         <button class="btn btn-primary" type="submit">
                                                             Export as Excel file
                                                         </button>
@@ -208,6 +243,47 @@
         const results = document.getElementById('employeeResults');
         const hiddenInput = document.getElementById('employee');
         let timeout = null;
+
+        const startDate = document.getElementById('startDate');
+        const endDate = document.getElementById('endDate');
+        const exportStartDate = document.getElementById('exportStartDate');
+        const exportEndDate = document.getElementById('exportEndDate');
+
+        startDate.value = new Date().toISOString().split("T")[0];
+        endDate.value = new Date().toISOString().split("T")[0];
+
+        exportStartDate.value = startDate.value;
+        exportEndDate.value = endDate.value;
+
+        const status = document.getElementById('status');
+        const exportStatus = document.getElementById('exportStatus');
+
+        status.addEventListener('change', () => {
+            console.log("STATUS:", status.value);
+            exportStatus.value = status.value;
+            skip = 0;
+            hasMore = true;
+            tbody.innerHTML = "";
+            loadEmployeeLeaves(currentEmployeeId);
+        });
+
+        startDate.addEventListener('change', () => {
+            console.log("START DATE:", startDate.value);
+            exportStartDate.value = startDate.value;
+            skip = 0;
+            hasMore = true;
+            tbody.innerHTML = "";
+            loadEmployeeLeaves(currentEmployeeId);
+        });
+
+        endDate.addEventListener('change', () => {
+            console.log("END DATE:", endDate.value);
+            exportEndDate.value = endDate.value;
+            skip = 0;
+            hasMore = true;
+            tbody.innerHTML = "";
+            loadEmployeeLeaves(currentEmployeeId);
+        });
 
         // const startDate = document.getElementById('startDate');
         // startDate.value = new Date().toISOString().split("T")[0];
@@ -272,7 +348,8 @@
                             skip = 0;
                             hasMore = true;
                             tbody.innerHTML = "";
-                            loadEmployeeLeaves(emp.id);
+                            currentEmployeeId = emp.id;
+                            loadEmployeeLeaves(currentEmployeeId);
                             footer.className = "card-footer";
                             exportEmployeeId.value = emp.id;
                             // const historyResponse = await fetch(`/leave/employee-leaves/paginate/${emp.id}?skip=0&take=10`);
@@ -289,13 +366,15 @@
         });
 
         async function loadEmployeeLeaves(employeeId) {
+            console.log("HAS MORE:", hasMore);
+            console.log("IS LOADING:", isLoading);
+            console.log("EMPLOYEE ID:", employeeId);
 
             if (isLoading || !hasMore || !employeeId) return;
 
             isLoading = true;
-            const url = `/leave/employee-leaves/paginate/${employeeId}?skip=${skip}&take=${take}`;
+            const url = `/leave/employee-leaves/paginate/${employeeId}?skip=${skip}&take=${take}&startDate=${startDate.value}&endDate=${endDate.value}&status=${status.value}`;
             console.log(url);
-
 
             try {
                 const res = await fetch(url);

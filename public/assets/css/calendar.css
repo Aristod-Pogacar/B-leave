@@ -147,44 +147,17 @@
             border-bottom: 7px solid #15ff00;
         }
 
-        .leave-Local_Leave_AMD.not-approved {
-            background-color: #898cd3;
+        .not-approved {
+            background-color: #bebebe;
             border-radius: 5px;
             cursor: pointer;
-            border-bottom: 7px solid #afb2e9;
+            border-bottom: 7px solid #dbdbdb;
         }
 
-        .leave-Local_Leave_AMD.not-approved:hover {
-            background-color: #8284b7;
+        .not-approved:hover {
+            background-color: #747474;
             border-radius: 5px;
-            cursor: pointer;
-            border-bottom: 7px solid #afb2e9;
-        }
-
-        .leave-Indisponibilite_AMD.not-approved {
-            background-color: #c8888f;
-            border-radius: 5px;
-            cursor: pointer;
-            border-bottom: 7px solid #edb6ba;
-        }
-
-        .leave-Indisponibilite_AMD.not-approved:hover {
-            background-color: #b26971;
-            border-radius: 5px;
-            border-bottom: 7px solid #edb6ba;
-        }
-
-        .leave-Permission_AMD.not-approved {
-            background-color: #99b496;
-            border-radius: 5px;
-            cursor: pointer;
-            border-bottom: 7px solid #b7d7bf;
-        }
-
-        .leave-Permission_AMD.not-approved:hover {
-            background-color: #7ba077;
-            border-radius: 5px;
-            border-bottom: 7px solid #b7d7bf;
+            border-bottom: 7px solid #bbbbbb;
         }
 
         .employee-row {

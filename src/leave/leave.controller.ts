@@ -59,10 +59,10 @@ export class LeaveController {
   @UseGuards(RolesGuard)
   @Roles(UserRole.SUPERADMIN, UserRole.MANAGER)
   @Render('approuve-leaves')
-  async approuveLeaves(@Req() req: any, @Query() error?: string) {
+  async approuveLeaves(@Req() req: any, @Query() error?: string, @Query() message?: string) {
     const leaves = await this.leaveService.getNonApprouvedLeaves(req.session.user.id);
     console.log("LEAVES:", leaves);
-    return { title: "Approuve Leaves", error: error ? error : null, leaves: leaves };
+    return { title: "Approuve Leaves", error: error ? error : null, leaves: leaves, message: message ? message : null };
   }
 
   @Post('approve-leave/:leaveId')
@@ -70,7 +70,8 @@ export class LeaveController {
   @Roles(UserRole.SUPERADMIN, UserRole.MANAGER)
   async approveLeave(@Param('leaveId') leaveId: string, @Res() res: express.Response, @Req() req: any) {
     await this.leaveService.approveLeave(leaveId, req.session.user.id);
-    res.redirect('/leave/approuve-leaves');
+    const message = "Leave approved successfully. You are pleased to validate also on OneHR platfrom."
+    res.redirect('/leave/approuve-leaves?message=' + message);
   }
 
   @Post('reject-leave/:leaveId')
@@ -78,12 +79,19 @@ export class LeaveController {
   @Roles(UserRole.SUPERADMIN, UserRole.MANAGER)
   async rejectLeave(@Param('leaveId') leaveId: string, @Res() res: express.Response, @Req() req: any) {
     await this.leaveService.rejectLeave(leaveId, req.session.user.id);
-    res.redirect('/leave/approuve-leaves');
+    const message = "Leave rejected successfully."
+    res.redirect('/leave/approuve-leaves?message=' + message);
   }
 
   @Get('employee-leaves/paginate/:employeeId')
-  async getEmployeeLeaves(@Param('employeeId') employeeId: string, @Query('skip') skip: number, @Query('take') take: number) {
-    return this.leaveService.getPaginateEmployeeLeaves(employeeId, skip, take);
+  async getEmployeeLeaves(@Param('employeeId') employeeId: string, @Query('skip') skip: number, @Query('take') take: number, @Query('startDate') startDate: string, @Query('endDate') endDate: string, @Query('status') status: string) {
+    const st = new Date(startDate);
+    const et = new Date(endDate);
+    console.log("STATUS:", status);
+    console.log("EMPLOYEE ID:", employeeId);
+    console.log("START DATE:", startDate);
+    console.log("END DATE:", endDate);
+    return this.leaveService.getPaginateEmployeeLeaves(employeeId, skip, take, st, et, status);
   }
 
   @Get('employee-leaves/:employeeId/:month/:year')
@@ -215,13 +223,14 @@ export class LeaveController {
     @Body('endDate') endDate: Date,
     @Body('line') line: string,
     @Body('departement') departement: string,
+    @Body('status') status: string,
     @Req() req: any,
     @Res() res: express.Response
   ) {
     const start = new Date(startDate);
     const end = new Date(endDate);
 
-    const workbook = await this.leaveService.exportLeavePlanning(req.session.user, start, end, line, departement);
+    const workbook = await this.leaveService.exportLeavePlanning(req.session.user, start, end, line, departement, status);
 
     res.setHeader(
       'Content-Type',
@@ -230,7 +239,7 @@ export class LeaveController {
 
     res.setHeader(
       'Content-Disposition',
-      `attachment; filename=planning-${startDate}-${endDate}.xlsx`
+      `attachment; filename=${status}-leaves-${line}-${departement}-${startDate}-${endDate}.xlsx`
     );
 
     await workbook.xlsx.write(res);
@@ -243,6 +252,9 @@ export class LeaveController {
   @Get('export-employee-leaves')
   async exportEmployeeLeaves(
     @Query('employeeId') employeeId: string,
+    @Query('start') startDate: string,
+    @Query('end') endDate: string,
+    @Query('status') status: string,
     @Res() res: express.Response
   ) {
     console.log("Employee ID:", employeeId);
@@ -253,7 +265,7 @@ export class LeaveController {
       return res.status(404).send('Employee not found');
     }
 
-    const workbook = await this.leaveService.exportEmployeeLeaves(employee);
+    const workbook = await this.leaveService.exportEmployeeLeaves(employee, new Date(startDate), new Date(endDate), status);
 
     res.setHeader(
       'Content-Type',

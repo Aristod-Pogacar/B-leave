@@ -27,19 +27,17 @@ export class SmiaOstieController {
 
   @Get('list')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HEAD_HR, UserRole.HR_ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HEAD_HR, UserRole.HR_ADMIN, UserRole.MANAGER)
   @Render('medical-service')
   async getMedicalService(@Req() req, @Query('search') search: string = '', @Query('page') page: number = 1) {
     const limit = 20;
-    const { data, total, totalPages } = await this.smiaOstieService.paginateMedicalService(search, Number(page), limit);
+    const { data, total, totalPages } = await this.smiaOstieService.paginateMedicalService(search, Number(page), limit, req.session.user);
     // console.log("DATA:", data);
 
     const currentPage = Number(page);
     const maxButtons = 7;
     let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
     let endPage = startPage + maxButtons - 1;
-
-    console.log("DATA:", data);
 
     if (endPage > totalPages) {
       endPage = totalPages;

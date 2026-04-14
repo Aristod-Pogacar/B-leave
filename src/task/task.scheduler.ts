@@ -33,8 +33,6 @@ export class TaskScheduler {
                 console.log(leave.employee.matricule);
             }
         });
-        // const leaves = await this.leaveService.findLeavesNotDone();
-        // console.log(this.i++, "NEW TEST SCHEDULING");
 
         await this.taskService.executePendingTasks();
     }

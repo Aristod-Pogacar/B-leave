@@ -7,6 +7,7 @@ import { CreateSmiaOstieDto } from './dto/create-smia_ostie.dto';
 import { UpdateSmiaOstieDto } from './dto/update-smia_ostie.dto';
 import { SmiaOstie } from './entities/smia_ostie.entity';
 import { Response } from 'express';
+import { Site, UserRole } from 'src/user/entities/user.entity';
 const ExcelJS = require('exceljs');
 
 @Injectable()
@@ -38,11 +39,20 @@ export class SmiaOstieService {
     return { monday, sunday };
   }
 
-  async paginateMedicalService(
-    search: string,
-    page: number,
-    limit: number,
-  ) {
+  private getAllowedSites(userSite: string): string[] {
+
+    if (userSite === Site.MADA) {
+      return [Site.ABE1, Site.ABE2, Site.TANA]; // pas de filtre
+    }
+
+    if (userSite === Site.ANTSIRABE) {
+      return [Site.ABE1, Site.ABE2];
+    }
+
+    return [userSite];
+  }
+
+  async paginateMedicalService(search: string, page: number, limit: number, user: any) {
 
     const skip = (page - 1) * limit;
 
@@ -54,6 +64,25 @@ export class SmiaOstieService {
     if (search && search.trim() !== '') {
       query.where('m.name LIKE :search', { search: `%${search}%` });
     }
+
+    if (user.role === UserRole.MANAGER) {
+      const allowedEmployees = await this.employeeRepo.find({
+        where: { manager: { id: user.id } },
+        select: ['id'],
+      });
+      const employeeIds: string[] = [];
+      allowedEmployees.forEach(employee => {
+        employeeIds.push(employee.id);
+      });
+      console.log("ALLOWED EMPLOYEES", allowedEmployees);
+      console.log(employeeIds);
+      if (employeeIds.length > 0) {
+        query.andWhere('e.id IN (:...employeeIds)', { employeeIds });
+      }
+    }
+
+    // const allowedSites = this.getAllowedSites(user.site);
+    // query.andWhere('e.site IN (:...sites)', { sites: allowedSites });
 
     const [data, total] = await query
       .orderBy('m.id', 'DESC')
