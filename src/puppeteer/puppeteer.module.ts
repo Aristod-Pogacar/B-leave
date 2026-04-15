@@ -10,11 +10,13 @@ import { EmployeeService } from 'src/employee/employee.service';
 import { LeaveService } from 'src/leave/leave.service';
 import { CryptoService } from 'src/crypto/crypto.service';
 import { User } from 'src/user/entities/user.entity';
+import { History } from 'src/history/entities/history.entity';
+import { HistoryService } from 'src/history/history.service';
 
 @Module({
     imports: [
         ConfigModule.forRoot({ isGlobal: true }),
-        TypeOrmModule.forFeature([Employee, Leave, User]),
+        TypeOrmModule.forFeature([Employee, Leave, User, History]),
     ],
     controllers: [PuppeteerController],
     providers: [
@@ -23,13 +25,14 @@ import { User } from 'src/user/entities/user.entity';
         EmployeeService,
         LeaveService,
         CryptoService,
-    ],
+        HistoryService],
     exports: [
         PuppeteerService,
         CryptoService,
         EmployeeService,
         LeaveService,
-        TypeOrmModule, // 🔥 IMPORTANT
+        TypeOrmModule,
+        HistoryService,
     ],
 })
 export class PuppeteerModule { }

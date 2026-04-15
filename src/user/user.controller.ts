@@ -7,12 +7,15 @@ import { UserRole, Site, User } from './entities/user.entity';
 import { RolesGuard } from './role.guard';
 import { Roles } from './role.decorator';
 import { AuthService } from 'src/auth/auth.service';
+import { HistoryService } from 'src/history/history.service';
+import { HistoryReason } from 'src/history/entities/history.entity';
 
 @Controller('user')
 export class UserController {
   constructor(
     private readonly userService: UserService,
     private readonly authService: AuthService,
+    private readonly historyService: HistoryService,
   ) { }
 
   private getAllowedSitesForNewUsers(userSite: string): string[] {
@@ -203,6 +206,10 @@ export class UserController {
         error: 'Invalid credentials'
       });
     }
+    await this.historyService.create({
+      reason: HistoryReason.USER,
+      message: "User " + user.firstName + " " + user.name + " created by " + req.session.user.firstName + " " + req.session.user.name,
+    });
 
     return res.redirect('/user/list');
   }
@@ -224,8 +231,16 @@ export class UserController {
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @Post('delete-user/:id')
-  async deleteTheUser(@Param('id') id: string, @Res() res: any) {
+  async deleteTheUser(@Param('id') id: string, @Res() res: any, @Req() req: any) {
+    const user = await this.userService.findOne(id);
+    if (!user) {
+      return res.redirect('/user/list');
+    }
     this.userService.remove(id);
+    await this.historyService.create({
+      reason: HistoryReason.USER,
+      message: "User " + user.firstName + " " + user.name + " deleted by " + req.session.user.firstName + " " + req.session.user.name,
+    });
     return res.redirect('/user/list');
   }
 
@@ -248,8 +263,16 @@ export class UserController {
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @Post('edit-user/:id')
-  async editTheUser(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto, @Res() res: any) {
+  async editTheUser(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto, @Res() res: any, @Req() req: any) {
+    const user = await this.userService.findOne(id);
+    if (!user) {
+      return res.redirect('/user/list');
+    }
     this.userService.update(id, updateUserDto);
+    await this.historyService.create({
+      reason: HistoryReason.USER,
+      message: "User " + user.firstName + " " + user.name + " updated by " + req.session.user.firstName + " " + req.session.user.name,
+    });
     return res.redirect('/user/list');
   }
 

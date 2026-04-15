@@ -9,6 +9,8 @@ import { Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Employee } from "src/employee/entities/employee.entity";
 import { Leave } from "src/leave/entities/leave.entity";
+import { HistoryService } from "src/history/history.service";
+import { HistoryReason } from "src/history/entities/history.entity";
 
 @Injectable()
 export class TaskService {
@@ -19,6 +21,7 @@ export class TaskService {
     private readonly employeeService: EmployeeService,
     private readonly leaveService: LeaveService,
     private cryptoService: CryptoService,
+    private readonly historyService: HistoryService,
     @InjectRepository(Employee)
     private readonly employeeRepo: Repository<Employee>,
     @InjectRepository(Leave)
@@ -84,6 +87,10 @@ export class TaskService {
                         console.log("✅ FORM COMPLETE");
                         await delay(5000);
                         await this.leaveService.doneLeave(leave);
+                        await this.historyService.create({
+                          reason: HistoryReason.LEAVE,
+                          message: "New leave " + leave.start_date + " to " + leave.end_date + " of " + leave.employee.fullname + " send to OneHR by AUTOMATION PUPPETEER",
+                        });
                         // await this.leaveService.save(data);
                         await this.manager.closeSession(sessionId);
                         // res.status(200).json({ success: true, message: "FORM COMPLETE" });

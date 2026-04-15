@@ -33,13 +33,16 @@
                                         <li class="nxl-item"><a class="nxl-link" href="/leave/leave-history">Leave
                                                 history</a>
                                         </li>
-                                        <li class="nxl-item"><a class="nxl-link" href="/leave/export">Export</a>
-                                        </li>
                                         <% if(user.role=="SUPERADMIN" || user.role=="PAYROLL" ) { %>
-                                            <li class="nxl-item"><a class="nxl-link" href="/leave/import-leaves">Import
-                                                    leaves</a>
+                                            <li class="nxl-item"><a class="nxl-link" href="/leave/export">Export</a>
                                             </li>
                                             <% } %>
+                                                <% if(user.role=="SUPERADMIN" || user.role=="PAYROLL" ) { %>
+                                                    <li class="nxl-item"><a class="nxl-link"
+                                                            href="/leave/import-leaves">Import
+                                                            leaves</a>
+                                                    </li>
+                                                    <% } %>
                     </ul>
                 </li>
                 <li class="nxl-item nxl-hasmenu">
@@ -150,6 +153,19 @@
                             <% } %>
                     </ul>
                 </li>
+                <% if(user.role=="SUPERADMIN" ) { %>
+                    <li class="nxl-item nxl-hasmenu">
+                        <a href="javascript:void(0);" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-skip-back"></i></span>
+                            <span class="nxl-mtext">History</span><span class="nxl-arrow"><i
+                                    class="feather-chevron-right"></i></span>
+                        </a>
+                        <ul class="nxl-submenu">
+                            <li class="nxl-item"><a class="nxl-link" href="/history/b-leave-history">B-Leave
+                                    history</a></li>
+                        </ul>
+                    </li>
+                    <% } %>
             </ul>
         </div>
     </div>

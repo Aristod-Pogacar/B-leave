@@ -10,13 +10,16 @@ import { Roles } from 'src/user/role.decorator';
 import { UserRole, Site } from 'src/user/entities/user.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
+import { HistoryService } from 'src/history/history.service';
+import { HistoryReason } from 'src/history/entities/history.entity';
 
 @Controller('leave')
 export class LeaveController {
 
   constructor(
     private readonly leaveService: LeaveService,
-    private readonly employeeService: EmployeeService
+    private readonly employeeService: EmployeeService,
+    private readonly historyService: HistoryService,
   ) { }
 
   private getAllowedSites(userSite: string): string[] {
@@ -43,8 +46,8 @@ export class LeaveController {
   @Post('new-leave')
   @UseGuards(RolesGuard)
   @Roles(UserRole.SUPERADMIN)
-  async createNewLeave(@Body() createLeaveDto: CreateLeaveDto, @Res() res: express.Response) {
-    await this.leaveService.create(createLeaveDto, res);
+  async createNewLeave(@Body() createLeaveDto: CreateLeaveDto, @Res() res: express.Response, @Req() req: any) {
+    await this.leaveService.create(createLeaveDto, res, req);
   }
 
   @Get('leave-history')
@@ -59,10 +62,10 @@ export class LeaveController {
   @UseGuards(RolesGuard)
   @Roles(UserRole.SUPERADMIN, UserRole.MANAGER)
   @Render('approuve-leaves')
-  async approuveLeaves(@Req() req: any, @Query() error?: string, @Query() message?: string) {
+  async approuveLeaves(@Req() req: any) {
     const leaves = await this.leaveService.getNonApprouvedLeaves(req.session.user.id);
     console.log("LEAVES:", leaves);
-    return { title: "Approuve Leaves", error: error ? error : null, leaves: leaves, message: message ? message : null };
+    return { title: "Approuve Leaves", error: req.query.error, leaves: leaves, message: req.query.message };
   }
 
   @Post('approve-leave/:leaveId')
@@ -71,6 +74,10 @@ export class LeaveController {
   async approveLeave(@Param('leaveId') leaveId: string, @Res() res: express.Response, @Req() req: any) {
     await this.leaveService.approveLeave(leaveId, req.session.user.id);
     const message = "Leave approved successfully. You are pleased to validate also on OneHR platfrom."
+    await this.historyService.create({
+      reason: HistoryReason.LEAVE,
+      message: "Leave approved by " + req.session.user.firstName + " " + req.session.user.name,
+    });
     res.redirect('/leave/approuve-leaves?message=' + message);
   }
 
@@ -80,6 +87,10 @@ export class LeaveController {
   async rejectLeave(@Param('leaveId') leaveId: string, @Res() res: express.Response, @Req() req: any) {
     await this.leaveService.rejectLeave(leaveId, req.session.user.id);
     const message = "Leave rejected successfully."
+    await this.historyService.create({
+      reason: HistoryReason.LEAVE,
+      message: "Leave rejected by " + req.session.user.firstName + " " + req.session.user.name,
+    });
     res.redirect('/leave/approuve-leaves?message=' + message);
   }
 
@@ -192,13 +203,17 @@ export class LeaveController {
       storage: memoryStorage(),
     }),
   )
-  async importLeavesPost(@UploadedFile() file: Express.Multer.File, @Res() res: express.Response) {
+  async importLeavesPost(@UploadedFile() file: Express.Multer.File, @Res() res: express.Response, @Req() req: any) {
     try {
       console.log("FILE:", file);
       const result = await this.leaveService.importLeaves(file);
       if (result.result === 'error') {
         return res.redirect(`/leave/import-leaves?error=${result.message}`);
       }
+      await this.historyService.create({
+        reason: HistoryReason.LEAVE,
+        message: "Import leaves by " + req.session.user.firstName + " " + req.session.user.name,
+      });
       return res.redirect(`/leave/planning-view`);
     } catch (error) {
       return res.redirect(`/leave/import-leaves?error=${error.message}`);
@@ -244,6 +259,10 @@ export class LeaveController {
 
     await workbook.xlsx.write(res);
     console.log("Exported successfully");
+    await this.historyService.create({
+      reason: HistoryReason.LEAVE,
+      message: "Export leaves by " + req.session.user.firstName + " " + req.session.user.name,
+    });
     res.end();
   }
 
@@ -255,7 +274,8 @@ export class LeaveController {
     @Query('start') startDate: string,
     @Query('end') endDate: string,
     @Query('status') status: string,
-    @Res() res: express.Response
+    @Res() res: express.Response,
+    @Req() req: any,
   ) {
     console.log("Employee ID:", employeeId);
     const employee = await this.employeeService.findOne(employeeId);
@@ -279,6 +299,10 @@ export class LeaveController {
 
     await workbook.xlsx.write(res);
     console.log("Exported successfully");
+    await this.historyService.create({
+      reason: HistoryReason.LEAVE,
+      message: "Export leaves of employee " + employee.fullname + " by " + req.session.user.firstName + " " + req.session.user.name,
+    });
     res.end();
   }
 
@@ -319,8 +343,8 @@ export class LeaveController {
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @Post()
-  create(@Body() createLeaveDto: CreateLeaveDto, @Res() res: express.Response) {
-    return this.leaveService.create(createLeaveDto, res);
+  create(@Body() createLeaveDto: CreateLeaveDto, @Res() res: express.Response, @Req() req: any) {
+    return this.leaveService.create(createLeaveDto, res, req);
   }
 
   @Get()

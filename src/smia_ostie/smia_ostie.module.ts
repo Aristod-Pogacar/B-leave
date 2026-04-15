@@ -6,6 +6,8 @@ import { SmiaOstie } from './entities/smia_ostie.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { History } from 'src/history/entities/history.entity';
+import { HistoryService } from 'src/history/history.service';
 
 @Module({
   imports: [
@@ -30,9 +32,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         },
       }),
     }),
-    TypeOrmModule.forFeature([SmiaOstie, Employee]),
+    TypeOrmModule.forFeature([SmiaOstie, Employee, History]),
   ],
   controllers: [SmiaOstieController],
-  providers: [SmiaOstieService],
+  providers: [SmiaOstieService, HistoryService],
+  exports: [SmiaOstieService, HistoryService],
 })
 export class SmiaOstieModule { }

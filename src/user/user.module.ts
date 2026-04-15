@@ -8,11 +8,13 @@ import { MailService } from 'src/mail/mail.service';
 import { JwtService } from '@nestjs/jwt';
 import { Employee } from 'src/employee/entities/employee.entity';
 import { Leave } from 'src/leave/entities/leave.entity';
+import { History } from 'src/history/entities/history.entity';
+import { HistoryService } from 'src/history/history.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Employee, Leave])],
+  imports: [TypeOrmModule.forFeature([User, Employee, Leave, History])],
   controllers: [UserController],
-  providers: [UserService, AuthService, MailService, JwtService],
-  exports: [UserService, AuthService, MailService, JwtService, TypeOrmModule],
+  providers: [UserService, AuthService, MailService, JwtService, HistoryService],
+  exports: [UserService, AuthService, MailService, JwtService, TypeOrmModule, HistoryService],
 })
 export class UserModule { }

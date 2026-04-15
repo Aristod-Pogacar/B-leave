@@ -132,7 +132,7 @@ export class PuppeteerController {
                                                 if (completeFormResponse.success == true) {
                                                     console.log("✅ FORM COMPLETE");
                                                     await delay(5000);
-                                                    const leave = await this.leaveService.create(data, res);
+                                                    const leave = await this.leaveService.create(data, res, { session: { user: { name: "PUPPETEER", firstName: "AUTOMATION" } } });
                                                     await this.manager.closeSession(sessionId);
                                                     res.status(200).json({ success: true, message: "LEAVE SAVED", leave: leave });
                                                 } else {

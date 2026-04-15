@@ -5,10 +5,12 @@ import { UpdateMedicalServiceDto } from './dto/update-medical_service.dto';
 import { Roles } from 'src/user/role.decorator';
 import { RolesGuard } from 'src/user/role.guard';
 import { UserRole } from 'src/user/entities/user.entity';
+import { HistoryReason } from 'src/history/entities/history.entity';
+import { HistoryService } from 'src/history/history.service';
 
 @Controller('medical-service')
 export class MedicalServiceController {
-  constructor(private readonly medicalServiceService: MedicalServiceService) { }
+  constructor(private readonly medicalServiceService: MedicalServiceService, private readonly historyService: HistoryService) { }
 
   @Get('list')
   @UseGuards(RolesGuard)
@@ -72,6 +74,10 @@ export class MedicalServiceController {
     }
     console.log("Name:", body.name);
     await this.medicalServiceService.create({ name: body.name });
+    await this.historyService.create({
+      reason: HistoryReason.MEDICAL_SERVICE,
+      message: "New medical service " + body.name + " by " + req.session.user.firstName + " " + req.session.user.name,
+    });
     return res.redirect('/medical-service/list');
   }
 
@@ -109,6 +115,10 @@ export class MedicalServiceController {
     }
     console.log("Name:", body.name);
     await this.medicalServiceService.update(id, { name: body.name });
+    await this.historyService.create({
+      reason: HistoryReason.MEDICAL_SERVICE,
+      message: "Medical service " + body.name + " updated by " + req.session.user.firstName + " " + req.session.user.name,
+    });
     return res.redirect('/medical-service/list');
   }
 
@@ -116,7 +126,15 @@ export class MedicalServiceController {
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.PAYROLL, UserRole.SUPERADMIN, UserRole.HR_ADMIN)
   async deleteMedicalService(@Req() req, @Param('id') id: string, @Res() res: any) {
+    const medicalService = await this.medicalServiceService.findOne(id);
+    if (!medicalService) {
+      return res.redirect('/medical-service/list');
+    }
     await this.medicalServiceService.remove(id);
+    await this.historyService.create({
+      reason: HistoryReason.MEDICAL_SERVICE,
+      message: "Medical service " + medicalService.name + " deleted by " + req.session.user.firstName + " " + req.session.user.name,
+    });
     return res.redirect('/medical-service/list');
   }
 

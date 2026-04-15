@@ -10,6 +10,8 @@ import { ManagerAssignation } from 'src/manager_assignation/entities/manager_ass
 import { User } from 'src/user/entities/user.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { HistoryService } from 'src/history/history.service';
+import { History } from 'src/history/entities/history.entity';
 
 @Module({
   imports: [
@@ -35,9 +37,9 @@ import { MailerModule } from '@nestjs-modules/mailer';
       }),
     }),
 
-    TypeOrmModule.forFeature([Leave, Employee, ManagerAssignation, User])],
+    TypeOrmModule.forFeature([Leave, Employee, ManagerAssignation, User, History])],
   controllers: [LeaveController],
-  providers: [LeaveService, EmployeeService, CryptoService],
-  exports: [LeaveService, TypeOrmModule, CryptoService],
+  providers: [LeaveService, EmployeeService, CryptoService, HistoryService],
+  exports: [LeaveService, TypeOrmModule, CryptoService, HistoryService],
 })
 export class LeaveModule { }

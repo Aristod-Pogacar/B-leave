@@ -11,6 +11,8 @@ import { Site, User, UserRole } from 'src/user/entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { CryptoService } from 'src/crypto/crypto.service';
 import { CompareAdminDto } from './dto/compare-admin.dto';
+import { HistoryService } from 'src/history/history.service';
+import { HistoryReason } from 'src/history/entities/history.entity';
 
 @Injectable()
 export class EmployeeService {
@@ -22,7 +24,8 @@ export class EmployeeService {
     private readonly leaveRepository: Repository<Leave>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    private readonly cryptoService: CryptoService
+    private readonly cryptoService: CryptoService,
+    private readonly historyService: HistoryService
   ) { }
 
   async getMyTeam(user: any) {
@@ -60,9 +63,13 @@ export class EmployeeService {
     return { "isEmployee": compare }
   }
 
-  async create(createEmployeeDto: CreateEmployeeDto, res: any) {
+  async create(createEmployeeDto: CreateEmployeeDto, res: any, req: any) {
     try {
       await this.employeeRepository.save(createEmployeeDto);
+      await this.historyService.create({
+        reason: HistoryReason.EMPLOYEE,
+        message: "New employee " + createEmployeeDto.matricule + " by " + req.session.user.firstName + " " + req.session.user.name,
+      });
       return res.redirect('/');
     } catch (error) {
       return res.redirect('/employee/new-employee?error=' + error.message);

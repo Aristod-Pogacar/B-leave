@@ -6,10 +6,12 @@ import type { Response } from 'express';
 import { Roles } from 'src/user/role.decorator';
 import { UserRole } from 'src/user/entities/user.entity';
 import { RolesGuard } from 'src/user/role.guard';
+import { HistoryReason } from 'src/history/entities/history.entity';
+import { HistoryService } from 'src/history/history.service';
 
 @Controller('permission2h')
 export class Permission2hController {
-  constructor(private readonly permission2hService: Permission2hService) { }
+  constructor(private readonly permission2hService: Permission2hService, private readonly historyService: HistoryService) { }
 
   @Get('approuve-permission-2h')
   @UseGuards(RolesGuard)
@@ -24,9 +26,15 @@ export class Permission2hController {
   @UseGuards(RolesGuard)
   @Roles(UserRole.SUPERADMIN, UserRole.MANAGER)
   async approveLeave(@Param('permissionId') permissionId: string, @Res() res: Response, @Req() req: any) {
-    console.log("PERMISSION ID:", permissionId);
-    console.log("USER ID:", req.session.user.id);
+    const permission = await this.permission2hService.findOne(permissionId);
+    if (!permission) {
+      return res.redirect('/permission2h/approuve-permission-2h');
+    }
     await this.permission2hService.approveLeave(permissionId, req.session.user.id);
+    await this.historyService.create({
+      reason: HistoryReason.PERMISSION_2H,
+      message: "Permission 2h " + permission.date + " of " + permission.employee.fullname + " approved by " + req.session.user.firstName + " " + req.session.user.name,
+    });
     res.redirect('/permission2h/approuve-permission-2h');
   }
 
@@ -34,7 +42,15 @@ export class Permission2hController {
   @UseGuards(RolesGuard)
   @Roles(UserRole.SUPERADMIN, UserRole.MANAGER)
   async rejectLeave(@Param('permissionId') permissionId: string, @Res() res: Response, @Req() req: any) {
+    const permission = await this.permission2hService.findOne(permissionId);
+    if (!permission) {
+      return res.redirect('/permission2h/approuve-permission-2h');
+    }
     await this.permission2hService.rejectLeave(permissionId, req.session.user.id);
+    await this.historyService.create({
+      reason: HistoryReason.PERMISSION_2H,
+      message: "Permission 2h " + permission.date + " of " + permission.employee.fullname + " rejected by " + req.session.user.firstName + " " + req.session.user.name,
+    });
     res.redirect('/permission2h/approuve-permission-2h');
   }
 

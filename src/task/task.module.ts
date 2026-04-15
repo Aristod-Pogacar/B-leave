@@ -15,11 +15,13 @@ import { UserService } from 'src/user/user.service';
 import { User } from 'src/user/entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import { ScheduleModule } from '@nestjs/schedule';
+import { HistoryService } from 'src/history/history.service';
+import { History } from 'src/history/entities/history.entity';
 
 @Module({
   imports: [
     ScheduleModule.forRoot(),
-    TypeOrmModule.forFeature([Task, Employee, Leave, User])
+    TypeOrmModule.forFeature([Task, Employee, Leave, User, History])
   ],
   controllers: [TaskController],
   providers: [
@@ -31,7 +33,8 @@ import { ScheduleModule } from '@nestjs/schedule';
     LeaveService,
     CryptoService,
     UserService,
-    JwtService
+    JwtService,
+    HistoryService
   ],
   exports: [
     TaskService,
@@ -42,6 +45,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     LeaveService,
     TypeOrmModule,
     UserService,
+    HistoryService,
     JwtService
   ],
 })

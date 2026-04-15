@@ -10,12 +10,15 @@ import { Roles } from 'src/user/role.decorator';
 import { Site, UserRole } from 'src/user/entities/user.entity';
 import * as XLSX from 'xlsx';
 import { UserService } from 'src/user/user.service';
+import { HistoryService } from 'src/history/history.service';
+import { HistoryReason } from 'src/history/entities/history.entity';
 
 @Controller('employee')
 export class EmployeeController {
   constructor(
     private readonly employeeService: EmployeeService,
     private readonly userService: UserService,
+    private readonly historyService: HistoryService,
   ) { }
 
   private getAllowedSites(userSite: string): string[] {
@@ -52,6 +55,7 @@ export class EmployeeController {
     @Body() body: any,
     @UploadedFile() file: Express.Multer.File,
     @Res() res: any,
+    @Req() req: any,
   ) {
 
     if (file) {
@@ -75,6 +79,11 @@ export class EmployeeController {
 
         await this.employeeService.updatePassword(data);
       }
+      await this.historyService.create({
+        reason: HistoryReason.EMPLOYEE,
+        message: "Import password send by " + req.session.user.firstName + " " + req.session.user.name,
+
+      });
       return res.redirect('/');
     } else {
       throw new BadRequestException('Aucun fichier reçu');
@@ -97,6 +106,7 @@ export class EmployeeController {
     @Body() body: any,
     @UploadedFile() file: Express.Multer.File,
     @Res() res: any,
+    @Req() req: any,
   ) {
 
     if (file) {
@@ -119,9 +129,15 @@ export class EmployeeController {
 
         await this.employeeService.updateManager(data);
       }
+      await this.historyService.create({
+        reason: HistoryReason.EMPLOYEE,
+        message: "Import manager by " + req.session.user.firstName + " " + req.session.user.name,
+
+      });
       return res.redirect('/');
     } else {
-      throw new BadRequestException('Aucun fichier reçu');
+      const error = "Aucun fichier reçu";
+      return res.redirect('/employee/import-manager?error=' + error);
     }
   }
 
@@ -250,9 +266,14 @@ export class EmployeeController {
   @Post('assign-manager')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HR_ADMIN, UserRole.HEAD_HR)
-  async assignManagerPost(@Body() body: any, @Res() res: express.Response) {
+  async assignManagerPost(@Body() body: any, @Res() res: express.Response, @Req() req: any) {
     console.log("BODY:", body);
     await this.employeeService.assignManager(body.managerId, body.employeeIds);
+    await this.historyService.create({
+      reason: HistoryReason.EMPLOYEE,
+      message: "Assign manager by " + req.session.user.firstName + " " + req.session.user.name,
+
+    });
     return res.redirect('/employee/assign-manager');
   }
 
@@ -266,9 +287,9 @@ export class EmployeeController {
   @Post('new-employee')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HEAD_HR, UserRole.HR_ADMIN)
-  async newEmployeePost(@Body() body: any, @Res() res: express.Response) {
+  async newEmployeePost(@Body() body: any, @Res() res: express.Response, @Req() req: any) {
     console.log("BODY:", body);
-    await this.employeeService.create(body, res);
+    await this.employeeService.create(body, res, req);
   }
 
   @Get('import-master-file')
@@ -291,16 +312,18 @@ export class EmployeeController {
     @Body() body: any,
     @UploadedFile() file: Express.Multer.File,
     @Res() res: express.Response,
+    @Req() req: any,
   ) {
     console.log("FILE:", file);
 
     try {
-      const result = await this.employeeService.processExcelBuffer(file);
-
-      // Redirection vers la liste des employés avec message
+      await this.employeeService.processExcelBuffer(file);
+      await this.historyService.create({
+        reason: HistoryReason.EMPLOYEE,
+        message: "Import master file by " + req.session.user.firstName + " " + req.session.user.name,
+      });
       res.redirect(`/leave/planning-view`);
     } catch (error) {
-      // Gestion d'erreur
       console.log("ERROR:", error.message)
       res.redirect(`/employee/import-master-file?error=${encodeURIComponent(error.message)}`);
     }

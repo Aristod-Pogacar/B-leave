@@ -9,6 +9,8 @@ import { SmiaOstie } from './entities/smia_ostie.entity';
 import { Response } from 'express';
 import { Site, UserRole } from 'src/user/entities/user.entity';
 import { MailerService } from '@nestjs-modules/mailer';
+import { HistoryReason } from 'src/history/entities/history.entity';
+import { HistoryService } from 'src/history/history.service';
 const ExcelJS = require('exceljs');
 
 @Injectable()
@@ -22,7 +24,8 @@ export class SmiaOstieService {
     @InjectRepository(Employee)
     private readonly employeeRepo: Repository<Employee>,
     private readonly configService: ConfigService,
-    private readonly mailerService: MailerService
+    private readonly mailerService: MailerService,
+    private readonly historyService: HistoryService,
   ) { }
 
   private getWeekRange() {
@@ -162,6 +165,10 @@ export class SmiaOstieService {
     });
 
     const consultation = await this.SmiaOstieRepo.save(smia);
+    await this.historyService.create({
+      reason: HistoryReason.CONSULTATION_MEDICAL,
+      message: "New consultation " + consultation.reason + " of " + consultation.employee.fullname + " requested by QUIOSQUE",
+    });
 
     var email: string[] = [];
     const manager = employee.manager;

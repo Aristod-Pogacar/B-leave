@@ -14,6 +14,8 @@ import { ConfigService } from '@nestjs/config';
 import { UserRole } from 'src/user/entities/user.entity';
 import { LeaveStatus } from 'src/leave/entities/leave.entity';
 import { MailerService } from '@nestjs-modules/mailer';
+import { HistoryService } from 'src/history/history.service';
+import { HistoryReason } from 'src/history/entities/history.entity';
 
 const ExcelJS = require('exceljs');
 
@@ -30,6 +32,7 @@ export class Permission2hService {
     // private payrollRepository: Repository<Payroll>,
     private readonly configService: ConfigService,
     private readonly mailerService: MailerService,
+    private readonly historyService: HistoryService,
   ) {
   }
 
@@ -183,6 +186,10 @@ export class Permission2hService {
 
     // 3. Enregistrer
     const permission = await this.permission2hRepository.save(entity);
+    await this.historyService.create({
+      reason: HistoryReason.PERMISSION_2H,
+      message: "Permission 2h " + permission.date + " of " + permission.employee.fullname + " requested by QUIOSQUE",
+    });
 
     var email: string[] = [];
     const manager = employee.manager;

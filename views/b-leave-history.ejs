@@ -1,0 +1,96 @@
+<%- include('partials/head.ejs') %>
+
+    <body>
+        <%- include('partials/sidebar.ejs') %>
+            <%- include('partials/header.ejs') %>
+                <main class="nxl-container">
+                    <div class="nxl-content">
+                        <div class="page-header">
+                            <div class="page-header-left d-flex align-items-center">
+                                <div class="page-header-title">
+                                    <h5 class="m-b-10">B-Leave</h5>
+                                </div>
+                                <ul class="breadcrumb">
+                                    <li class="breadcrumb-item">History</li>
+                                </ul>
+                            </div>
+                            <div class="page-header-right ms-auto">
+                                <div class="page-header-right-items">
+                                    <div class="d-flex d-md-none">
+                                        <a href="javascript:void(0)" class="page-header-right-close-toggle">
+                                            <i class="feather-arrow-left me-2"></i>
+                                            <span>Back</span>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="d-md-none d-flex align-items-center">
+                                    <a href="javascript:void(0)" class="page-header-right-open-toggle">
+                                        <i class="feather-align-right fs-20"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- [ page-header ] end -->
+                        <div class="bg-white py-3 border-bottom rounded-0 p-md-0 mb-0">
+                            <div class="d-md-none d-flex align-items-center justify-content-between">
+                                <a href="javascript:void(0)" class="page-content-left-open-toggle">
+                                    <i class="feather-align-left fs-20"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <!-- [ Main Content ] start -->
+                        <div class="main-content">
+                            <div class="tab-content">
+                                <div class="tab-pane fade active show" id="overviewTab">
+                                    <div class="row">
+
+                                        <div class="col-12">
+                                            <div class="card stretch stretch-full">
+                                                <div class="card-header">
+                                                    <h5 class="card-title">B-Leave History</h5>
+                                                    <div
+                                                        class="col-10 task-header d-md-flex align-items-center justify-content-between">
+                                                        <div class="me-4 w-75">
+                                                        </div>
+                                                        <div class="">
+                                                            <div class="d-flex gap-2">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="card-body custom-card-action p-0">
+                                                    <div class="table-responsive mb-3">
+                                                        <table class="table table-hover mb-0">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th class="w-25">Date</th>
+                                                                    <th class="w-75">Message</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <% histories.forEach(history=> { %>
+                                                                    <tr>
+                                                                        <td class="w-25">
+                                                                            <%= history.date_at.toLocaleDateString('fr-FR',
+                                                                                { year: 'numeric' , month: '2-digit' ,
+                                                                                day: '2-digit' , hour: '2-digit' ,
+                                                                                minute: '2-digit' , second: '2-digit' })
+                                                                                %>
+                                                                        </td>
+                                                                        <td class="w-75">
+                                                                            <%= history.message %>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <% }) %>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <%- include('partials/footer.ejs') %>

@@ -10,11 +10,13 @@ import { ManagerAssignation } from 'src/manager_assignation/entities/manager_ass
 import { UserService } from 'src/user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/user/entities/user.entity';
+import { HistoryService } from 'src/history/history.service';
+import { History } from 'src/history/entities/history.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Leave, Employee, ManagerAssignation, User])],
+  imports: [TypeOrmModule.forFeature([Leave, Employee, ManagerAssignation, User, History])],
   controllers: [EmployeeController],
-  providers: [EmployeeService, LeaveService, CryptoService, UserService, JwtService],
-  exports: [EmployeeService, TypeOrmModule, CryptoService, UserService, JwtService],
+  providers: [EmployeeService, LeaveService, CryptoService, UserService, JwtService, HistoryService],
+  exports: [EmployeeService, TypeOrmModule, CryptoService, UserService, JwtService, HistoryService],
 })
 export class EmployeeModule { }

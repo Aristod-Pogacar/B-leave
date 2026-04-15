@@ -11,6 +11,8 @@ import { User } from 'src/user/entities/user.entity';
 import { UserService } from 'src/user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { History } from 'src/history/entities/history.entity';
+import { HistoryService } from 'src/history/history.service';
 
 @Module({
   imports: [
@@ -38,14 +40,14 @@ import { MailerModule } from '@nestjs-modules/mailer';
     TypeOrmModule.forFeature([
       Permission2h,
       Employee,
-      // Payroll,
+      History,
       User
     ]),
   ],
   controllers: [Permission2hController],
   providers: [
     Permission2hService,
-    // PayrollService,
+    HistoryService,
     UserService,
     JwtService
   ],

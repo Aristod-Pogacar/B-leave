@@ -13,6 +13,8 @@ import { EmployeeService } from 'src/employee/employee.service';
 import * as nodemailer from 'nodemailer';
 import { ConfigService } from '@nestjs/config';
 import { MailerService } from '@nestjs-modules/mailer';
+import { HistoryReason } from 'src/history/entities/history.entity';
+import { HistoryService } from 'src/history/history.service';
 
 @Injectable()
 export class LeaveService {
@@ -27,6 +29,7 @@ export class LeaveService {
     private readonly employeeService: EmployeeService,
     private readonly configService: ConfigService,
     private readonly mailerService: MailerService,
+    private readonly historyService: HistoryService,
   ) { }
 
   async findLeavesNotDone(limit?: number) {
@@ -80,7 +83,7 @@ export class LeaveService {
     return this.leaveRepository.find({ where: { start_date: Between(new Date(year, month, 1), new Date(year, month, 31)), employee: { line, departement, site }, status: In([LeaveStatus.APPROVED, LeaveStatus.PENDING]) }, relations: ['employee', 'approver'] });
   }
 
-  async create(createLeaveDto: CreateLeaveDto, res: express.Response) {
+  async create(createLeaveDto: CreateLeaveDto, res: express.Response, req: any) {
     const employee = await this.employeeRepository.findOne({
       where: { id: createLeaveDto.employee },
       relations: ['manager']
@@ -106,7 +109,10 @@ export class LeaveService {
 
     leave.duration = (nbDate / (1000 * 60 * 60 * 24)) + 1;
     const leaveSaved = await this.leaveRepository.save(leave);
-
+    await this.historyService.create({
+      reason: HistoryReason.LEAVE,
+      message: "New leave " + leaveSaved.id + " by " + req.session.user.firstName + " " + req.session.user.name,
+    });
     var email: string[] = [];
     const manager = employee.manager;
     if (manager) email.push(manager.email);
