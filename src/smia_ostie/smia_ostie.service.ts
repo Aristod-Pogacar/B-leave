@@ -8,6 +8,7 @@ import { UpdateSmiaOstieDto } from './dto/update-smia_ostie.dto';
 import { SmiaOstie } from './entities/smia_ostie.entity';
 import { Response } from 'express';
 import { Site, UserRole } from 'src/user/entities/user.entity';
+import { MailerService } from '@nestjs-modules/mailer';
 const ExcelJS = require('exceljs');
 
 @Injectable()
@@ -20,6 +21,8 @@ export class SmiaOstieService {
 
     @InjectRepository(Employee)
     private readonly employeeRepo: Repository<Employee>,
+    private readonly configService: ConfigService,
+    private readonly mailerService: MailerService
   ) { }
 
   private getWeekRange() {
@@ -124,7 +127,7 @@ export class SmiaOstieService {
   }
 
   async create(createSmiaOstieDto: CreateSmiaOstieDto) {
-    const employee = await this.employeeRepo.findOne({ where: { matricule: createSmiaOstieDto.employee } });
+    const employee = await this.employeeRepo.findOne({ where: { matricule: createSmiaOstieDto.employee }, relations: ['manager'] });
 
     if (!employee) {
       return {
@@ -158,7 +161,64 @@ export class SmiaOstieService {
       employee,
     });
 
-    return await this.SmiaOstieRepo.save(smia);
+    const consultation = await this.SmiaOstieRepo.save(smia);
+
+    var email: string[] = [];
+    const manager = employee.manager;
+    if (manager) email.push(manager.email);
+    const emailAdress = this.configService.get<string>('EMAIL_ADRESS')
+    const emailPassword = this.configService.get<string>('EMAIL_PASSWORD')
+    console.log(email)
+    if (email.length > 0) {
+      if (emailAdress && emailPassword) {
+        console.log('SEND EMAIL...')
+        await this.mailerService.sendMail({
+          to: email,
+          subject: 'Consultation médicale',
+          text: 'Consultation médicale',
+          html: `
+      <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333; line-height: 1.6;">
+        <p>
+          Bonjour Monsieur/Madame,
+        </p>
+        <p>
+          Un membre de votre équipe ayant la matricule <strong>${employee.matricule} (${employee.fullname})</strong> a envoyé une demande de consultation médicale sur <a href="http://localhost:4000/smia-ostie/list" target="_blank">B-Leave</a>.
+        </p>
+        <p>
+          <strong>
+            Date de consultation: ${consultation.date}<br>
+            Raison: ${consultation.reason}<br>
+          </strong>
+        </p>
+        <p>
+          Cordialement,<br>
+          L'équipe RH
+        </p>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+        <p>
+          Hello Mister/Misses,
+        </p>
+        <p>
+          A member of your team with matricule <strong>${employee.matricule} (${employee.fullname})</strong> has taken a medical consultation on <a href="http://localhost:4000/smia-ostie/list" target="_blank">B-Leave</a>.
+        </p>
+        <p>
+          <strong>
+            Consultation date: ${consultation.date}<br>
+            Reason: ${consultation.reason}<br>
+          </strong>
+        </p>
+        <p>
+          Best regards,<br>
+          HR Team
+        </p>
+      </div>
+    `
+        });
+        console.log('EMAIL SENDED')
+      }
+    }
+
+    return consultation;
   }
 
   async findAll() {

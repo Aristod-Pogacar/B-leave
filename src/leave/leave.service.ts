@@ -10,6 +10,9 @@ import * as ExcelJS from 'exceljs';
 import * as XLSX from 'xlsx';
 import { Site, User, UserRole } from 'src/user/entities/user.entity';
 import { EmployeeService } from 'src/employee/employee.service';
+import * as nodemailer from 'nodemailer';
+import { ConfigService } from '@nestjs/config';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class LeaveService {
@@ -22,6 +25,8 @@ export class LeaveService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly employeeService: EmployeeService,
+    private readonly configService: ConfigService,
+    private readonly mailerService: MailerService,
   ) { }
 
   async findLeavesNotDone(limit?: number) {
@@ -78,6 +83,7 @@ export class LeaveService {
   async create(createLeaveDto: CreateLeaveDto, res: express.Response) {
     const employee = await this.employeeRepository.findOne({
       where: { id: createLeaveDto.employee },
+      relations: ['manager']
     });
 
     if (!employee) {
@@ -96,12 +102,68 @@ export class LeaveService {
       return res.status(500).redirect('/leave/new-leave?error=startDateAfterEndDate');
     }
 
-
-
     const nbDate = endDate.getTime() - startDate.getTime();
 
     leave.duration = (nbDate / (1000 * 60 * 60 * 24)) + 1;
-    await this.leaveRepository.save(leave);
+    const leaveSaved = await this.leaveRepository.save(leave);
+
+    var email: string[] = [];
+    const manager = employee.manager;
+    if (manager) email.push(manager.email);
+    const emailAdress = this.configService.get<string>('EMAIL_ADRESS')
+    const emailPassword = this.configService.get<string>('EMAIL_PASSWORD')
+    if (email.length > 0) {
+      if (emailAdress && emailPassword) {
+        await this.mailerService.sendMail({
+          to: email,
+          subject: 'Consultation médicale',
+          text: 'Consultation médicale',
+          html: `
+      <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333; line-height: 1.6;">
+        <p>
+          Bonjour Monsieur/Madame,
+        </p>
+        <p>
+          Un membre de votre équipe ayant la matricule <strong>${employee.matricule} (${employee.fullname})</strong> a envoyé une demande de congé et a besoin de votre approbation sur <a href="http://localhost:3000/leave/approuve-leaves" target="_blank">B-Leave</a>.
+        </p>
+        <p>
+          <strong>
+            Date de debut: ${leaveSaved.start_date}<br>
+            Date de fin: ${leaveSaved.end_date}<br>
+            Raison: ${leaveSaved.reason}<br>
+            Type de conge: ${leaveSaved.leave_type}<br>
+            Durée: ${leaveSaved.duration}<br>
+          </strong>
+        </p>
+        <p>
+          Cordialement,<br>
+          L'équipe RH
+        </p>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+        <p>
+          Hello Mister/Misses,
+        </p>
+        <p>
+          A member of your team with matricule <strong>${employee.matricule} (${employee.fullname})</strong> has taken a leave and need your approval on <a href="http://localhost:3000/leave/approuve-leaves" target="_blank">B-Leave</a>.
+        </p>
+        <p>
+          <strong>
+            Starting date: ${leaveSaved.start_date}<br>
+            Ending date: ${leaveSaved.end_date}<br>
+            Reason: ${leaveSaved.reason}<br>
+            Leave type: ${leaveSaved.leave_type}<br>
+            Duration: ${leaveSaved.duration}<br>
+          </strong>
+        </p>
+        <p>
+          Best regards,<br>
+          HR Team
+        </p>
+      </div>
+    `
+        });
+      }
+    }
 
     return res.status(200).redirect('/leave/planning-view?line=' + employee.line + '&departement=' + employee.departement);
   }

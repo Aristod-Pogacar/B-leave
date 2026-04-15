@@ -7,82 +7,15 @@ import { UpdatePermission2hDto } from './dto/update-permission2h.dto';
 import { Employee } from 'src/employee/entities/employee.entity';
 import { Between } from 'typeorm';
 import { Response } from 'express';
-// import ExcelJS from 'exceljs';
 
 import * as nodemailer from 'nodemailer';
 import { UserService } from 'src/user/user.service';
 import { ConfigService } from '@nestjs/config';
 import { UserRole } from 'src/user/entities/user.entity';
 import { LeaveStatus } from 'src/leave/entities/leave.entity';
-// import { Payroll } from 'src/payroll/entities/payroll.entity';
-// import { ConfigService } from '@nestjs/config';
-// import { UserRole } from 'src/users/entities/user.entity';
-// import { UsersService } from 'src/users/users.service';
+import { MailerService } from '@nestjs-modules/mailer';
+
 const ExcelJS = require('exceljs');
-
-async function envoyerEmail(employee: Employee, permissionDetails: Permission2h, emailList: string[], emailAdress: string, emailPassword: string) {
-  const today = new Date(permissionDetails.date);
-  const transporter = nodemailer.createTransport({
-    host: "smtp.office365.com",
-    port: 587,
-    secure: false,
-    auth: {
-      user: emailAdress,
-      pass: emailPassword
-    }
-  });
-
-  const info = await transporter.sendMail({
-    from: '"Stagiaire digital project" <' + emailAdress + '>',
-    to: emailList,
-    subject: "Permission 2h: " + employee.fullname + " - " + today.getFullYear() + "/" + String(today.getMonth() + 1).padStart(2, "0") + "/" + String(today.getDate()).padStart(2, "0"),
-    html: `
-      <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333; line-height: 1.6;">
-        <p>
-          Bonjour l'équipe Payroll,
-        </p>
-        <p>
-          Nous souhaitons vous informer que l'employé(e) avec la matricule <strong>${employee.matricule} (${employee.fullname})</strong> a pris une permission de deux heures.
-        </p>
-        <p>
-          <strong>
-            Raison: ${permissionDetails.reason}<br>
-            Heure de départ: ${permissionDetails.expectedStartTime}<br>
-            Heure d'arrivé: ${permissionDetails.expectedEndTime}<br>
-          </strong>
-        </p>
-        <p>
-          Cordialement,<br>
-          L'équipe RH
-        </p>
-        <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
-        <p>
-          Hello Payroll Team,
-        </p>
-        <p>
-          We would like to inform you that the employee with matricule <strong>${employee.matricule} (${employee.fullname})</strong> has taken a two-hour leave.
-        </p>
-        <p>
-          <strong>
-            Reason: ${permissionDetails.reason}<br>
-            Start time: ${permissionDetails.expectedStartTime}<br>
-            End time: ${permissionDetails.expectedEndTime}<br>
-          </strong>
-        </p>
-        <p>
-          Best regards,<br>
-          HR Team
-        </p>
-      </div>
-    `
-
-  });
-
-  return {
-    "status": "Email envoyé",
-    "messageId": info.messageId
-  };
-}
 
 @Injectable()
 export class Permission2hService {
@@ -95,7 +28,8 @@ export class Permission2hService {
     private permission2hRepository: Repository<Permission2h>,
     // @InjectRepository(Payroll)
     // private payrollRepository: Repository<Payroll>,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    private readonly mailerService: MailerService,
   ) {
   }
 
@@ -234,6 +168,7 @@ export class Permission2hService {
     // 1. Récupérer l'employé correspondant au matricule
     const employee = await this.employeeRepository.findOne({
       where: { matricule: dto.employee },
+      relations: ['manager']
     });
 
     if (!employee) {
@@ -246,25 +181,64 @@ export class Permission2hService {
       employee,  // Remplacement du string par l'objet Employee
     });
 
-    // var email = [];
-    // const payrollList = await this.userService.findHrAndPayrollBySameSite(dto.employee);
-    // const payrollList = await this.userService.getUsersByRole(UserRole.PAYROLL);
-    // for (let i = 0; i < payrollList.length; i++) {
-    //   email.push(payrollList[i].email);
-    // }
-    // const adminList = await this.userService.getUsersByRole(UserRole.HR_ADMIN);
-    // for (let i = 0; i < adminList.length; i++) {
-    //   email.push(payrollList[i].email);
-    // }
-
-    // const emailAdress = this.configService.get<string>('EMAIL_ADRESS')
-    // const emailPassword = this.configService.get<string>('EMAIL_PASSWORD')
-    // if (email.length > 0) {
-    //   await envoyerEmail(employee, entity, email, emailAdress, emailPassword);
-    // }
-
     // 3. Enregistrer
-    return await this.permission2hRepository.save(entity);
+    const permission = await this.permission2hRepository.save(entity);
+
+    var email: string[] = [];
+    const manager = employee.manager;
+    if (manager) email.push(manager.email);
+
+    const emailAdress = this.configService.get<string>('EMAIL_ADRESS')
+    const emailPassword = this.configService.get<string>('EMAIL_PASSWORD')
+    if (email.length > 0) {
+      if (emailAdress && emailPassword) {
+        await this.mailerService.sendMail({
+          to: email,
+          subject: 'Consultation médicale',
+          text: 'Consultation médicale',
+          html: `
+      <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333; line-height: 1.6;">
+        <p>
+          Bonjour Monsieur/Madame,
+        </p>
+        <p>
+          Nous souhaitons vous informer que l'employé(e) avec la matricule <strong>${employee.matricule} (${employee.fullname})</strong> a pris une permission de deux heures.
+        </p>
+        <p>
+          <strong>
+            Raison: ${permission.reason}<br>
+            Heure de départ: ${permission.expectedStartTime}<br>
+            Heure d'arrivé: ${permission.expectedEndTime}<br>
+          </strong>
+        </p>
+        <p>
+          Cordialement,<br>
+          L'équipe RH
+        </p>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+        <p>
+          Hello Mister/Misses,
+        </p>
+        <p>
+          We would like to inform you that the employee with matricule <strong>${employee.matricule} (${employee.fullname})</strong> has taken a two-hour leave.
+        </p>
+        <p>
+          <strong>
+            Reason: ${permission.reason}<br>
+            Start time: ${permission.expectedStartTime}<br>
+            End time: ${permission.expectedEndTime}<br>
+          </strong>
+        </p>
+        <p>
+          Best regards,<br>
+          HR Team
+        </p>
+      </div>
+    `
+        });
+      }
+    }
+    return permission;
   }
 
   findAll() {

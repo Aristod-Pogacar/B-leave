@@ -316,27 +316,27 @@ export class LeaveController {
     return { title: "Simulate leave", userRole: UserRole };
   }
 
-  // @UseGuards(RolesGuard)
-  // @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
-  // @Post()
-  // create(@Body() createLeaveDto: CreateLeaveDto, @Res() res: express.Response) {
-  //   return this.leaveService.create(createLeaveDto, res);
-  // }
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
+  @Post()
+  create(@Body() createLeaveDto: CreateLeaveDto, @Res() res: express.Response) {
+    return this.leaveService.create(createLeaveDto, res);
+  }
 
-  // @Get()
-  // findAll() {
-  //   return this.leaveService.findAll();
-  // }
+  @Get()
+  findAll() {
+    return this.leaveService.findAll();
+  }
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.leaveService.findOne(id);
-  // }
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.leaveService.findOne(id);
+  }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateLeaveDto: UpdateLeaveDto) {
-  //   return this.leaveService.update(id, updateLeaveDto);
-  // }
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateLeaveDto: UpdateLeaveDto) {
+    return this.leaveService.update(id, updateLeaveDto);
+  }
 
   @Delete(':id')
   remove(@Param('id') id: string) {

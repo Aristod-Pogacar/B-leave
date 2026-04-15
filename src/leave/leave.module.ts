@@ -8,9 +8,34 @@ import { EmployeeService } from 'src/employee/employee.service';
 import { CryptoService } from 'src/crypto/crypto.service';
 import { ManagerAssignation } from 'src/manager_assignation/entities/manager_assignation.entity';
 import { User } from 'src/user/entities/user.entity';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MailerModule } from '@nestjs-modules/mailer';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Leave, Employee, ManagerAssignation, User])],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true, // Makes ConfigService available everywhere
+    }),
+    MailerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        transport: {
+          host: "smtp.office365.com", // e.g., Gmail, Mailtrap
+          port: 587,
+          secure: false,
+          auth: {
+            user: configService.get<string>('EMAIL_ADRESS'),
+            pass: configService.get<string>('EMAIL_PASSWORD'),
+          },
+        },
+        defaults: {
+          from: `"No Reply" <${configService.get<string>('EMAIL_ADRESS')}>`,
+        },
+      }),
+    }),
+
+    TypeOrmModule.forFeature([Leave, Employee, ManagerAssignation, User])],
   controllers: [LeaveController],
   providers: [LeaveService, EmployeeService, CryptoService],
   exports: [LeaveService, TypeOrmModule, CryptoService],
