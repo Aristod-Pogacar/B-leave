@@ -9,6 +9,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { History } from 'src/history/entities/history.entity';
 import { HistoryService } from 'src/history/history.service';
+import { EmployeeService } from 'src/employee/employee.service';
+import { UserService } from 'src/user/user.service';
+import { User } from 'src/user/entities/user.entity';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -33,9 +37,9 @@ import { HistoryService } from 'src/history/history.service';
         },
       }),
     }),
-    TypeOrmModule.forFeature([Leave, Employee, History])],
+    TypeOrmModule.forFeature([Leave, Employee, History, User])],
   controllers: [LeaveController],
-  providers: [LeaveService, CryptoService, HistoryService],
-  exports: [LeaveService, TypeOrmModule, CryptoService, HistoryService],
+  providers: [LeaveService, CryptoService, HistoryService, EmployeeService, UserService, JwtService],
+  exports: [LeaveService, TypeOrmModule, CryptoService, HistoryService, EmployeeService, UserService, JwtService],
 })
 export class ApiLeaveModule { }

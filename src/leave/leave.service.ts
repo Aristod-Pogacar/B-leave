@@ -472,7 +472,7 @@ export class LeaveService {
     return this.leaveRepository.delete(id);
   }
 
-  async getPaginateEmployeeLeaves(employeeId: string, skip: number = 0, take: number = 10, startDate: Date, endDate: Date, status: string) {
+  async getPaginateEmployeeLeaves(employeeId: string, skip: number = 0, take: number = 1000, startDate: Date, endDate: Date, status: string) {
     const [data, count] = await this.leaveRepository.findAndCount({
       where: { employee: { id: employeeId }, start_date: Between(startDate, endDate), status: In(this.getLeavesByStatus(status)) },
       order: { start_date: 'DESC' },
@@ -644,7 +644,7 @@ export class LeaveService {
           employee: { line, departement, manager: { id: user.id } },
           status: In(leaveEx)
         }],
-        relations: ['employee']
+        relations: ['employee', 'approver']
       });
     } else {
       employees = await this.employeeRepository.find({ where: { line, departement }, order: { matricule: 'ASC' } });
@@ -658,7 +658,7 @@ export class LeaveService {
           employee: { line, departement },
           status: In(leaveEx)
         }],
-        relations: ['employee']
+        relations: ['employee', 'approver']
       });
     }
 
@@ -667,6 +667,19 @@ export class LeaveService {
 
     const workbook = new ExcelJS.Workbook();
     const sheet = workbook.addWorksheet("Leave Planning");
+    const requiredColumns = [
+      'mle',
+      'nom et prenom',
+      'fonction',
+      'codeabs',
+      'debutcongé',
+      'fincongé',
+      'DuréeAbsEffectif',
+      'status',
+      'Approuvé/Refusé par',
+      'Mle Approbateur',
+      'Date Approbation'
+    ];
 
     const header = [
       "Matricule",
@@ -681,10 +694,11 @@ export class LeaveService {
       // "Solde pris",
       // "Solde cumul",
       // "Solde restant",
-      ...dates.map(d => d.toLocaleDateString("en-US", { day: "numeric", month: "short" }))
+      // ...dates.map(d => d.toLocaleDateString("en-US", { day: "numeric", month: "short" }))
     ];
 
-    sheet.addRow(header);
+    // sheet.addRow(header);
+    sheet.addRow(requiredColumns);
 
     const headerRow = sheet.getRow(1);
 
@@ -699,47 +713,71 @@ export class LeaveService {
       };
     });
 
-    const sundayColumns = new Set<number>();
+    // const sundayColumns = new Set<number>();
 
-    dates.forEach((date, index) => {
+    // dates.forEach((date, index) => {
 
-      if (date.getDay() === 0) { // dimanche
+    //   if (date.getDay() === 0) { // dimanche
 
-        const columnIndex = index + 9; // 8 colonnes fixes + 1
+    //     const columnIndex = index + 9; // 8 colonnes fixes + 1
 
-        sundayColumns.add(columnIndex);
+    //     sundayColumns.add(columnIndex);
 
-        sheet.getColumn(columnIndex).eachCell(cell => {
+    //     sheet.getColumn(columnIndex).eachCell(cell => {
 
-          cell.fill = {
-            type: "pattern",
-            pattern: "solid",
-            fgColor: { argb: "FF808080" } // gris foncé
-          };
+    //       cell.fill = {
+    //         type: "pattern",
+    //         pattern: "solid",
+    //         fgColor: { argb: "FF808080" } // gris foncé
+    //       };
 
-        });
-      }
+    //     });
+    //   }
 
-    });
+    // });
 
-    const leaveMap = new Map();
+    // const leaveMap = new Map();
 
     leaves.forEach(l => {
-
-      let current = new Date(l.start_date);
-      const end = new Date(l.end_date);
-      console.log("Leaves:", "" + current + "-" + end);
-      current.setDate(current.getDate() - 1);
-      end.setDate(end.getDate() - 1);
-
-      while (current <= end) {
-
-        const key = `${l.employee.id}_${current.toISOString().slice(0, 10)}`;
-
-        leaveMap.set(key, l.leave_type);
-
-        current.setDate(current.getDate() + 1);
+      var codeabs = '';
+      if (l.leave_type === 'Local_Leave_AMD') {
+        codeabs = 'Congé annuel';
       }
+      if (l.leave_type === 'Permission_AMD') {
+        codeabs = 'Permission';
+      }
+      if (l.leave_type === 'Indisponibilite_AMD') {
+        codeabs = 'Disponibilité';
+      }
+      // const row = ['mle', 'nom et prenom', 'fonction', 'codeabs', 'debutcongé', 'fincongé'];
+      const row = [
+        l.employee.matricule,
+        l.employee.fullname,
+        l.employee.occupation,
+        codeabs,
+        l.start_date,
+        l.end_date,
+        l.duration,
+        l.status,
+        l.approver ? l.approver.firstName + ' ' + l.approver.name : '',
+        l.approver ? l.approver.matricule : '',
+        l.approved_date ? l.approved_date : ''
+      ];
+      sheet.addRow(row);
+      // let current = new Date(l.start_date);
+      // const end = new Date(l.end_date);
+      // console.log("Leaves:", "" + current + "-" + end);
+      // current.setDate(current.getDate() - 1);
+      // end.setDate(end.getDate() - 1);
+
+      // while (current <= end) {
+
+      //   const key = `${l.employee.id}_${current.toISOString().slice(0, 10)}`;
+
+      // leaveMap.set(key, l.leave_type);
+
+      // current.setDate(current.getDate() + 1);
+      // }
 
     });
 
@@ -761,80 +799,80 @@ export class LeaveService {
 
       ];
 
-      dates.forEach(date => {
+      // dates.forEach(date => {
 
-        const key = `${emp.id}_${date.toISOString().slice(0, 10)}`;
+      //   const key = `${emp.id}_${date.toISOString().slice(0, 10)}`;
 
-        rowData.push(leaveMap.get(key) || "");
+      //   rowData.push(leaveMap.get(key) || "");
 
-      });
+      // });
 
-      const row = sheet.addRow(rowData);
+      // const row = sheet.addRow(rowData);
 
       // 🔹 style colonnes infos employé (gris clair)
-      for (let i = 1; i <= 8; i++) {
+      // for (let i = 1; i <= 8; i++) {
 
-        const cell = row.getCell(i);
+      //   const cell = row.getCell(i);
 
-        cell.fill = {
-          type: "pattern",
-          pattern: "solid",
-          fgColor: { argb: "FFEFEFEF" }
-        };
+      //   cell.fill = {
+      //     type: "pattern",
+      //     pattern: "solid",
+      //     fgColor: { argb: "FFEFEFEF" }
+      //   };
 
-      }
+      // }
 
       // 🔹 style cellules planning
-      dates.forEach((date, index) => {
+      // dates.forEach((date, index) => {
 
-        const columnIndex = index + 9;
-        const cell = row.getCell(columnIndex);
-        const value = cell.value as string;
+      //   const columnIndex = index + 9;
+      //   const cell = row.getCell(columnIndex);
+      //   const value = cell.value as string;
 
-        // dimanche → gris foncé (prioritaire)
-        if (sundayColumns.has(columnIndex)) {
+      // dimanche → gris foncé (prioritaire)
+      // if (sundayColumns.has(columnIndex)) {
 
-          cell.fill = {
-            type: "pattern",
-            pattern: "solid",
-            fgColor: { argb: "FF808080" }
-          };
+      //   cell.fill = {
+      //     type: "pattern",
+      //     pattern: "solid",
+      //     fgColor: { argb: "FF808080" }
+      //   };
 
-          return;
-        }
+      //   return;
+      // }
 
-        // couleurs selon type de leave
-        if (value === "Local_Leave_AMD") {
+      // couleurs selon type de leave
+      // if (value === "Local_Leave_AMD") {
 
-          cell.fill = {
-            type: "pattern",
-            pattern: "solid",
-            fgColor: { argb: "FF4F81BD" }
-          };
+      //   cell.fill = {
+      //     type: "pattern",
+      //     pattern: "solid",
+      //     fgColor: { argb: "FF4F81BD" }
+      //   };
 
-        }
+      // }
 
-        if (value === "Permission_AMD") {
+      // if (value === "Permission_AMD") {
 
-          cell.fill = {
-            type: "pattern",
-            pattern: "solid",
-            fgColor: { argb: "FFC0504D" }
-          };
+      //   cell.fill = {
+      //     type: "pattern",
+      //     pattern: "solid",
+      //     fgColor: { argb: "FFC0504D" }
+      //   };
 
-        }
+      // }
 
-        if (value === "Indisponibilite_AMD") {
+      // if (value === "Indisponibilite_AMD") {
 
-          cell.fill = {
-            type: "pattern",
-            pattern: "solid",
-            fgColor: { argb: "FF9BBB59" }
-          };
+      //   cell.fill = {
+      //     type: "pattern",
+      //     pattern: "solid",
+      //     fgColor: { argb: "FF9BBB59" }
+      //   };
 
-        }
+      // }
 
-      });
+      // });
 
     });
 

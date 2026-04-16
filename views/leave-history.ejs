@@ -185,7 +185,10 @@
                                                                                 <th class="text-center px-1"
                                                                                     style="width: 5%;">Status</th>
                                                                                 <th class="text-center px-1"
-                                                                                    style="width: 30%;">By</th>
+                                                                                    style="width: 10%;">
+                                                                                    Approuved/Rejected at</th>
+                                                                                <th class="text-center px-1"
+                                                                                    style="width: 20%;">By</th>
                                                                             </tr>
                                                                         </thead>
                                                                         <tbody id="leaveHistoryBody"
@@ -207,7 +210,7 @@
                                                             <input type="hidden" name="end" id="exportEndDate">
                                                             <input type="hidden" name="status" id="exportStatus"
                                                                 value="all">
-                                                            <button class="btn btn-primary d-none" type="submit">
+                                                            <button class="btn btn-primary" type="submit">
                                                                 Export as Excel file
                                                             </button>
                                                         </form>
@@ -449,6 +452,19 @@
                 }
 
                 const approver = leave.approver ? leave.approver.firstName : "-";
+                let approvedDate = "-";
+                if (leave.approved_date) {
+                    approvedDate = new Date(leave.approved_date).toLocaleDateString("en-US",
+                        {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                            hour: "numeric",
+                            minute: "numeric",
+                            second: "numeric",
+                        }
+                    );
+                }
 
                 row.innerHTML = `
                                         <td class="text-center text-muted py-3 px-1" style="width: 5%;">${i}
@@ -465,7 +481,10 @@
                                         <td class="text-center py-3 px-1" style="width: 5%;">
                                             <span class="badge ${statusClass}">${status}</span>
                                         </td>
-                                        <td class="text-center text-muted py-3 px-1" style="width: 30%;">${approver}</td>
+                                        <td class="text-center py-3 px-1" style="width: 10%;">
+                                            ${approvedDate}
+                                        </td>
+                                        <td class="text-center text-muted py-3 px-1" style="width: 20%;">${approver}</td>
         `;
 
                 tbody.appendChild(row);

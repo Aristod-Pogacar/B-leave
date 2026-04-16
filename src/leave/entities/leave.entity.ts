@@ -38,7 +38,7 @@ export class Leave {
     @Column({ nullable: true })
     reason?: string;
 
-    @Column({ type: 'date', nullable: true })
+    @Column({ type: 'timestamp', nullable: true })
     approved_date?: Date;
 
     @ManyToOne(() => User, user => user.leaves)

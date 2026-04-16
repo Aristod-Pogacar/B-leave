@@ -63,7 +63,7 @@
                                                                     <!-- Recherche Employé -->
                                                                     <div class="">
                                                                         <div class="row">
-                                                                            <div class="col-md-4 mb-3">
+                                                                            <div class="col-md-6 mb-3">
                                                                                 <label
                                                                                     class="form-label">Departement</label>
                                                                                 <select class="form-select"
@@ -86,7 +86,7 @@
                                                                                                     <% }); %>
                                                                                 </select>
                                                                             </div>
-                                                                            <div class="col-md-4 mb-3">
+                                                                            <div class="col-md-6 mb-3">
                                                                                 <label class="form-label">Line</label>
                                                                                 <select class="form-select" name="line"
                                                                                     id="lineFilter">
@@ -105,6 +105,27 @@
                                                                                                     <% }) %>
                                                                                 </select>
                                                                             </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div class="">
+                                                                        <div class="row">
+                                                                            <div class="col-md-4 mb-3">
+                                                                                <label class="form-label">Start
+                                                                                    date</label>
+                                                                                <input type="date" class="form-control"
+                                                                                    id="startDate" name="startDate"
+                                                                                    placeholder="Enter your start date"
+                                                                                    required>
+                                                                            </div>
+                                                                            <div class="col-md-4 mb-3">
+                                                                                <label class="form-label">End
+                                                                                    date</label>
+                                                                                <input type="date" class="form-control"
+                                                                                    id="endDate" name="endDate"
+                                                                                    placeholder="Enter your end date"
+                                                                                    required>
+                                                                            </div>
                                                                             <div class="col-md-4">
                                                                                 <label for="status"
                                                                                     class="form-label">Status</label>
@@ -118,27 +139,6 @@
                                                                                     <option value="rejected">Rejected
                                                                                     </option>
                                                                                 </select>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <div class="">
-                                                                        <div class="row">
-                                                                            <div class="col-md-6 mb-3">
-                                                                                <label class="form-label">Start
-                                                                                    date</label>
-                                                                                <input type="date" class="form-control"
-                                                                                    id="startDate" name="startDate"
-                                                                                    placeholder="Enter your start date"
-                                                                                    required>
-                                                                            </div>
-                                                                            <div class="col-md-6 mb-3">
-                                                                                <label class="form-label">End
-                                                                                    date</label>
-                                                                                <input type="date" class="form-control"
-                                                                                    id="endDate" name="endDate"
-                                                                                    placeholder="Enter your end date"
-                                                                                    required>
                                                                             </div>
                                                                         </div>
                                                                     </div>

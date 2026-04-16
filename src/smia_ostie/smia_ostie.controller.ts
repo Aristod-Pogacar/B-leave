@@ -27,7 +27,7 @@ export class SmiaOstieController {
 
   @Get('list')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HEAD_HR, UserRole.HR_ADMIN, UserRole.MANAGER)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HEAD_HR, UserRole.HR_ADMIN, UserRole.MANAGER, UserRole.PAYROLL)
   @Render('medical-service')
   async getMedicalService(@Req() req, @Query('search') search: string = '', @Query('page') page: number = 1) {
     const limit = 20;

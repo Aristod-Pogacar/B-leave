@@ -54,8 +54,10 @@ export class LeaveController {
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER, UserRole.HEAD_HR, UserRole.HR_ADMIN)
   @Render('leave-history')
-  async leaveHistory(@Query() query: any, @Query() error?: string) {
-    return { title: "Leave History", error: error ? error : null };
+  async leaveHistory(@Query() query: any, @Req() req: any) {
+    const error = req.query.error;
+    const message = req.query.message;
+    return { title: "Leave History", error, message };
   }
 
   @Get('approuve-leaves')
@@ -95,6 +97,8 @@ export class LeaveController {
   }
 
   @Get('employee-leaves/paginate/:employeeId')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER, UserRole.HEAD_HR, UserRole.HR_ADMIN)
   async getEmployeeLeaves(@Param('employeeId') employeeId: string, @Query('skip') skip: number, @Query('take') take: number, @Query('startDate') startDate: string, @Query('endDate') endDate: string, @Query('status') status: string) {
     const st = new Date(startDate);
     const et = new Date(endDate);
@@ -106,11 +110,15 @@ export class LeaveController {
   }
 
   @Get('employee-leaves/:employeeId/:month/:year')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER, UserRole.HEAD_HR, UserRole.HR_ADMIN)
   async getEmployeeLeavesByMonth(@Param('employeeId') employeeId: string, @Param('month') month: number, @Param('year') year: number) {
     return this.leaveService.getEmployeeLeavesByMonth(employeeId, month, year);
   }
 
   @Get('employee-leaves/:employeeId/:year')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER, UserRole.HEAD_HR, UserRole.HR_ADMIN)
   async getEmployeeLeavesByYear(@Param('employeeId') employeeId: string, @Param('year') year: number) {
     return this.leaveService.getEmployeeLeavesByYear(employeeId, year);
   }

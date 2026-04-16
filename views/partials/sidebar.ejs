@@ -139,33 +139,36 @@
                             <% } %>
                     </ul>
                 </li>
-                <li class="nxl-item nxl-hasmenu">
-                    <a href="javascript:void(0);" class="nxl-link">
-                        <span class="nxl-micon"><i class="feather-at-sign"></i></span>
-                        <span class="nxl-mtext">Users</span><span class="nxl-arrow"><i
-                                class="feather-chevron-right"></i></span>
-                    </a>
-                    <ul class="nxl-submenu">
-                        <li class="nxl-item"><a class="nxl-link" href="/user/list">User list</a></li>
-                        <% if(user.role=="SUPERADMIN" || user.role=="ADMIN" || user.role=="HR_ADMIN" ||
-                            user.role=="HEAD_HR" ) { %>
-                            <li class="nxl-item"><a class="nxl-link" href="/user/new-user">New user</a></li>
-                            <% } %>
-                    </ul>
-                </li>
-                <% if(user.role=="SUPERADMIN" ) { %>
+                <% if(user.role=="SUPERADMIN" || user.role=="ADMIN" || user.role=="HR_ADMIN" || user.role=="HEAD_HR" ) {
+                    %>
                     <li class="nxl-item nxl-hasmenu">
                         <a href="javascript:void(0);" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-skip-back"></i></span>
-                            <span class="nxl-mtext">History</span><span class="nxl-arrow"><i
+                            <span class="nxl-micon"><i class="feather-at-sign"></i></span>
+                            <span class="nxl-mtext">Users</span><span class="nxl-arrow"><i
                                     class="feather-chevron-right"></i></span>
                         </a>
                         <ul class="nxl-submenu">
-                            <li class="nxl-item"><a class="nxl-link" href="/history/b-leave-history">B-Leave
-                                    history</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="/user/list">User list</a></li>
+                            <% if(user.role=="SUPERADMIN" || user.role=="ADMIN" || user.role=="HR_ADMIN" ||
+                                user.role=="HEAD_HR" ) { %>
+                                <li class="nxl-item"><a class="nxl-link" href="/user/new-user">New user</a></li>
+                                <% } %>
                         </ul>
+                        <% } %>
                     </li>
-                    <% } %>
+                    <% if(user.role=="SUPERADMIN" ) { %>
+                        <li class="nxl-item nxl-hasmenu">
+                            <a href="javascript:void(0);" class="nxl-link">
+                                <span class="nxl-micon"><i class="feather-skip-back"></i></span>
+                                <span class="nxl-mtext">History</span><span class="nxl-arrow"><i
+                                        class="feather-chevron-right"></i></span>
+                            </a>
+                            <ul class="nxl-submenu">
+                                <li class="nxl-item"><a class="nxl-link" href="/history/b-leave-history">B-Leave
+                                        history</a></li>
+                            </ul>
+                        </li>
+                        <% } %>
             </ul>
         </div>
     </div>

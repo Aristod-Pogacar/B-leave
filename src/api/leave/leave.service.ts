@@ -3,11 +3,12 @@ import { CreateLeaveDto } from './dto/create-leave.dto';
 import { UpdateLeaveDto } from './dto/update-leave.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Response } from 'express';
-import { Repository } from 'typeorm';
+import { Between, In, Repository } from 'typeorm';
 import { Employee } from 'src/employee/entities/employee.entity';
 import { Leave, LeaveStatus } from 'src/leave/entities/leave.entity';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
+import { EmployeeService } from 'src/employee/employee.service';
 
 @Injectable()
 export class LeaveService {
@@ -18,6 +19,7 @@ export class LeaveService {
     private readonly employeeRepository: Repository<Employee>,
     private readonly mailerService: MailerService,
     private readonly configService: ConfigService,
+    private readonly employeeService: EmployeeService,
   ) { }
 
   async create(createLeaveDto: CreateLeaveDto, res: any) {
@@ -27,8 +29,29 @@ export class LeaveService {
       where: { matricule: createLeaveDto.employee },
     });
 
+    // const
+
     if (!employee) {
       return res.status(500).json({ message: 'Employee not found' });
+    }
+
+    if (createLeaveDto.leave_type == 'Permission_AMD') {
+
+      const d1 = new Date(createLeaveDto.start_date.getFullYear(), 11, 31);
+      const d2 = new Date(createLeaveDto.start_date.getFullYear(), 11, 31);
+
+      const permissionList = await this.leaveRepository.find({
+        where: { employee, status: LeaveStatus.APPROVED, start_date: Between(d1, d2) }
+      });
+
+      var permissionCount = 0;
+      permissionList.forEach(permission => {
+        permissionCount += permission.duration;
+      });
+
+      if ((10 - permissionCount) == 0) {
+        return res.status(500).json({ message: 'Permission solde not enough' });
+      }
     }
 
     const date1 = createLeaveDto.start_date.toISOString().split('T')[0];
@@ -43,18 +66,13 @@ export class LeaveService {
         { date1, date2 },
       )
       .andWhere('leave.employee = :employeeId', { employeeId: employee.id })
-      .andWhere('leave.status = :status', { status: LeaveStatus.APPROVED })
+      .andWhere('leave.status IN (:...status)', { status: [LeaveStatus.APPROVED, LeaveStatus.PENDING] })
       .getMany();
     console.log("OVERLAPPING LEAVE:", overlappingLeave);
 
     if (overlappingLeave.length > 0) {
-      return res.status(500).json({ message: 'Ce congé chevauche un congé existant' });
+      return res.status(500).json({ message: 'Leave dates overlap with existing leave' });
     }
-
-    const leave = await this.leaveRepository.create({
-      ...createLeaveDto,
-      employee,
-    });
 
     const startDate = new Date(createLeaveDto.start_date);
     const endDate = new Date(createLeaveDto.end_date);
@@ -64,8 +82,24 @@ export class LeaveService {
     }
 
     const nbDate = endDate.getTime() - startDate.getTime();
+    const duration = (nbDate / (1000 * 60 * 60 * 24)) + 1;
 
-    leave.duration = (nbDate / (1000 * 60 * 60 * 24)) + 1;
+    if (createLeaveDto.leave_type == 'Local_Leave_AMD') {
+      const employeeSolde = await this.employeeService.getEmployeeSolde(employee.matricule, createLeaveDto.start_date);
+      console.log("EMPLOYEE SOLDE:", employeeSolde.solde_restant);
+      console.log("DURATION:", duration);
+      console.log("EMPLOYEE SOLDE - DURATION:", employeeSolde.solde_restant - duration);
+      if ((employeeSolde.solde_restant - duration) < 0) {
+        return res.status(500).json({ message: 'Local leave solde not enough' });
+      }
+    }
+
+    const leave = await this.leaveRepository.create({
+      ...createLeaveDto,
+      employee,
+      duration,
+    });
+
     const leaveSaved = await this.leaveRepository.save(leave);
     var email: string[] = [];
     const manager = employee.manager;
