@@ -28,6 +28,29 @@ export class EmployeeService {
     private readonly historyService: HistoryService
   ) { }
 
+  async paginateEmployee(search: string, page: number, limit: number, user: any) {
+    const query = this.employeeRepository.createQueryBuilder('e');
+    query.leftJoinAndSelect('e.manager', 'manager');
+    query.orderBy('e.matricule', 'ASC');
+
+    const role = this.getAllowedSites(user.site);
+
+    if (search && search.trim() !== '') {
+      query.andWhere(
+        '(e.matricule LIKE :s OR e.fullname LIKE :s) AND e.site IN (:...role)',
+        { s: `%${search}%`, role }
+      );
+    }
+
+    const total = await query.getCount();
+    const data = await query
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getMany();
+
+    return { data, total, totalPages: Math.ceil(total / limit) };
+  }
+
   async getMyTeam(user: any) {
     return this.employeeRepository.find({
       where: { manager: { id: user.id } },
@@ -385,11 +408,33 @@ export class EmployeeService {
   }
 
   findOne(id: string) {
-    return this.employeeRepository.findOne({ where: { id } });
+    return this.employeeRepository.findOne({ where: { id }, relations: ['manager'] });
   }
 
   update(id: string, updateEmployeeDto: UpdateEmployeeDto) {
     return this.employeeRepository.update(id, updateEmployeeDto);
+  }
+
+  async updateEmployee(id: string, updateEmployeeDto: UpdateEmployeeDto, res: any, managerId: string) {
+    try {
+
+      const employee = await this.employeeRepository.findOne({ where: { id } });
+      if (!employee) {
+        return res.status(404).redirect('/employee/edit/' + id + '?error=Employee not found');
+      }
+      const manager = await this.userRepository.findOne({ where: { id: managerId } });
+      if (!manager && managerId !== '') {
+        return res.status(404).redirect('/employee/edit/' + id + '?error=Manager not found');
+      } else if (managerId === '' || manager == null) {
+        await this.employeeRepository.update(id, { ...updateEmployeeDto });
+      } else {
+        await this.employeeRepository.update(id, { ...updateEmployeeDto, manager: manager });
+      }
+      return res.redirect('/employee/details/' + id);
+    } catch (error) {
+      return res.status(500).redirect('/employee/edit/' + id + '?error=' + error.message);
+    }
+    // return res.status(200).redirect('/employee/list?message=Employee updated successfully');
   }
 
   remove(id: string) {

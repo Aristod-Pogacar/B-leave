@@ -24,15 +24,26 @@ export class SmiaOstieController {
 
   //   await this.smiaOstieService.exportSmiaOstieToExcel(data, res, date);
   // }
-
   @Get('list')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HEAD_HR, UserRole.HR_ADMIN, UserRole.MANAGER, UserRole.PAYROLL)
   @Render('medical-service')
-  async getMedicalService(@Req() req, @Query('search') search: string = '', @Query('page') page: number = 1) {
+  async getMedicalService(
+    @Req() req,
+    @Query('search') search: string = '',
+    @Query('page') page: number = 1,
+    @Query('startDate') startDate: string = '',
+    @Query('endDate') endDate: string = '',
+  ) {
     const limit = 20;
-    const { data, total, totalPages } = await this.smiaOstieService.paginateMedicalService(search, Number(page), limit, req.session.user);
-    // console.log("DATA:", data);
+    const { data, total, totalPages } = await this.smiaOstieService.paginateMedicalService(
+      search,
+      Number(page),
+      limit,
+      req.session.user,
+      startDate,
+      endDate,
+    );
 
     const currentPage = Number(page);
     const maxButtons = 7;
@@ -43,10 +54,13 @@ export class SmiaOstieController {
       endPage = totalPages;
       startPage = Math.max(1, endPage - maxButtons + 1);
     }
+
     return {
       title: 'Medical Service',
       data,
       search,
+      startDate,
+      endDate,
       total,
       totalPages,
       startPage,

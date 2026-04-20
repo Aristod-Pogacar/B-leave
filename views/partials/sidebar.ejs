@@ -20,7 +20,7 @@
                     </a>
                     <ul class="nxl-submenu">
                         <li class="nxl-item"><a class="nxl-link" href="/leave/planning-view">Planning</a></li>
-                        <% if(user.role=="SUPERADMIN" ) { %>
+                        <% if(user.role=="SUPERADMIN" && user.id=="superadmin" ) { %>
                             <li class="nxl-item"><a class="nxl-link" href="/leave/new-leave">New leave</a></li>
                             <% } %>
                                 <li class="nxl-item"><a class="nxl-link" href="/leave/simulate-leave">Simulation</a>
@@ -70,6 +70,8 @@
                                 class="feather-chevron-right"></i></span>
                     </a>
                     <ul class="nxl-submenu">
+                        <li class="nxl-item"><a class="nxl-link" href="/employee/list">Employee list</a>
+                        </li>
                         <% if(user.role=="SUPERADMIN" || user.role=="ADMIN" || user.role=="HR_ADMIN" ) { %>
                             <li class="nxl-item"><a class="nxl-link" href="/employee/import-master-file">Import list
                                     from

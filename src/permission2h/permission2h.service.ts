@@ -77,25 +77,23 @@ export class Permission2hService {
     search: string,
     page: number,
     limit: number,
-    date: string,
+    startDate: string,
+    endDate: string,
     user: any,
   ) {
     const skip = (page - 1) * limit;
 
-    let query;
-
-    query = this.permission2hRepository
+    const query = this.permission2hRepository
       .createQueryBuilder('p')
       .leftJoinAndSelect('p.employee', 'employee');
 
-    if (user.role == UserRole.MANAGER) {
+    if (user.role === UserRole.MANAGER) {
       query.andWhere('employee.manager = :manager', { manager: user.id });
     }
 
-    // ✅ Recherche multi-champs sécurisée
     if (search) {
       query.andWhere(
-        `
+        `(
         employee.matricule LIKE :search
         OR employee.fullname LIKE :search
         OR p.id LIKE :search
@@ -103,13 +101,17 @@ export class Permission2hService {
         OR p.expectedStartTime LIKE :search
         OR p.expectedEndTime LIKE :search
         OR DATE(p.date) LIKE :search
-        `,
+      )`,
         { search: `%${search}%` },
       );
     }
 
-    if (date) {
-      query.where('DATE(p.date) = :date', { date });
+    if (startDate) {
+      query.andWhere('DATE(p.date) >= :startDate', { startDate });
+    }
+
+    if (endDate) {
+      query.andWhere('DATE(p.date) <= :endDate', { endDate });
     }
 
     const [data, total] = await query
@@ -125,6 +127,7 @@ export class Permission2hService {
       currentPage: page,
     };
   }
+
   async paginatePermission2hById(
     id: number,
     search: string,

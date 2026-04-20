@@ -72,16 +72,27 @@ export class Permission2hController {
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER, UserRole.HEAD_HR, UserRole.HR_ADMIN)
   @Render('permission-2h')
-  async permission2h(@Req() req, @Query('page') page = 1, @Query('search') search = '', @Query('date') date = '') {
+  async permission2h(
+    @Req() req,
+    @Query('page') page = 1,
+    @Query('search') search = '',
+    @Query('startDate') startDate = '',
+    @Query('endDate') endDate = '',
+  ) {
     const limit = 20;
 
     const { data, total, totalPages } =
-      await this.permission2hService.paginatePermission2h(search, Number(page), limit, date, req.session.user);
+      await this.permission2hService.paginatePermission2h(
+        search,
+        Number(page),
+        limit,
+        startDate,
+        endDate,
+        req.session.user,
+      );
 
     const currentPage = Number(page);
     const maxButtons = 7;
-
-    let title = 'Permission 2h';
 
     let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
     let endPage = startPage + maxButtons - 1;
@@ -100,10 +111,11 @@ export class Permission2hController {
       data,
       total,
       search,
-      site: '',
-      title: title,
-      user: req.session.user
-    }
+      startDate,
+      endDate,
+      title: 'Permission 2h',
+      user: req.session.user,
+    };
   }
 
   @Post()

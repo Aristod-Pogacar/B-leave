@@ -58,52 +58,40 @@ export class SmiaOstieService {
     return [userSite];
   }
 
-  async paginateMedicalService(search: string, page: number, limit: number, user: any) {
+  async paginateMedicalService(
+    search: string,
+    page: number,
+    limit: number,
+    user: any,
+    startDate?: string,
+    endDate?: string,
+  ) {
+    const query = this.SmiaOstieRepo.createQueryBuilder('ms')
+      .leftJoinAndSelect('ms.employee', 'employee');
 
-    const skip = (page - 1) * limit;
-
-    const query = this.SmiaOstieRepo
-      .createQueryBuilder('m')
-      .leftJoinAndSelect('m.employee', 'e');
-
-    // 🔍 Filtre si un search est présent
     if (search && search.trim() !== '') {
-      query.where('m.name LIKE :search', { search: `%${search}%` });
+      query.andWhere(
+        '(employee.matricule LIKE :s OR employee.fullname LIKE :s)',
+        { s: `%${search}%` }
+      );
     }
 
-    if (user.role === UserRole.MANAGER) {
-      const allowedEmployees = await this.employeeRepo.find({
-        where: { manager: { id: user.id } },
-        select: ['id'],
-      });
-      const employeeIds: string[] = [];
-      allowedEmployees.forEach(employee => {
-        employeeIds.push(employee.id);
-      });
-      console.log("ALLOWED EMPLOYEES", allowedEmployees);
-      console.log(employeeIds);
-      if (employeeIds.length > 0) {
-        query.andWhere('e.id IN (:...employeeIds)', { employeeIds });
-      }
+    if (startDate && startDate.trim() !== '') {
+      query.andWhere('ms.date >= :startDate', { startDate });
     }
 
-    // const allowedSites = this.getAllowedSites(user.site);
-    // query.andWhere('e.site IN (:...sites)', { sites: allowedSites });
+    if (endDate && endDate.trim() !== '') {
+      query.andWhere('ms.date <= :endDate', { endDate });
+    }
 
-    const [data, total] = await query
-      .orderBy('m.id', 'DESC')
-      .skip(skip)
+    const total = await query.getCount();
+    const data = await query
+      .skip((page - 1) * limit)
       .take(limit)
-      .getManyAndCount();
+      .getMany();
 
-    return {
-      data,
-      total,
-      totalPages: Math.ceil(total / limit),
-      currentPage: page
-    };
+    return { data, total, totalPages: Math.ceil(total / limit) };
   }
-
   async countByDayForCurrentWeek(site: string) {
     const { monday, sunday } = this.getWeekRange();
 

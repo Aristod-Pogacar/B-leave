@@ -136,7 +136,9 @@
 
             employeeColumn.innerHTML += `
     <div class="employee-row">
-      <div class="employee-cell leave-bar-text">${emp.matricule} - ${emp.fullname}</div>
+      <div class="employee-cell leave-bar-text">
+        <a href="/employee/details/${emp.id}">${emp.matricule} - ${emp.fullname}</a>
+    </div>
       <div class="employee-cell text-center">${prises}</div>
       <div class="employee-cell text-center">${restant}</div>
       <div class="employee-cell text-center">${cumule}</div>

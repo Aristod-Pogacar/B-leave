@@ -34,6 +34,87 @@ export class EmployeeController {
     return [userSite];
   }
 
+  @Get('details/:id')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HEAD_HR, UserRole.HR_ADMIN, UserRole.MANAGER, UserRole.PAYROLL)
+  @Render('employee')
+  async getEmployee(@Param('id') id: string, @Req() req: any) {
+    const employee = await this.employeeService.findOne(id);
+    return { title: "Employee details", employee };
+  }
+
+  @Get('edit/:id')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HEAD_HR, UserRole.HR_ADMIN, UserRole.MANAGER, UserRole.PAYROLL)
+  @Render('edit-employee')
+  async getEmployeeEdit(@Param('id') id: string, @Req() req: any, @Query('error') error: string = '') {
+    const allowedSites = this.getAllowedSites(req.session.user.site);
+    const employee = await this.employeeService.findOne(id);
+    const KEYS = allowedSites.map(val => {
+      // On cherche la clé dans l'objet Site qui possède cette valeur
+      const key = (Object.keys(Site) as (keyof typeof Site)[]).find(
+        k => Site[k] === val
+      );
+      return key;
+    });
+    return { title: "Edit employee", employee, allowedSites, KEYS, error };
+  }
+
+  @Post('edit/:id')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HEAD_HR, UserRole.HR_ADMIN, UserRole.MANAGER, UserRole.PAYROLL)
+  async postEmployeeEdit(@Param('id') id: string, @Body() body: any, @Res() res: any) {
+    // console.log("BODY:", body);
+    const managerId = body.managerId;
+    delete body.managerId;
+    console.log("BODY (after delete):", body);
+    return await this.employeeService.updateEmployee(id, body, res, managerId);
+  }
+
+  @Get('list')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HEAD_HR, UserRole.HR_ADMIN, UserRole.MANAGER, UserRole.PAYROLL)
+  @Render('employee-list')
+  async getMedicalService(
+    @Req() req,
+    @Query('search') search: string = '',
+    @Query('page') page: number = 1,
+    @Query('startDate') startDate: string = '',
+    @Query('endDate') endDate: string = '',
+  ) {
+    const limit = 20;
+    const { data, total, totalPages } = await this.employeeService.paginateEmployee(
+      search,
+      Number(page),
+      limit,
+      req.session.user,
+    );
+
+    const currentPage = Number(page);
+    const maxButtons = 7;
+    let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+    let endPage = startPage + maxButtons - 1;
+
+    if (endPage > totalPages) {
+      endPage = totalPages;
+      startPage = Math.max(1, endPage - maxButtons + 1);
+    }
+
+    return {
+      title: 'Employee list',
+      data,
+      search,
+      startDate,
+      endDate,
+      total,
+      totalPages,
+      startPage,
+      endPage,
+      currentPage,
+      user: req.session.user,
+    };
+  }
+
   @Post('compare')
   compare(@Body() data: any) {
     return this.employeeService.compare(data);

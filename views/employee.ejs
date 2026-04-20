@@ -1,0 +1,381 @@
+<%- include('partials/head.ejs') %>
+
+    <body>
+        <%- include('partials/sidebar.ejs') %>
+            <%- include('partials/header.ejs') %>
+                <main class="nxl-container">
+                    <div class="nxl-content">
+                        <div class="page-header">
+                            <div class="page-header-left d-flex align-items-center">
+                                <div class="page-header-title">
+                                    <h5 class="m-b-10">Be-Leave</h5>
+                                </div>
+                                <ul class="breadcrumb">
+                                    <li class="breadcrumb-item">Employee</li>
+                                    <li class="breadcrumb-item">Employee details</li>
+                                </ul>
+                            </div>
+                            <div class="page-header-right ms-auto">
+                                <div class="page-header-right-items">
+                                    <div class="d-flex d-md-none">
+                                        <a href="javascript:void(0)" class="page-header-right-close-toggle">
+                                            <i class="feather-arrow-left me-2"></i>
+                                            <span>Back</span>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="d-md-none d-flex align-items-center">
+                                    <a href="javascript:void(0)" class="page-header-right-open-toggle">
+                                        <i class="feather-align-right fs-20"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- [ page-header ] end -->
+                        <div class="bg-white py-3 border-bottom rounded-0 p-md-0 mb-0">
+                            <div class="d-md-none d-flex align-items-center justify-content-between">
+                                <a href="javascript:void(0)" class="page-content-left-open-toggle">
+                                    <i class="feather-align-left fs-20"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <!-- [ Main Content ] start -->
+                        <div class="main-content">
+                            <div class="tab-content">
+                                <div class="tab-pane fade active show" id="overviewTab">
+                                    <div class="row">
+
+                                        <div class="col-12">
+                                            <div class="card stretch stretch-full d-flex">
+                                                <div class="card-header">
+                                                    <h4 class="header">Employee details - <%= employee.fullname %>
+                                                    </h4>
+                                                    <button type="submit" form="userForm" class="btn btn-primary"
+                                                        onclick="window.location.href='/employee/edit/<%= employee.id %>';"
+                                                        id="submit">
+                                                        Edit
+                                                    </button>
+                                                </div>
+                                                <div class="card-body">
+
+                                                    <div class="modal-body">
+                                                        <div class="row">
+
+                                                            <!-- ===== LEFT: FORM ===== -->
+                                                            <div class="col-12">
+                                                                <% if (locals.error) { %>
+                                                                    <div class="alert alert-danger" role="alert"
+                                                                        id="message">
+                                                                        <%= error %>
+                                                                    </div>
+                                                                    <% } %>
+                                                                        <!-- Recherche Employé -->
+                                                                        <div class="">
+                                                                            <div class="row">
+                                                                                <div class="col-md-2 mb-3">
+                                                                                    <label
+                                                                                        class="form-label">Matricule</label>
+                                                                                    <div class="form-control">
+                                                                                        <%= employee.matricule %>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-md-7 mb-3">
+                                                                                    <label class="form-label">Full
+                                                                                        name</label>
+                                                                                    <div class="form-control">
+                                                                                        <%= employee.fullname %>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-md-3 mb-3">
+                                                                                    <label class="form-label">Date
+                                                                                        of
+                                                                                        birth</label>
+                                                                                    <div class="form-control">
+                                                                                        <%= employee.date_of_birth %>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <!-- Recherche Employé -->
+                                                                        <div class="">
+                                                                            <div class="row">
+                                                                                <div class="col-md-4 mb-3">
+                                                                                    <label
+                                                                                        class="form-label">Gender</label>
+                                                                                    <div class="form-control">
+                                                                                        <% if(employee.gender==='M' ) {
+                                                                                            %>
+                                                                                            Male
+                                                                                            <% } else { %>
+                                                                                                Female
+                                                                                                <% } %>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-md-4 mb-3">
+                                                                                    <label
+                                                                                        class="form-label">CIN</label>
+                                                                                    <div class="form-control">
+                                                                                        <%= employee.CIN %>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-md-4 mb-3">
+                                                                                    <label
+                                                                                        class="form-label">CNAPS</label>
+                                                                                    <div class="form-control">
+                                                                                        <%= employee.CNAPS %>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="">
+                                                                            <div class="row">
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="">
+                                                                            <div class="row">
+                                                                                <div class="col-md-4 mb-3">
+                                                                                    <label class="form-label">Street
+                                                                                        adress</label>
+                                                                                    <div class="form-control">
+                                                                                        <%= employee.adrs_street %>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-md-4 mb-3">
+                                                                                    <label
+                                                                                        class="form-label">Locality</label>
+                                                                                    <div class="form-control">
+                                                                                        <%= employee.adrs_locality %>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-md-4 mb-3">
+                                                                                    <label
+                                                                                        class="form-label">Town/Village</label>
+                                                                                    <div class="form-control">
+                                                                                        <%= employee.adrs_twnvge %>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="">
+                                                                            <div class="row">
+                                                                                <div class="col-md-4 mb-3">
+                                                                                    <label class="form-label">Basic
+                                                                                        category</label>
+                                                                                    <div class="form-control">
+                                                                                        <%= employee.cat_basic %>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-md-4 mb-3">
+                                                                                    <label class="form-label">Industrial
+                                                                                        category</label>
+                                                                                    <div class="form-control">
+                                                                                        <%= employee.cat_ind %>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-md-4 mb-3">
+                                                                                    <label
+                                                                                        class="form-label">Professional
+                                                                                        category</label>
+                                                                                    <div class="form-control">
+                                                                                        <%= employee.cat_prof %>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="">
+                                                                            <div class="row">
+                                                                                <div class="col-md-4 mb-3">
+                                                                                    <label
+                                                                                        class="form-label">Site</label>
+                                                                                    <div class="form-control">
+                                                                                        <%= employee.site %>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-md-4 mb-3">
+                                                                                    <label
+                                                                                        class="form-label">Departement</label>
+                                                                                    <div class="form-control">
+                                                                                        <%= employee.departement %>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-md-4 mb-3">
+                                                                                    <label
+                                                                                        class="form-label">Section</label>
+                                                                                    <div class="form-control">
+                                                                                        <%= employee.section %>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="">
+                                                                            <div class="row">
+                                                                                <div class="col-md-4 mb-3">
+                                                                                    <label
+                                                                                        class="form-label">Division</label>
+                                                                                    <div class="form-control">
+                                                                                        <%= employee.division %>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-md-4 mb-3">
+                                                                                    <label
+                                                                                        class="form-label">Occupation</label>
+                                                                                    <div class="form-control">
+                                                                                        <%= employee.occupation %>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-md-4 mb-3">
+                                                                                    <label
+                                                                                        class="form-label">Line</label>
+                                                                                    <div class="form-control">
+                                                                                        <%= employee.line %>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="">
+                                                                            <div class="row">
+                                                                                <div class="col-md-4 mb-3">
+                                                                                    <label class="form-label">Job
+                                                                                        post</label>
+                                                                                    <div class="form-control">
+                                                                                        <%= employee.job_post %>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-md-4 mb-3">
+                                                                                    <label class="form-label">Job
+                                                                                        level</label>
+                                                                                    <div class="form-control">
+                                                                                        <%= employee.job_level %>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-md-4 mb-3">
+                                                                                    <label
+                                                                                        class="form-label">Type</label>
+                                                                                    <div class="form-control">
+                                                                                        <%= employee.type %>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="">
+                                                                            <div class="row">
+                                                                                <div class="col-md-4 mb-3">
+                                                                                    <label
+                                                                                        class="form-label">PRTR</label>
+                                                                                    <div class="form-control">
+                                                                                        <%= employee.prtr %>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-md-4 mb-3">
+                                                                                    <label class="form-label">DI</label>
+                                                                                    <div class="form-control">
+                                                                                        <%= employee.di %>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-md-4 mb-3">
+                                                                                    <label
+                                                                                        class="form-label">Pattern</label>
+                                                                                    <div class="form-control">
+                                                                                        <%= employee.pattern %>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="">
+                                                                            <div class="row">
+                                                                                <div class="col-md-12 mb-3">
+                                                                                    <label
+                                                                                        class="form-label">Manager</label>
+                                                                                    <div class="form-control">
+                                                                                        <%= employee.manager?
+                                                                                            employee.manager?.firstName
+                                                                                            + " " +
+                                                                                            employee.manager?.name : "-"
+                                                                                            %>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="">
+                                                                            <div class="row">
+                                                                                <div class="col-md-4 mb-3">
+                                                                                    <label
+                                                                                        class="form-label">DOE</label>
+                                                                                    <div class="form-control">
+                                                                                        <%= employee.DOE %>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-md-4 mb-3">
+                                                                                    <label
+                                                                                        class="form-label">DOC</label>
+                                                                                    <div class="form-control">
+                                                                                        <%= employee.DOC %>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-md-4 mb-3">
+                                                                                    <label
+                                                                                        class="form-label">DOR</label>
+                                                                                    <div class="form-control">
+                                                                                        <%= employee.DOR %>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="">
+                                                                            <div class="row">
+                                                                                <div class="col-md-4 mb-3">
+                                                                                    <label class="form-label">Effective
+                                                                                        start date</label>
+                                                                                    <div class="form-control">
+                                                                                        <%= employee.effective_start_date
+                                                                                            %>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-md-4 mb-3">
+                                                                                    <label class="form-label">Effective
+                                                                                        end
+                                                                                        date</label>
+                                                                                    <div class="form-control">
+                                                                                        <%= employee.effective_end_date?
+                                                                                            employee.effective_end_date
+                                                                                            : "-" %>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-md-4 mb-3">
+                                                                                    <label class="form-label">Pay
+                                                                                        mode</label>
+                                                                                    <div class="form-control">
+                                                                                        <%= employee.pay_mode %>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+
+                                                            </div>
+
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <%- include('partials/new-leave-modal-test') %>
+                        <%- include('partials/footer.ejs') %>
+    </body>
+
+    </html>

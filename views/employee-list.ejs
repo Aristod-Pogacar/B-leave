@@ -11,24 +11,9 @@
                                     <h5 class="m-b-10">B-Leave</h5>
                                 </div>
                                 <ul class="breadcrumb">
-                                    <li class="breadcrumb-item">Permission 2h</li>
+                                    <li class="breadcrumb-item">Employee</li>
                                     <li class="breadcrumb-item">List</li>
                                 </ul>
-                            </div>
-                            <div class="page-header-right ms-auto">
-                                <div class="d-md-none d-flex align-items-center">
-                                    <a href="javascript:void(0)" class="page-header-right-open-toggle">
-                                        <i class="feather-align-right fs-20"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="bg-white py-3 border-bottom rounded-0 p-md-0 mb-0">
-                            <div class="d-md-none d-flex align-items-center justify-content-between">
-                                <a href="javascript:void(0)" class="page-content-left-open-toggle">
-                                    <i class="feather-align-left fs-20"></i>
-                                </a>
                             </div>
                         </div>
 
@@ -39,31 +24,22 @@
                                         <div class="col-12">
                                             <div class="card stretch stretch-full">
                                                 <div class="card-header">
-                                                    <h5 class="card-title">Permission 2h list</h5>
+                                                    <h5 class="card-title">Employee list</h5>
 
                                                     <!-- Filtres -->
-                                                    <form method="GET" action=""
+                                                    <form method="GET" action="/employee/list"
                                                         class="d-flex align-items-end gap-3 mt-2 flex-wrap">
                                                         <div>
                                                             <label class="form-label mb-1">Recherche</label>
                                                             <input type="text" name="search" class="form-control"
                                                                 placeholder="Matricule, nom..." value="<%= search %>" />
                                                         </div>
-                                                        <div>
-                                                            <label class="form-label mb-1">Date début</label>
-                                                            <input type="date" name="startDate" class="form-control"
-                                                                value="<%= startDate %>" />
-                                                        </div>
-                                                        <div>
-                                                            <label class="form-label mb-1">Date fin</label>
-                                                            <input type="date" name="endDate" class="form-control"
-                                                                value="<%= endDate %>" />
-                                                        </div>
                                                         <div class="d-flex gap-2">
                                                             <button type="submit" class="btn btn-primary">
                                                                 <i class="feather-search me-1"></i> Filtrer
                                                             </button>
-                                                            <a href="?" class="btn btn-outline-secondary">
+                                                            <a href="/employee/list"
+                                                                class="btn btn-outline-secondary ms-2">
                                                                 <i class="feather-x me-1"></i> Reset
                                                             </a>
                                                         </div>
@@ -77,49 +53,38 @@
                                                                 <tr>
                                                                     <th style="width: 10%;">Matricule</th>
                                                                     <th style="width: 30%;">Fullname</th>
-                                                                    <th style="width: 10%;">Date</th>
-                                                                    <th style="width: 10%;">Start time</th>
-                                                                    <th style="width: 10%;">End time</th>
-                                                                    <th style="width: 10%;">Status</th>
+                                                                    <th style="width: 10%;">Departement</th>
+                                                                    <th style="width: 10%;">Occupation</th>
+                                                                    <th style="width: 30%;">Manager</th>
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
-                                                                <% data.forEach(d=> {
-                                                                    var leaveTypeClass = "";
-                                                                    if (d.status === "pending") {
-                                                                    leaveTypeClass = "bg-soft-primary text-primary";
-                                                                    } else if (d.status === "approved") {
-                                                                    leaveTypeClass = "bg-soft-success text-success";
-                                                                    } else if (d.status === "rejected") {
-                                                                    leaveTypeClass = "bg-soft-danger text-danger";
-                                                                    }
-                                                                    %>
+                                                                <% data.forEach(employee=> { %>
                                                                     <tr>
                                                                         <td style="width: 10%;">
-                                                                            <%= d.employee.matricule %>
+                                                                            <%= employee.matricule %>
                                                                         </td>
                                                                         <td style="width: 30%;">
-                                                                            <%= d.employee.fullname %>
+                                                                            <a
+                                                                                href="/employee/details/<%= employee.id %>">
+                                                                                <%= employee.fullname %>
+                                                                            </a>
                                                                         </td>
                                                                         <td style="width: 10%;">
-                                                                            <%= d.date %>
+                                                                            <%= employee.departement %>
                                                                         </td>
                                                                         <td style="width: 10%;">
-                                                                            <%= d.expectedStartTime %>
+                                                                            <%= employee.occupation %>
                                                                         </td>
-                                                                        <td style="width: 10%;">
-                                                                            <%= d.expectedEndTime %>
-                                                                        </td>
-                                                                        <td style="width: 10%;">
-                                                                            <span class="badge <%= leaveTypeClass %>">
-                                                                                <%= d.status %>
-                                                                            </span>
+                                                                        <td style="width: 30%;">
+                                                                            <%= employee.manager?.firstName %>
+                                                                                <%= employee.manager?.lastName %>
                                                                         </td>
                                                                     </tr>
                                                                     <% }) %>
                                                                         <% if (data.length===0) { %>
                                                                             <tr>
-                                                                                <td colspan="6"
+                                                                                <td colspan="5"
                                                                                     class="text-center text-muted py-4">
                                                                                     Aucun résultat trouvé.</td>
                                                                             </tr>
