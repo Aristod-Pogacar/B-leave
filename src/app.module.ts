@@ -37,6 +37,12 @@ import { TaskService } from './task/task.service';
 import { HistoryModule } from './history/history.module';
 import { History } from './history/entities/history.entity';
 import { HistoryService } from './history/history.service';
+import { FingerprintGateway } from './fingerprint/fingerprint.gateway';
+import { FortestGateway } from './fortest/fortest.gateway';
+import { FingerprintService } from './fingerprint/fingerprint.service';
+import { FingerprintModule } from './fingerprint/fingerprint.module';
+import { Permission2hService } from './permission2h/permission2h.service';
+import { SmiaOstieService } from './smia_ostie/smia_ostie.service';
 
 @Module({
   imports: [
@@ -94,9 +100,10 @@ import { HistoryService } from './history/history.service';
     SmiaOstieModule,
     TaskModule,
     HistoryModule,
+    FingerprintModule,
   ],
   controllers: [AppController, PuppeteerController],
-  providers: [AppService, MailService, AuthService, JwtService, EmployeeService, PuppeteerService, CryptoService, PuppeteerManagerService, TaskService, HistoryService],
+  providers: [AppService, MailService, AuthService, JwtService, EmployeeService, PuppeteerService, CryptoService, PuppeteerManagerService, TaskService, HistoryService, FingerprintGateway, FortestGateway, FingerprintService, Permission2hService, SmiaOstieService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

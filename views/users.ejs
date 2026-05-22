@@ -125,8 +125,8 @@
                                                                         roleColor="warning"
                                                                         } else if (users.role==userRole.PAYROLL) {
                                                                         roleColor="info"
-                                                                        } else if (users.role==userRole.USER) {
-                                                                        roleColor="primary"
+                                                                        } else if (users.role==userRole.HR_LEAD) {
+                                                                        roleColor="success"
                                                                         } %>
                                                                         <tr>
                                                                             <td>
@@ -165,10 +165,7 @@
                                                                                 </span>
                                                                             </td>
                                                                             <td class="text-center">
-                                                                                <% if(user.role !=="PAYROLL" &&
-                                                                                    allowedSites.includes(users.site) &&
-                                                                                    users.role !==userRole.SUPERADMIN )
-                                                                                    { %>
+                                                                                <% if(users.id !=='superadmin' ) { %>
                                                                                     <div
                                                                                         class="hstack gap-2 justify-content-center">
                                                                                         <a href="/user/edit-user/<%= users.id %>"
@@ -177,15 +174,13 @@
                                                                                             title="Edit">
                                                                                             <i class="feather-edit"></i>
                                                                                         </a>
-                                                                                        <% if(user.id !==users.id ) { %>
-                                                                                            <a href="/user/delete-user/<%= users.id %>"
-                                                                                                class="avatar-text avatar-md"
-                                                                                                data-bs-toggle="tooltip"
-                                                                                                title="Delete">
-                                                                                                <i
-                                                                                                    class="feather-trash"></i>
-                                                                                            </a>
-                                                                                            <% } %>
+                                                                                        <a href="/user/delete-user/<%= users.id %>"
+                                                                                            class="avatar-text avatar-md"
+                                                                                            data-bs-toggle="tooltip"
+                                                                                            title="Delete">
+                                                                                            <i
+                                                                                                class="feather-trash"></i>
+                                                                                        </a>
                                                                                     </div>
                                                                                     <% } %>
                                                                             </td>

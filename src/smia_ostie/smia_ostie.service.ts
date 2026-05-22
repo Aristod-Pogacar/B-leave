@@ -58,6 +58,39 @@ export class SmiaOstieService {
     return [userSite];
   }
 
+  async toExport(
+    search: string,
+    user: any,
+    startDate?: string,
+    endDate?: string,
+  ) {
+    const allowedSites = this.getAllowedSites(user.site);
+    const query = this.SmiaOstieRepo.createQueryBuilder('ms')
+      .leftJoinAndSelect('ms.employee', 'employee')
+      .andWhere('employee.site IN (:...sites)', { sites: allowedSites });
+
+    if (search && search.trim() !== '') {
+      query.andWhere(
+        '(employee.matricule LIKE :s OR employee.fullname LIKE :s)',
+        { s: `%${search}%` }
+      );
+    }
+
+    if (startDate && startDate.trim() !== '') {
+      query.andWhere('ms.date >= :startDate', { startDate });
+    }
+
+    if (endDate && endDate.trim() !== '') {
+      query.andWhere('ms.date <= :endDate', { endDate });
+    }
+
+    const data = await query.getMany();
+
+    console.log('DATA===>', data);
+
+    return data;
+  }
+
   async paginateMedicalService(
     search: string,
     page: number,
@@ -66,8 +99,10 @@ export class SmiaOstieService {
     startDate?: string,
     endDate?: string,
   ) {
+    const allowedSites = this.getAllowedSites(user.site);
     const query = this.SmiaOstieRepo.createQueryBuilder('ms')
-      .leftJoinAndSelect('ms.employee', 'employee');
+      .leftJoinAndSelect('ms.employee', 'employee')
+      .andWhere('employee.site IN (:...sites)', { sites: allowedSites });
 
     if (search && search.trim() !== '') {
       query.andWhere(
@@ -92,6 +127,7 @@ export class SmiaOstieService {
 
     return { data, total, totalPages: Math.ceil(total / limit) };
   }
+
   async countByDayForCurrentWeek(site: string) {
     const { monday, sunday } = this.getWeekRange();
 
@@ -155,7 +191,8 @@ export class SmiaOstieService {
     const consultation = await this.SmiaOstieRepo.save(smia);
     await this.historyService.create({
       reason: HistoryReason.CONSULTATION_MEDICAL,
-      message: "New consultation " + consultation.reason + " of " + consultation.employee.fullname + " requested by QUIOSQUE",
+      message: "New consultation " + consultation.reason + " of " + consultation.employee.name + " " + consultation.employee.firstname + " requested by QUIOSQUE",
+      created_by: consultation.employee.matricule,
     });
 
     var email: string[] = [];
@@ -177,7 +214,7 @@ export class SmiaOstieService {
           Bonjour Monsieur/Madame,
         </p>
         <p>
-          Un membre de votre équipe ayant la matricule <strong>${employee.matricule} (${employee.fullname})</strong> a envoyé une demande de consultation médicale sur <a href="http://localhost:4000/smia-ostie/list" target="_blank">B-Leave</a>.
+          Un membre de votre équipe ayant la matricule <strong>${employee.matricule} (${employee.name} ${employee.firstname})</strong> a envoyé une demande de consultation médicale sur <a href="http://localhost:4000/smia-ostie/list" target="_blank">B-Leave</a>.
         </p>
         <p>
           <strong>
@@ -194,7 +231,7 @@ export class SmiaOstieService {
           Hello Mister/Misses,
         </p>
         <p>
-          A member of your team with matricule <strong>${employee.matricule} (${employee.fullname})</strong> has taken a medical consultation on <a href="http://localhost:4000/smia-ostie/list" target="_blank">B-Leave</a>.
+          A member of your team with matricule <strong>${employee.matricule} (${employee.name} ${employee.firstname})</strong> has taken a medical consultation on <a href="http://localhost:4000/smia-ostie/list" target="_blank">B-Leave</a>.
         </p>
         <p>
           <strong>
@@ -220,11 +257,11 @@ export class SmiaOstieService {
     return await this.SmiaOstieRepo.find();
   }
 
-  async findOne(id: number) {
-    return await this.SmiaOstieRepo.findOne({ where: { id } });
+  async findOne(id: string) {
+    return await this.SmiaOstieRepo.findOne({ relations: ['employee'], where: { id } });
   }
 
-  async update(id: number, updateSmiaOstieDto: UpdateSmiaOstieDto) {
+  async update(id: string, updateSmiaOstieDto: UpdateSmiaOstieDto) {
     let employeeEntity;
 
     // Si employee (matricule) est envoyé, alors on le remplace par l'entité
@@ -251,7 +288,7 @@ export class SmiaOstieService {
     return this.SmiaOstieRepo.update(id, updatePayload);
   }
 
-  async remove(id: number) {
+  async remove(id: string) {
     return await this.SmiaOstieRepo.delete(id);
   }
 
@@ -348,11 +385,11 @@ export class SmiaOstieService {
     });
   }
 
-  async getSmiaOstie(date: string, site: string) {
-    const start = new Date(date);
+  async getSmiaOstie(startDate: string, endDate: string, site: string) {
+    const start = new Date(startDate);
     start.setHours(0, 0, 0, 0);
 
-    const end = new Date(date);
+    const end = new Date(endDate);
     end.setHours(23, 59, 59, 999);
 
     return this.SmiaOstieRepo
@@ -366,7 +403,8 @@ export class SmiaOstieService {
   async exportSmiaOstieToExcel(
     data: any[],
     res: Response,
-    date: string,
+    startDate: string,
+    endDate: string,
   ) {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('MEDICAL SERVICE');
@@ -374,7 +412,7 @@ export class SmiaOstieService {
     /* ================= TITRE ================= */
     worksheet.mergeCells('A1:H1');
     const titleCell = worksheet.getCell('A1');
-    titleCell.value = `MEDICAL SERVICE - ${date}`;
+    titleCell.value = `MEDICAL SERVICE - from ${startDate} to ${endDate}`;
     titleCell.font = {
       size: 16,
       bold: true,
@@ -389,6 +427,7 @@ export class SmiaOstieService {
       'Site',
       'Reason',
       'Date',
+      'Status',
     ]);
 
     headerRow.eachCell((cell) => {
@@ -415,6 +454,7 @@ export class SmiaOstieService {
         p.employee.site,
         p.reason,
         p.date,
+        p.status,
       ]);
     });
 
@@ -440,12 +480,63 @@ export class SmiaOstieService {
     );
     res.setHeader(
       'Content-Disposition',
-      `attachment; filename=medical_services_${date}.xlsx`,
+      `attachment; filename=medical_services_${startDate}_to_${endDate}.xlsx`,
     );
 
     await workbook.xlsx.write(res);
     res.end();
   }
 
+  async getMedicalRateBySectionToday(): Promise<SectionMedicalStat[]> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+
+    const sections = await this.employeeRepo
+      .createQueryBuilder("employee")
+      .leftJoin(
+        "employee.smia_ostie",
+        "smia",
+        `
+      smia.status = :status
+      AND smia.date >= :today
+      AND smia.date < :tomorrow
+      `,
+        {
+          status: "approved",
+          today,
+          tomorrow
+        }
+      )
+      .select("employee.section", "section")
+      .addSelect("COUNT(DISTINCT employee.id)", "employees")
+      .addSelect("COUNT(DISTINCT smia.employee_matricule)", "consultation")
+      .where("employee.is_active = true")
+      .groupBy("employee.section")
+      .getRawMany();
+
+    return sections
+      .map(s => ({
+        section: s.section,
+        employees: Number(s.employees),
+        consultation: Number(s.consultation),
+        pct: Number(
+          (
+            (Number(s.consultation) /
+              Number(s.employees)) * 100
+          ).toFixed(0)
+        )
+      }))
+      .sort((a, b) => b.pct - a.pct);
+  }
+
+}
+
+export interface SectionMedicalStat {
+  section: string;
+  employees: number;
+  consultation: number;
+  pct: number;
 }

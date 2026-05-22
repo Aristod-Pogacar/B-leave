@@ -17,11 +17,15 @@ import { JwtService } from '@nestjs/jwt';
 import { ScheduleModule } from '@nestjs/schedule';
 import { HistoryService } from 'src/history/history.service';
 import { History } from 'src/history/entities/history.entity';
+import { Permission2hService } from 'src/permission2h/permission2h.service';
+import { Permission2h } from 'src/permission2h/entities/permission2h.entity';
+import { SmiaOstie } from 'src/smia_ostie/entities/smia_ostie.entity';
+import { SmiaOstieService } from 'src/smia_ostie/smia_ostie.service';
 
 @Module({
   imports: [
     ScheduleModule.forRoot(),
-    TypeOrmModule.forFeature([Task, Employee, Leave, User, History])
+    TypeOrmModule.forFeature([Task, Employee, Leave, User, History, Permission2h, SmiaOstie])
   ],
   controllers: [TaskController],
   providers: [
@@ -34,7 +38,9 @@ import { History } from 'src/history/entities/history.entity';
     CryptoService,
     UserService,
     JwtService,
-    HistoryService
+    HistoryService,
+    Permission2hService,
+    SmiaOstieService
   ],
   exports: [
     TaskService,
@@ -46,7 +52,9 @@ import { History } from 'src/history/entities/history.entity';
     TypeOrmModule,
     UserService,
     HistoryService,
-    JwtService
+    JwtService,
+    Permission2hService,
+    SmiaOstieService
   ],
 })
 export class TaskModule { }

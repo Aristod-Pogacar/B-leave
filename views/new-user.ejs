@@ -130,16 +130,12 @@
                                                                                             <%
                                                                                                 Object.keys(userRole).forEach(key=>
                                                                                                 { %>
-                                                                                                <% if(userRole[key]
-                                                                                                    !==userRole.SUPERADMIN)
-                                                                                                    { %>
-                                                                                                    <option
-                                                                                                        value="<%= userRole[key] %>">
-                                                                                                        <%= userRole[key]
-                                                                                                            %>
-                                                                                                    </option>
-                                                                                                    <% } %>
-                                                                                                        <% }) %>
+
+                                                                                                <option
+                                                                                                    value="<%= userRole[key] %>">
+                                                                                                    <%= userRole[key] %>
+                                                                                                </option>
+                                                                                                <% }) %>
                                                                                         </select>
                                                                                     </div>
                                                                                     <div class="col-md-4 mb-3">
@@ -215,5 +211,46 @@
                     <%- include('partials/new-leave-modal-test') %>
                         <%- include('partials/footer.ejs') %>
     </body>
+    <script>
+        const roleSelect = document.getElementById("role");
+        const siteSelect = document.getElementById("site");
+
+        // Sauvegarder toutes les options originales
+        const allSiteOptions = Array.from(siteSelect.options);
+
+        function filterSites() {
+            const role = roleSelect.value;
+
+            // Roles limités
+            const restrictedRoles = ["HR_LEAD", "MANAGER", "ADMIN", "PAYROLL"];
+
+            // Sites autorisés pour ces rôles
+            const allowedSites = ["TANA", "ABE 1", "ABE 2"];
+
+            // Vider les options actuelles
+            siteSelect.innerHTML = "";
+
+            let filteredOptions;
+
+            if (restrictedRoles.includes(role)) {
+                filteredOptions = allSiteOptions.filter(option =>
+                    allowedSites.includes(option.value)
+                );
+            } else {
+                filteredOptions = allSiteOptions;
+            }
+
+            // Réajouter les options filtrées
+            filteredOptions.forEach(option => {
+                siteSelect.appendChild(option.cloneNode(true));
+            });
+        }
+
+        // Déclencher au changement du rôle
+        roleSelect.addEventListener("change", filterSites);
+
+        // Exécuter au chargement de la page
+        filterSites();
+    </script>
 
     </html>

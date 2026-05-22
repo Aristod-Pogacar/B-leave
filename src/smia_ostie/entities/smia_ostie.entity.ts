@@ -3,8 +3,8 @@ import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "t
 
 @Entity('smia_ostie')
 export class SmiaOstie {
-    @PrimaryGeneratedColumn()
-    id: number;
+    @PrimaryGeneratedColumn('uuid')
+    id: string;
 
     @Column({
         type: 'datetime',
@@ -14,7 +14,7 @@ export class SmiaOstie {
     date_at: Date;
 
     @Column({
-        type: 'date',
+        type: 'datetime',
         nullable: false,
         default: () => 'CURRENT_TIMESTAMP',
     })
@@ -25,6 +25,13 @@ export class SmiaOstie {
         nullable: true,
     })
     reason: string;
+
+    @Column({
+        type: 'varchar',
+        nullable: true,
+        default: 'normal',
+    })
+    status: string;
 
     @ManyToOne(() => Employee, (employee) => employee.smia_ostie, { eager: true })
     @JoinColumn({ name: 'employee_matricule', referencedColumnName: 'matricule' })

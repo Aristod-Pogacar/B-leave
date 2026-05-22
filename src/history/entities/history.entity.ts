@@ -29,4 +29,7 @@ export class History {
     @Column()
     message: string;
 
+    @Column({ nullable: true })
+    created_by?: string;
+
 }

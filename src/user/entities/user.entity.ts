@@ -6,19 +6,20 @@ import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 export enum UserRole {
     // USER = 'USER',
     ADMIN = 'ADMIN',
-    HR_ADMIN = 'HR_ADMIN',
-    HEAD_HR = 'HEAD_HR',
+    // HR_ADMIN = 'HR_ADMIN',
+    HR_LEAD = 'HR_LEAD',
+    // HEAD_HR = 'HEAD_HR',
     MANAGER = 'MANAGER',
     PAYROLL = 'PAYROLL',
     SUPERADMIN = 'SUPERADMIN'
 }
 
 export enum Site {
-    ABE1 = 'RABE',
-    ABE2 = 'LAG',
+    ABE1 = 'ABE 1',
+    ABE2 = 'ABE 2',
     ANTSIRABE = 'ANTSIRABE',
     TANA = 'TANA',
-    MADA = 'ADMIN',
+    MADA = 'MADA',
 }
 
 @Entity()

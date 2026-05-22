@@ -36,7 +36,7 @@ export class EmployeeController {
 
   @Get('details/:id')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HEAD_HR, UserRole.HR_ADMIN, UserRole.MANAGER, UserRole.PAYROLL)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HR_LEAD, UserRole.MANAGER, UserRole.PAYROLL, UserRole.HR_LEAD)
   @Render('employee')
   async getEmployee(@Param('id') id: string, @Req() req: any) {
     const employee = await this.employeeService.findOne(id);
@@ -45,7 +45,7 @@ export class EmployeeController {
 
   @Get('edit/:id')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HEAD_HR, UserRole.HR_ADMIN, UserRole.MANAGER, UserRole.PAYROLL)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @Render('edit-employee')
   async getEmployeeEdit(@Param('id') id: string, @Req() req: any, @Query('error') error: string = '') {
     const allowedSites = this.getAllowedSites(req.session.user.site);
@@ -62,18 +62,16 @@ export class EmployeeController {
 
   @Post('edit/:id')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HEAD_HR, UserRole.HR_ADMIN, UserRole.MANAGER, UserRole.PAYROLL)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   async postEmployeeEdit(@Param('id') id: string, @Body() body: any, @Res() res: any) {
-    // console.log("BODY:", body);
     const managerId = body.managerId;
     delete body.managerId;
-    console.log("BODY (after delete):", body);
     return await this.employeeService.updateEmployee(id, body, res, managerId);
   }
 
   @Get('list')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HEAD_HR, UserRole.HR_ADMIN, UserRole.MANAGER, UserRole.PAYROLL)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HR_LEAD, UserRole.MANAGER, UserRole.PAYROLL)
   @Render('employee-list')
   async getMedicalService(
     @Req() req,
@@ -123,14 +121,14 @@ export class EmployeeController {
   @Get('import-password')
   @Render('import-password')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.HR_ADMIN)
+  @Roles(UserRole.SUPERADMIN, UserRole.ADMIN)
   async getImportPassword(@Req() req: any) {
     return { title: "Import Password", error: req.query.error };
   }
 
   @Post('import-password')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.HR_ADMIN)
+  @Roles(UserRole.SUPERADMIN, UserRole.ADMIN)
   @UseInterceptors(FileInterceptor('file'))
   async importFromPassword(
     @Body() body: any,
@@ -163,7 +161,7 @@ export class EmployeeController {
       await this.historyService.create({
         reason: HistoryReason.EMPLOYEE,
         message: "Import password send by " + req.session.user.firstName + " " + req.session.user.name,
-
+        created_by: req.session.user.matricule,
       });
       return res.redirect('/');
     } else {
@@ -174,14 +172,14 @@ export class EmployeeController {
   @Get('import-manager')
   @Render('import-manager')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.HR_ADMIN)
+  @Roles(UserRole.SUPERADMIN, UserRole.ADMIN)
   async getImportManager(@Req() req: any) {
     return { title: "Import Manager", error: req.query.error };
   }
 
   @Post('import-manager')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.HR_ADMIN)
+  @Roles(UserRole.SUPERADMIN, UserRole.ADMIN)
   @UseInterceptors(FileInterceptor('file'))
   async importFromManager(
     @Body() body: any,
@@ -213,7 +211,28 @@ export class EmployeeController {
       await this.historyService.create({
         reason: HistoryReason.EMPLOYEE,
         message: "Import manager by " + req.session.user.firstName + " " + req.session.user.name,
+        created_by: req.session.user.matricule,
+      });
 
+      // 🎯 Sélectionner uniquement certains champs
+      const filtered2 = rows.map(row => ({
+        matricule: row['matricule'],
+        app_password: row['app_password'],
+        onehr_password: row['onehr_password']
+      }));
+
+      // ❗ ignorer lignes vides
+      const cleanData2 = filtered2.filter(x => x.matricule);
+
+      for (const data of cleanData2) {
+        console.log("DATA:", data);
+
+        await this.employeeService.updatePassword(data);
+      }
+      await this.historyService.create({
+        reason: HistoryReason.EMPLOYEE,
+        message: "Import password send by " + req.session.user.firstName + " " + req.session.user.name,
+        created_by: req.session.user.matricule,
       });
       return res.redirect('/');
     } else {
@@ -224,7 +243,7 @@ export class EmployeeController {
 
   @Get('finding/search-list')
   async search(@Query('q') q: string, @Req() req: any) {
-    return this.employeeService.search(q, req.session.user.site);
+    return this.employeeService.search(q, req.session.user);
   }
 
   @Get('find-one-by-matricule')
@@ -233,9 +252,9 @@ export class EmployeeController {
     return await this.employeeService.findOneByMatricule(matricule);
   }
 
-  @Get('find-one-by-fullname')
-  async findOneByFullName(@Query('fullname') fullname: string) {
-    return this.employeeService.findOneByFullName(fullname);
+  @Get('find-one-by-name')
+  async findOneByName(@Query('name') name: string) {
+    return this.employeeService.findOneByName(name);
   }
 
   @Get('find-by-line')
@@ -257,16 +276,19 @@ export class EmployeeController {
   async findAllByLineAndSection(
     @Req() req: any,
     @Query('line') line: string,
-    @Query('departement') departement: string,
+    // @Query('departement') departement: string,
+    @Query('section') section: string,
+    @Query('division') division: string,
     @Query('site') site: string,
     @Query('skip') skip: number = 0,
     @Query('take') take: number = 50,
     @Query('year') year: number = new Date().getFullYear(),
+    @Query('search') search: string = '',
   ) {
     // const test = await this.employeeService.getEmployeeSolde("10784", new Date("2017-12-31"))
     // console.log("TEST 10784 2017-01-10:", test);
 
-    const employees = await this.employeeService.getEmployeesWithBalances(line, departement, site, +skip, +take, +year, req.session.user);
+    const employees = await this.employeeService.getEmployeesWithBalances(line, "", section, division, site, +skip, +take, +year, req.session.user, search);
     // console.log("employees", employees);
     // console.log("SESSION:", req.session.user);
     return employees;
@@ -278,12 +300,14 @@ export class EmployeeController {
     @Req() req: any,
     @Query('line') line: string,
     @Query('departement') departement: string,
+    @Query('section') section: string,
+    @Query('division') division: string,
     @Query('site') site: string,
     @Query('skip') skip: number = 0,
     @Query('take') take: number = 50,
     @Query('year') year: number = new Date().getFullYear(),
   ) {
-    const employees = await this.employeeService.getEmployeesWithBalances(line, departement, site, +skip, +take, +year, req.session.user);
+    const employees = await this.employeeService.getEmployeesWithBalances(line, departement, section, division, site, +skip, +take, +year, req.session.user, '');
     console.log("employees", employees);
     return employees;
     // return this.employeeService.findAllByLineAndDepartement(line, departement, +skip, +take, year);
@@ -291,7 +315,7 @@ export class EmployeeController {
 
   @Get('new-employee')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HR_ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @Render('new-employee')
   async newEmployee(
     @Req() req: any,
@@ -316,12 +340,12 @@ export class EmployeeController {
   @UseGuards(RolesGuard)
   @Roles(UserRole.SUPERADMIN, UserRole.MANAGER)
   @Render('my-team')
-  async getMyTeam(@Req() req: any, @Query('search') search: string) {
+  async getMyTeam(@Req() req: any, @Query('search') search: string = '') {
     // const employees = await this.employeeService.getNoManager(req.session.user.site, search);
     console.log("SEARCH:", search);
-    const employees = await this.employeeService.getMyTeam(req.session.user);
+    const employees = await this.employeeService.getMyTeam(req.session.user, search);
     console.log("EMPLOYEES:", employees);
-    return { title: "My Team", employees };
+    return { title: "My Team", employees, search };
   }
 
   @Get('no-manager')
@@ -335,7 +359,7 @@ export class EmployeeController {
 
   @Get('assign-manager')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.HEAD_HR, UserRole.HR_ADMIN)
+  @Roles(UserRole.SUPERADMIN, UserRole.ADMIN)
   // @Render('test')
   @Render('employee-assign')
   async assignManager(@Req() req: any) {
@@ -346,14 +370,14 @@ export class EmployeeController {
 
   @Post('assign-manager')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HR_ADMIN, UserRole.HEAD_HR)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   async assignManagerPost(@Body() body: any, @Res() res: express.Response, @Req() req: any) {
     console.log("BODY:", body);
     await this.employeeService.assignManager(body.managerId, body.employeeIds);
     await this.historyService.create({
       reason: HistoryReason.EMPLOYEE,
       message: "Assign manager by " + req.session.user.firstName + " " + req.session.user.name,
-
+      created_by: req.session.user.matricule,
     });
     return res.redirect('/employee/assign-manager');
   }
@@ -367,7 +391,7 @@ export class EmployeeController {
 
   @Post('new-employee')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HEAD_HR, UserRole.HR_ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   async newEmployeePost(@Body() body: any, @Res() res: express.Response, @Req() req: any) {
     console.log("BODY:", body);
     await this.employeeService.create(body, res, req);
@@ -375,7 +399,7 @@ export class EmployeeController {
 
   @Get('import-master-file')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HEAD_HR, UserRole.HR_ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @Render('import-master-file')
   async importMasterFile(@Req() req: any) {
     return { title: "Import Master File", error: req.query.error };
@@ -383,7 +407,7 @@ export class EmployeeController {
 
   @Post('import-master-file')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HEAD_HR, UserRole.HR_ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),
@@ -398,10 +422,56 @@ export class EmployeeController {
     console.log("FILE:", file);
 
     try {
+      const workbook = XLSX.read(file.buffer, { type: 'buffer' });
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+
+      const rows: any[] = XLSX.utils.sheet_to_json(worksheet);
       await this.employeeService.processExcelBuffer(file);
+
+      // 🎯 Sélectionner uniquement certains champs
+      const filtered = rows.map(row => ({
+        matricule: "" + row['Emp No'],
+        manager: "" + row['Manager']
+      }));
+
+      // ❗ ignorer lignes vides
+      const cleanData = filtered.filter(x => x.matricule);
+
+      for (const data of cleanData) {
+        console.log("DATA:", data);
+
+        await this.employeeService.updateManager(data);
+      }
+      await this.historyService.create({
+        reason: HistoryReason.EMPLOYEE,
+        message: "Import manager by " + req.session.user.firstName + " " + req.session.user.name,
+        created_by: req.session.user.matricule,
+      });
+
+      // 🎯 Sélectionner uniquement certains champs
+      const filtered2 = rows.map(row => ({
+        matricule: "" + row['Emp No'],
+        app_password: "" + row['App password'],
+        onehr_password: "" + row['Onehr password']
+      }));
+
+      // ❗ ignorer lignes vides
+      const cleanData2 = filtered2.filter(x => x.matricule);
+
+      for (const data of cleanData2) {
+        console.log("DATA:", data);
+
+        await this.employeeService.updatePassword(data);
+      }
+      await this.historyService.create({
+        reason: HistoryReason.EMPLOYEE,
+        message: "Import password send by " + req.session.user.firstName + " " + req.session.user.name,
+        created_by: req.session.user.matricule,
+      });
       await this.historyService.create({
         reason: HistoryReason.EMPLOYEE,
         message: "Import master file by " + req.session.user.firstName + " " + req.session.user.name,
+        created_by: req.session.user.matricule,
       });
       res.redirect(`/leave/planning-view`);
     } catch (error) {
@@ -411,7 +481,7 @@ export class EmployeeController {
   }
 
   // @UseGuards(RolesGuard)
-  // @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HEAD_HR, UserRole.HR_ADMIN)
+  // @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   // @Post()
   // create(@Body() createEmployeeDto: CreateEmployeeDto) {
   //   return this.employeeService.create(createEmployeeDto);
@@ -430,14 +500,14 @@ export class EmployeeController {
   }
 
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HEAD_HR, UserRole.HR_ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateEmployeeDto: UpdateEmployeeDto) {
     return this.employeeService.update(id, updateEmployeeDto);
   }
 
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HEAD_HR, UserRole.HR_ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.employeeService.remove(id);

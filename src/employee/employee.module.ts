@@ -12,11 +12,15 @@ import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/user/entities/user.entity';
 import { HistoryService } from 'src/history/history.service';
 import { History } from 'src/history/entities/history.entity';
+import { Permission2h } from 'src/permission2h/entities/permission2h.entity';
+import { Permission2hService } from 'src/permission2h/permission2h.service';
+import { SmiaOstieService } from 'src/smia_ostie/smia_ostie.service';
+import { SmiaOstie } from 'src/smia_ostie/entities/smia_ostie.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Leave, Employee, ManagerAssignation, User, History])],
+  imports: [TypeOrmModule.forFeature([Leave, Employee, ManagerAssignation, User, History, Permission2h, SmiaOstie])],
   controllers: [EmployeeController],
-  providers: [EmployeeService, LeaveService, CryptoService, UserService, JwtService, HistoryService],
-  exports: [EmployeeService, TypeOrmModule, CryptoService, UserService, JwtService, HistoryService],
+  providers: [EmployeeService, LeaveService, CryptoService, UserService, JwtService, HistoryService, Permission2hService, SmiaOstieService],
+  exports: [EmployeeService, TypeOrmModule, CryptoService, UserService, JwtService, HistoryService, Permission2hService, SmiaOstieService],
 })
 export class EmployeeModule { }

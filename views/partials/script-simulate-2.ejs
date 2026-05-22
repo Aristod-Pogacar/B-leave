@@ -10,6 +10,9 @@
     const simulateDate = document.getElementById('simulate_date');
     const formSimulation = document.getElementById('formSimulation');
     const leaveType = document.getElementById('leave_type');
+    const balance_type = document.getElementById('balance_type');
+
+    const days_taken = document.getElementById('days_taken');
 
     const startDate1 = document.getElementById('startDate1');
     const endDate1 = document.getElementById('endDate1');
@@ -20,15 +23,44 @@
     startDate1.addEventListener('change', checkSimulationLeave);
     endDate1.addEventListener('change', checkSimulationLeave);
 
+    simulateDate.value = new Date().toISOString().slice(0, 10);
+    startDate1.value = new Date().toISOString().slice(0, 10);
+    endDate1.value = new Date().toISOString().slice(0, 10);
+
+    simulateDate.addEventListener('change', () => {
+        startDate1.value = simulateDate.value;
+        endDate1.value = new Date(new Date(simulateDate.value).setDate(new Date(simulateDate.value).getDate() + parseInt(days_taken.value) - 1)).toISOString().slice(0, 10);
+        checkSimulationLeave();
+    });
+
+    days_taken.addEventListener('change', () => {
+        endDate1.value = new Date(new Date(startDate1.value).setDate(new Date(startDate1.value).getDate() + parseInt(days_taken.value) - 1)).toISOString().slice(0, 10);
+        checkSimulationLeave();
+    });
+
+    balance_type.addEventListener('change', () => {
+        if (balance_type.value === 'Daily') {
+            document.getElementsByName("entitlement-day").forEach((el) => el.className = "mb-2");
+            document.getElementsByName("entitlement-month").forEach((el) => el.className = "d-none");
+        } else {
+            document.getElementsByName("entitlement-day").forEach((el) => el.className = "d-none");
+            document.getElementsByName("entitlement-month").forEach((el) => el.className = "mb-2");
+        }
+    });
+
     const soldeCumule1 = document.getElementById('soldeCumule1');
+    const soldeCumuleMensuel1 = document.getElementById('soldeCumuleMensuel1');
     const soldeDebut1 = document.getElementById('soldeDebut1');
     const soldePris1 = document.getElementById('soldePris1');
     const soldeRestant1 = document.getElementById('soldeRestant1');
+    const soldeRestantMensuel1 = document.getElementById('soldeRestantMensuel1');
 
     const soldeCumule2 = document.getElementById('soldeCumule2');
+    const soldeCumuleMensuel2 = document.getElementById('soldeCumuleMensuel2');
     const soldeDebut2 = document.getElementById('soldeDebut2');
     const soldePris2 = document.getElementById('soldePris2');
     const soldeRestant2 = document.getElementById('soldeRestant2');
+    const soldeRestantMensuel2 = document.getElementById('soldeRestantMensuel2');
 
     let solde_simulate = 0;
 
@@ -53,19 +85,35 @@
                 const data = await res.json();
 
                 results1.innerHTML = '';
+                console.log("Data:", data);
                 data.forEach(emp => {
                     const li = document.createElement('li');
                     li.classList.add('list-group-item');
-                    li.textContent = `${emp.matricule} - ${emp.fullname}`;
+                    li.textContent = `${emp.matricule} - ${emp.name + " " + emp.firstname}`;
                     li.onclick = () => {
                         input1.value = li.textContent;
                         hiddenInput1.value = emp.id;
                         hiddenInputMatricule1.value = emp.matricule;
-                        soldeCumule1.textContent = emp.solde_cumul;
+                        if (leaveType.value === "Local_Leave_AMD") {
+                            soldeCumule1.textContent = emp.solde_cumul;
+                            soldeCumuleMensuel1.textContent = emp.solde_cumul_mensuel;
+                            soldeCumule2.textContent = emp.solde_cumul;
+                            soldeCumuleMensuel2.textContent = emp.solde_cumul_mensuel;
+                            // document.getElementsByName("entitlement-day")[0].classList.add("d-none");
+                            // document.getElementsByName("entitlement-month")[0].classList.remove("d-none");
+                        } else {
+                            soldeCumule1.textContent = emp.solde_cumul;
+                            soldeCumuleMensuel1.textContent = emp.solde_cumul_mensuel;
+                            soldeCumule2.textContent = emp.solde_cumul;
+                            soldeCumuleMensuel2.textContent = emp.solde_cumul_mensuel;
+                            // document.getElementsByName("entitlement-day")[0].classList.remove("d-none");
+                            // document.getElementsByName("entitlement-month")[0].classList.add("d-none");
+                        }
                         soldeDebut1.textContent = emp.solde_debut;
                         soldeDebut2.textContent = emp.solde_debut;
                         soldePris1.textContent = emp.solde_pris;
                         soldeRestant1.textContent = emp.solde_restant;
+                        soldeRestantMensuel1.textContent = emp.solde_restant_mensuel;
                         solde = emp.solde_restant;
                         results1.innerHTML = '';
                     };
@@ -108,22 +156,28 @@
             solde_simulate = data.solde_restant;
             solde_pris_simulate = data.solde_pris;
             solde_cumule_simulate = data.solde_cumul;
+            solde_cumul_mensuel = data.solde_cumul_mensuel;
             const startDate = document.getElementById('startDate1').value;
             const endDate = document.getElementById('endDate1').value;
 
+            let numberOfDays = getNumberOfDays(startDate, endDate);
             soldeCumule2.textContent = solde_cumule_simulate;
-            soldePris2.textContent = solde_pris_simulate;
-            soldeRestant2.textContent = solde_simulate;
+            soldeCumuleMensuel2.textContent = solde_cumul_mensuel;
+            soldeRestantMensuel2.textContent = (data.solde_restant_mensuel - numberOfDays).toFixed(2);
+            if (numberOfDays == NaN) {
+                numberOfDays = 0;
+            }
+            soldePris2.textContent = solde_pris_simulate + numberOfDays;
+            soldeRestant2.textContent = (solde_simulate - numberOfDays).toFixed(2);
             console.log("SOLDE SIMULATE:", solde_simulate);
             console.log("SOLDE PRIS:", solde_pris_simulate);
             console.log("SOLDE CUMULE:", solde_cumule_simulate);
-            const numberOfDays = getNumberOfDays(startDate, endDate);
             console.log("NUMBER OF DAYS:", numberOfDays)
             if (numberOfDays > solde_simulate) {
                 console.log("Solde de congé: " + solde_simulate + " jours. Insuffisant pour cette demande (" + numberOfDays + " jours)");
             }
             if (!checkDate(startDate, endDate) || numberOfDays <= 0) {
-                messageContainer.innerHTML = "Invalid starting or ending date";
+                messageContainer.innerHTML = "Invalid number of days";
                 styleAlert = "warning";
             } else if ((solde === null || solde === undefined || solde === "")) {
                 messageContainer.innerHTML = "Choose an employee";

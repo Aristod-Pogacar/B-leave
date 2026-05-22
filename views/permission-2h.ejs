@@ -43,19 +43,44 @@
 
                                                     <!-- Filtres -->
                                                     <form method="GET" action=""
-                                                        class="d-flex align-items-end gap-3 mt-2 flex-wrap">
+                                                        class="d-flex align-items-end gap-5 mt-2 flex-wrap">
                                                         <div>
                                                             <label class="form-label mb-1">Recherche</label>
                                                             <input type="text" name="search" class="form-control"
                                                                 placeholder="Matricule, nom..." value="<%= search %>" />
                                                         </div>
                                                         <div>
-                                                            <label class="form-label mb-1">Date début</label>
+
+                                                            <label
+                                                                class="form-label mb-1 <% if (user.role== 'MANAGER' || user.role=='HR_LEAD' ) { %> d-none <% } %>">Site</label>
+                                                            <select
+                                                                class="form-select <% if (user.role== 'MANAGER' || user.role=='HR_LEAD' ) { %> d-none <% } %>"
+                                                                name="site" id="site">
+                                                                <option value="all">All</option>
+                                                                <% allowedSites.forEach(function(st) { %>
+                                                                    <% const maValeur=st ; const
+                                                                        index=allowedSites.indexOf(maValeur); const
+                                                                        maCle=(index !==-1) ? KEYS[index] : "Inconnu" ;
+                                                                        %>
+                                                                        <% if(st===site) { %>
+                                                                            <option value="<%= st %>" selected>
+                                                                                <%= maCle %>
+                                                                            </option>
+                                                                            <% } else { %>
+                                                                                <option value="<%= st %>">
+                                                                                    <%= maCle %>
+                                                                                </option>
+                                                                                <% } %>
+                                                                                    <% }); %>
+                                                            </select>
+                                                        </div>
+                                                        <div>
+                                                            <label class="form-label mb-1">Start date</label>
                                                             <input type="date" name="startDate" class="form-control"
                                                                 value="<%= startDate %>" />
                                                         </div>
                                                         <div>
-                                                            <label class="form-label mb-1">Date fin</label>
+                                                            <label class="form-label mb-1">End date</label>
                                                             <input type="date" name="endDate" class="form-control"
                                                                 value="<%= endDate %>" />
                                                         </div>
@@ -76,8 +101,8 @@
                                                             <thead>
                                                                 <tr>
                                                                     <th style="width: 10%;">Matricule</th>
-                                                                    <th style="width: 30%;">Fullname</th>
-                                                                    <th style="width: 10%;">Date</th>
+                                                                    <th style="width: 40%;">Fullname</th>
+                                                                    <th style="width: 20%;">Applied at</th>
                                                                     <th style="width: 10%;">Start time</th>
                                                                     <th style="width: 10%;">End time</th>
                                                                     <th style="width: 10%;">Status</th>
@@ -98,11 +123,17 @@
                                                                         <td style="width: 10%;">
                                                                             <%= d.employee.matricule %>
                                                                         </td>
-                                                                        <td style="width: 30%;">
-                                                                            <%= d.employee.fullname %>
+                                                                        <td style="width: 40%;">
+                                                                            <a
+                                                                                href="/employee/details/<%= d.employee.id %>">
+                                                                                <%= d.employee.name %>
+                                                                                    <%= d.employee.firstname %>
+                                                                            </a>
                                                                         </td>
-                                                                        <td style="width: 10%;">
-                                                                            <%= d.date %>
+                                                                        <td style="width: 20%;">
+                                                                            <%= d.applied_at.toLocaleDateString('en-GB',
+                                                                                { weekday: 'long' , year: 'numeric' ,
+                                                                                month: 'long' , day: 'numeric' }) %>
                                                                         </td>
                                                                         <td style="width: 10%;">
                                                                             <%= d.expectedStartTime %>
@@ -208,6 +239,15 @@
                                                     </div>
 
                                                 </div>
+                                                <% if (user.role==='SUPERADMIN' || user.role==='HR_LEAD' ) { %>
+                                                    <div class="card-footer">
+                                                        <div class="d-flex gap-2 justify-content-end">
+                                                            <a href="/permission2h/export?search=<%= search %>&startDate=<%= startDate %>&endDate=<%= endDate %>&site=<%= site %>"
+                                                                class="btn btn-primary"><i
+                                                                    class="feather-download me-1"></i> Export</a>
+                                                        </div>
+                                                    </div>
+                                                    <% } %>
                                             </div>
                                         </div>
                                     </div>

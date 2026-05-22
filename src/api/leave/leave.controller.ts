@@ -16,11 +16,14 @@ export class LeaveController {
   @Post()
   async create(@Body() createLeaveDto: CreateLeaveDto, @Res() res: any) {
     const leave = await this.leaveService.create(createLeaveDto, res);
-    await this.historyService.create({
-      reason: HistoryReason.LEAVE,
-      message: "New leave send by API. Leave ID: " + leave.id,
-
-    });
+    console.log("LEAVE", leave.body);
+    if (leave?.status == 200 && leave?.body?.id) {
+      await this.historyService.create({
+        reason: HistoryReason.LEAVE,
+        message: "New leave send by API for employee " + leave.body.employee.matricule,
+        created_by: leave.body.employee.matricule,
+      });
+    }
     return leave;
   }
 

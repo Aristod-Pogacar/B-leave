@@ -1,4 +1,4 @@
-import { IsString } from "class-validator";
+import { IsOptional, IsString } from "class-validator";
 
 export class CreateHistoryDto {
     @IsString()
@@ -6,4 +6,8 @@ export class CreateHistoryDto {
 
     @IsString()
     message: string;
+
+    @IsString()
+    @IsOptional()
+    created_by: string;
 }

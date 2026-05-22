@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Site, User, UserRole } from 'src/user/entities/user.entity';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { MailService } from 'src/mail/mail.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
@@ -61,7 +61,7 @@ export class AuthService {
             };
         }
         const user = await this.userRepo.findOne({
-            where: [{ email: login }, { matricule: login }]
+            where: [{ email: login, role: Not(UserRole.MANAGER) }, { matricule: login, role: Not(UserRole.MANAGER) }]
         });
         return user;
     }

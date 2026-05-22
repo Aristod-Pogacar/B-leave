@@ -48,17 +48,85 @@
                                         <div class="col-xl-12">
                                             <div class="card stretch stretch-full d-flex">
                                                 <div class="card-header">
-                                                    <div class="row w-100">
+                                                    <!-- <div class="row w-100"> -->
+                                                    <!-- <div class="col-md-8"> -->
+                                                    <h5 class="header">Leave Plan</h5>
+                                                    <!-- </div> -->
+                                                    <% if(user.role==='MANAGER' ) { %>
                                                         <div class="col-md-2">
-                                                            <h4 class="header">Leave Plan</h4>
+                                                            <label for="startDateFilter"
+                                                                class="form-label ms-3">Start:</label>
+                                                            <input type="date" class="form-control mx-3"
+                                                                name="startDateFilter" id="startDateFilter">
                                                         </div>
-                                                        <div
-                                                            class="col-10 task-header d-md-flex align-items-center justify-content-between">
-                                                            <div class="me-4 w-100">
-                                                                <div class="d-flex align-items-center">
+                                                        <div class="col-md-2">
+                                                            <label for="endDateFilter"
+                                                                class="form-label ms-3">End:</label>
+                                                            <input type="date" class="form-control mx-3"
+                                                                name="endDateFilter" id="endDateFilter">
+                                                        </div>
+                                                        <% } %>
+                                                            <div class="">
+                                                                <label class="form-label mb-1">Search</label>
+                                                                <input type="text" name="search" id="search"
+                                                                    class="form-control"
+                                                                    placeholder="Matricule, name..." />
+                                                            </div>
+                                                            <!-- </div> -->
+                                                </div>
+                                                <div class="card-body p-0 m-0">
+                                                    <div
+                                                        class="col-12 mb-3 task-header d-md-flex align-items-center justify-content-between">
+                                                        <div class="me-4 w-100 no-global-wrap">
+                                                            <div
+                                                                class="d-flex align-items-center no-global-wrap row g-1">
+                                                                <div class="col-md-3 mt-3">
+                                                                    <label for="sectionFilter"
+                                                                        class="form-label ms-3 <% if(user.role==='MANAGER' ) { %>d-none<% } %>">
+                                                                        Section:
+                                                                    </label>
+                                                                    <select
+                                                                        class="form-select mx-3 <% if(user.role==='MANAGER' ) { %>d-none<% } %>"
+                                                                        name="sectionFilter" id="sectionFilter">
+
+                                                                        <% sectionList.forEach(function(section) { %>
+                                                                            <% if(section==='HR' ) { %>
+                                                                                <option value="<%= section %>" selected>
+                                                                                    <%= section %>
+                                                                                </option>
+                                                                                <% } else { %>
+                                                                                    <option value="<%= section %>">
+                                                                                        <%= section %>
+                                                                                    </option>
+                                                                                    <% } %>
+                                                                                        <% }); %>
+
+                                                                    </select>
+                                                                </div>
+                                                                <div class="col-md-3 mt-3">
+                                                                    <label for="divisionFilter"
+                                                                        class="form-label ms-3 <% if(user.role==='MANAGER' ) { %>d-none<% } %>">Division:</label>
+                                                                    <select
+                                                                        class="form-select mx-3 <% if(user.role==='MANAGER' ) { %>d-none<% } %>"
+                                                                        name="divisionFilter" id="divisionFilter">
+                                                                        <% divisionList.forEach(function(division) { %>
+                                                                            <% if(division==='Administration' ) { %>
+                                                                                <option value="<%= division %>"
+                                                                                    selected>
+                                                                                    <%= division %>
+                                                                                </option>
+                                                                                <% } else { %>
+                                                                                    <option value="<%= division %>">
+                                                                                        <%= division %>
+                                                                                    </option>
+                                                                                    <% } %>
+                                                                                        <% }); %>
+                                                                    </select>
+                                                                </div>
+                                                                <div class="col-md-2 mt-3 d-none">
                                                                     <label for="departementFilter"
                                                                         class="form-label ms-3">Departement:</label>
-                                                                    <select class="form-select mx-3"
+                                                                    <select class="form-select mx-3 d-none"
                                                                         name="departementFilter" id="departementFilter">
                                                                         <% departementList.forEach(function(departement)
                                                                             { %>
@@ -74,10 +142,14 @@
                                                                                     <% } %>
                                                                                         <% }); %>
                                                                     </select>
+                                                                </div>
+                                                                <div class="col-md-2 mt-3">
                                                                     <label for="lineFilter"
-                                                                        class="form-label ms-3">Line:</label>
-                                                                    <select class="form-select mx-3" name="lineFilter"
-                                                                        id="lineFilter">
+                                                                        class="form-label ms-3
+                                                                <% if(user.role==='MANAGER' ) { %>d-none<% } %>">Line:</label>
+                                                                    <select
+                                                                        class="form-select mx-3 <% if(user.role==='MANAGER' ) { %>d-none<% } %>"
+                                                                        name="lineFilter" id="lineFilter">
                                                                         <% lineList.forEach(line=> { %>
                                                                             <% if (line==='NULL' ) { %>
                                                                                 <option value="<%= line %>" selected>
@@ -90,6 +162,9 @@
                                                                                     <% } %>
                                                                                         <% }) %>
                                                                     </select>
+                                                                </div>
+                                                                <div
+                                                                    class="col-md-2 <% if(user.role!=='SUPERADMIN' ) { %>d-none<% } %>">
                                                                     <label for="siteFilter"
                                                                         class="form-label ms-3">Site:</label>
                                                                     <select class="form-select mx-3" name="siteFilter"
@@ -111,20 +186,25 @@
                                                                                         <% } %>
                                                                                             <% }); %>
                                                                     </select>
-                                                                    <label for="startDateFilter"
-                                                                        class="form-label ms-3">Start:</label>
-                                                                    <input type="date" class="form-control mx-3"
-                                                                        name="startDateFilter" id="startDateFilter">
-                                                                    <label for="endDateFilter"
-                                                                        class="form-label ms-3">End:</label>
-                                                                    <input type="date" class="form-control mx-3"
-                                                                        name="endDateFilter" id="endDateFilter">
                                                                 </div>
+                                                                <% if(user.role!=='MANAGER' ) { %>
+                                                                    <div class="col-md-2">
+                                                                        <label for="startDateFilter"
+                                                                            class="form-label ms-3">Start:</label>
+                                                                        <input type="date" class="form-control mx-3"
+                                                                            name="startDateFilter" id="startDateFilter">
+                                                                    </div>
+                                                                    <div class="col-md-2">
+                                                                        <label for="endDateFilter"
+                                                                            class="form-label ms-3">End:</label>
+                                                                        <input type="date" class="form-control mx-3"
+                                                                            name="endDateFilter" id="endDateFilter">
+                                                                    </div>
+                                                                    <% } %>
+
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                                <div class="card-body">
                                                     <%- include('partials/planning-calendar') %>
                                                 </div>
                                             </div>

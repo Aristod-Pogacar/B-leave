@@ -22,7 +22,7 @@ export class TaskScheduler {
     ) { }
 
     // @Cron('0 0 16 * * *') // tous les jours à 16h
-    @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+    // @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
     // @Cron(CronExpression.EVERY_30_MINUTES_BETWEEN_9AM_AND_6PM)"0 */30 9-18 * * *"
     // @Interval(10000)
     async runTasks() {

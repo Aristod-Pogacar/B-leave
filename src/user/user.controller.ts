@@ -88,7 +88,7 @@ export class UserController {
   @Get('get-all-managers')
   @UseGuards(AuthGuard)
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL)
+  @Roles(UserRole.SUPERADMIN)
   async getAllManagers(@Req() req: any) {
     return this.userService.findAllManagers(req.session.user.site);
   }
@@ -104,7 +104,7 @@ export class UserController {
 
   @UseGuards(AuthGuard)
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL)
+  @Roles(UserRole.SUPERADMIN)
   @Get('list')
   @Render('users')
   async getList(@Req() req: any) {
@@ -137,7 +137,7 @@ export class UserController {
 
   @UseGuards(AuthGuard)
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
+  @Roles(UserRole.SUPERADMIN)
   @Get('new-user')
   @Render('new-user')
   async getNewUser(@Req() req: any) {
@@ -153,7 +153,7 @@ export class UserController {
   }
 
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
+  @Roles(UserRole.SUPERADMIN)
   @Post('new-user')
   async register(@Body() body, @Req() req: any, @Res() res: any) {
     if (body.password !== body.confirmPassword) {
@@ -192,6 +192,7 @@ export class UserController {
         error: 'Phone number is required'
       });
     }
+    console.log("BODY", body)
     const user = await this.userService.create(body);
 
     if (!user) {
@@ -209,6 +210,7 @@ export class UserController {
     await this.historyService.create({
       reason: HistoryReason.USER,
       message: "User " + user.firstName + " " + user.name + " created by " + req.session.user.firstName + " " + req.session.user.name,
+      created_by: req.session.user.matricule,
     });
 
     return res.redirect('/user/list');
@@ -216,7 +218,7 @@ export class UserController {
 
   @UseGuards(AuthGuard)
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
+  @Roles(UserRole.SUPERADMIN)
   @Get('delete-user/:id')
   @Render('delete-user')
   async deleteUser(@Param('id') id: string) {
@@ -229,7 +231,7 @@ export class UserController {
 
   @UseGuards(AuthGuard)
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
+  @Roles(UserRole.SUPERADMIN)
   @Post('delete-user/:id')
   async deleteTheUser(@Param('id') id: string, @Res() res: any, @Req() req: any) {
     const user = await this.userService.findOne(id);
@@ -240,13 +242,14 @@ export class UserController {
     await this.historyService.create({
       reason: HistoryReason.USER,
       message: "User " + user.firstName + " " + user.name + " deleted by " + req.session.user.firstName + " " + req.session.user.name,
+      created_by: req.session.user.matricule,
     });
     return res.redirect('/user/list');
   }
 
   @UseGuards(AuthGuard)
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
+  @Roles(UserRole.SUPERADMIN)
   @Get('edit-user/:id')
   @Render('edit-user')
   async editUser(@Param('id') id: string, @Req() req: any) {
@@ -261,7 +264,7 @@ export class UserController {
 
   @UseGuards(AuthGuard)
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
+  @Roles(UserRole.SUPERADMIN)
   @Post('edit-user/:id')
   async editTheUser(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto, @Res() res: any, @Req() req: any) {
     const user = await this.userService.findOne(id);
@@ -272,6 +275,7 @@ export class UserController {
     await this.historyService.create({
       reason: HistoryReason.USER,
       message: "User " + user.firstName + " " + user.name + " updated by " + req.session.user.firstName + " " + req.session.user.name,
+      created_by: req.session.user.matricule,
     });
     return res.redirect('/user/list');
   }

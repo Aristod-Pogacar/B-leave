@@ -3,7 +3,7 @@ import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Employee } from './entities/employee.entity';
-import { In, IsNull, Like, Repository } from 'typeorm';
+import { In, IsNull, Like, Not, Repository } from 'typeorm';
 import * as ExcelJS from 'exceljs';
 import * as XLSX from 'xlsx';
 import { Leave, LeaveStatus } from 'src/leave/entities/leave.entity';
@@ -37,7 +37,7 @@ export class EmployeeService {
 
     if (search && search.trim() !== '') {
       query.andWhere(
-        '(e.matricule LIKE :s OR e.fullname LIKE :s) AND e.site IN (:...role)',
+        '(e.matricule LIKE :s OR e.name LIKE :s OR e.firstname LIKE :s) AND e.site IN (:...role)',
         { s: `%${search}%`, role }
       );
     }
@@ -51,18 +51,28 @@ export class EmployeeService {
     return { data, total, totalPages: Math.ceil(total / limit) };
   }
 
-  async getMyTeam(user: any) {
-    return this.employeeRepository.find({
-      where: { manager: { id: user.id } },
-      select: ['fullname', 'matricule', 'id', 'section', 'line'],
-      order: { matricule: 'ASC' }
-    });
+  async getMyTeam(user: any, search: string) {
+    const query = this.employeeRepository.createQueryBuilder('e');
+    query.leftJoinAndSelect('e.manager', 'manager');
+    query.orderBy('e.matricule', 'ASC');
+    query.where({ manager: { id: user.id } });
+
+    if (search && search.trim() !== '') {
+      query.andWhere(
+        '(e.matricule LIKE :s OR e.name LIKE :s OR e.firstname LIKE :s OR e.section LIKE :s OR e.designation LIKE :s)',
+        { s: `%${search}%` }
+      );
+    }
+
+    const data = await query.getMany();
+
+    return data;
   }
 
   async updateManager(data: { matricule: any; manager: any; }) {
     const employee = await this.employeeRepository.findOne({ where: { matricule: data.matricule } });
     if (employee) {
-      const manager = await this.userRepository.findOne({ where: { matricule: data.manager } });
+      const manager = await this.userRepository.findOne({ where: { matricule: data.manager, role: UserRole.MANAGER } });
       if (manager) {
         employee.manager = manager;
         await this.employeeRepository.save(employee);
@@ -73,7 +83,7 @@ export class EmployeeService {
   async getAssignedEmployees(managerId: string) {
     return this.employeeRepository.find({
       where: { manager: { id: managerId } },
-      select: ['fullname', 'matricule', 'id', 'section', 'line']
+      select: ['name', 'firstname', 'matricule', 'id', 'section', 'line']
     });
   }
 
@@ -92,6 +102,7 @@ export class EmployeeService {
       await this.historyService.create({
         reason: HistoryReason.EMPLOYEE,
         message: "New employee " + createEmployeeDto.matricule + " by " + req.session.user.firstName + " " + req.session.user.name,
+        created_by: req.session.user.matricule,
       });
       return res.redirect('/');
     } catch (error) {
@@ -141,10 +152,12 @@ export class EmployeeService {
     const employees = await this.employeeRepository.find({
       where: [
         { site: In(allowedSites), matricule: Like(`%${search}%`) },
-        { site: In(allowedSites), fullname: Like(`%${search}%`) }
+        { site: In(allowedSites), firstname: Like(`%${search}%`) },
+        { site: In(allowedSites), name: Like(`%${search}%`) }
       ],
       select: [
-        'fullname',
+        'name',
+        'firstname',
         'matricule',
         'id',
         'section',
@@ -190,39 +203,57 @@ export class EmployeeService {
   }
 
   async getEmployeesWithBalances(
-    line: string,
-    departement: string,
-    site: string,
-    skip: number,
-    take: number,
-    year: number,
-    user: any
-  ) {
+    line: string, departement: string, section: string, division: string, site: string, skip: number, take: number, year: number, user: any, search: string = '') {
 
     let employees: Employee[];
     let total: number;
 
     if (user.role === UserRole.MANAGER) {
+      if (search && search.trim() !== "") {
+        [employees, total] = await this.employeeRepository.findAndCount({
+          where: [
+            { manager: { id: user.id }, matricule: Like(`%${search}%`) },
+            { manager: { id: user.id }, name: Like(`%${search}%`) },
+            { manager: { id: user.id }, firstname: Like(`%${search}%`) },
+            { manager: { id: user.id }, division: Like(`%${search}%`) },
+            { manager: { id: user.id }, section: Like(`%${search}%`) },
+          ],
+          order: { matricule: 'ASC' },
+          skip,
+          take,
+        });
+      } else {
+        [employees, total] = await this.employeeRepository.findAndCount({
+          where: { manager: { id: user.id } },
+          order: { matricule: 'ASC' },
+          skip,
+          take,
+        });
 
-      // 1️⃣ Récupérer les employés
-      [employees, total] = await this.employeeRepository.findAndCount({
-        where: { manager: { id: user.id }, line, departement, site },
-        order: { matricule: 'ASC' },
-        skip,
-        take,
-      });
-
+      }
     } else {
-
-      // 1️⃣ Récupérer les employés
-      [employees, total] = await this.employeeRepository.findAndCount({
-        where: { line, departement, site },
-        order: { matricule: 'ASC' },
-        skip,
-        take,
-      });
-
-
+      if (search && search.trim() !== "") {
+        [employees, total] = await this.employeeRepository.findAndCount({
+          where: [
+            { matricule: Like(`%${search}%`) },
+            { name: Like(`%${search}%`) },
+            { firstname: Like(`%${search}%`) },
+            { division: Like(`%${search}%`) },
+            { section: Like(`%${search}%`) },
+          ],
+          order: { matricule: 'ASC' },
+          skip,
+          take,
+        });
+      } else {
+        // 1️⃣ Récupérer les employés
+        [employees, total] = await this.employeeRepository.findAndCount({
+          where: { line, section, division, site },
+          order: { matricule: 'ASC' },
+          skip,
+          take,
+        });
+      }
     }
 
     if (employees.length === 0) {
@@ -379,6 +410,27 @@ export class EmployeeService {
     return results.map(res => res.value);
   }
 
+  async findAllDivisions(): Promise<string[]> {
+    const results = await this.employeeRepository
+      .createQueryBuilder('employee')
+      .select('DISTINCT employee.division', 'division')
+      // .where('employee.division IS NOT NULL')
+      .orderBy('employee.division', 'ASC')
+      .getRawMany();
+
+    return results.map((res) => res.division);
+  }
+
+  async findAllSections(): Promise<string[]> {
+    const results = await this.employeeRepository
+      .createQueryBuilder('employee')
+      .select('DISTINCT employee.section', 'section')
+      // .where('employee.section IS NOT NULL')
+      .orderBy('employee.section', 'ASC')
+      .getRawMany();
+
+    return results.map((res) => res.section);
+  }
 
   async findAllDepartments(): Promise<string[]> {
     const results = await this.employeeRepository
@@ -454,36 +506,18 @@ export class EmployeeService {
       // 🎯 Sélectionner uniquement certains champs
       const filtered = rows.map(row => ({
         type: row['Type'],
-        div: row['Div'],
         departement: row['Dept'],
         section: row['Sect'],
         line: row['Line'],
         matricule: row['Emp No'],
         gender: row['Gender'],
-        pay_mode: row['Pay Mode'],
         DOE: row['D.O.E'],
-        DOC: row['D.O.C'],
-        DOR: row['D.O.R'],
-        effective_start_date: row['Effec. Start Date'],
-        effective_end_date: row['Effec. End Date'],
         division: row['Division'],
-        fullname: row['Fullname'],
+        name: row['Name'],
+        firstname: row['Firstname'],
         job_level: row['Job Level'],
-        job_post: row['Job Post'],
-        occupation: row['Occupation'],
-        prtr: row['PRTR'],
-        DI: row['DI'],
+        designation: row['Designation'],
         site: row['Sit'],
-        pattern: row['Pattern'],
-        date_of_birth: row['D.O.B'],
-        CIN: row['NIC No'],
-        CNAPS: row['CNAPS No'],
-        adrs_street: row['Adrs street'],
-        adrs_locality: row['Adrs locality'],
-        adrs_twnvge: row['Adrs twnvge'],
-        cat_basic: row['Cat Basic'],
-        cat_ind: row['Cat Ind'],
-        cat_prof: row['Cat Prof']
       }));
 
       // ❗ ignorer lignes vides
@@ -496,7 +530,22 @@ export class EmployeeService {
           .insert()
           .into(Employee)
           .values(cleanData)
-          .orIgnore()  // ⚡ ignore les doublons automatiquement
+          .orUpdate(
+            [
+              'type',
+              'departement',
+              'section',
+              'line',
+              'gender',
+              'DOE',
+              'division',
+              'name',
+              'firstname',
+              'job_level',
+              'designation',
+            ],
+            ['matricule']
+          )
           .execute();
       } catch (e) {
         console.log(e);
@@ -543,40 +592,45 @@ export class EmployeeService {
 
       employees.push({
         type: row.getCell(headerMap['type']).value?.toString(),
-        div: row.getCell(headerMap['div']).value?.toString(),
         departement: row.getCell(headerMap['dept']).value?.toString(),
         section: row.getCell(headerMap['sect']).value?.toString(),
         line: row.getCell(headerMap['line']).value?.toString(),
         matricule: row.getCell(headerMap['emp no']).value?.toString(),
         gender: row.getCell(headerMap['gender']).value?.toString(),
-        pay_mode: row.getCell(headerMap['pay mode']).value?.toString(),
         DOE: row.getCell(headerMap['d.o.e']).value as Date,
-        DOC: row.getCell(headerMap['d.o.c']).value as Date,
-        DOR: row.getCell(headerMap['d.o.r']).value as Date,
-        effective_start_date: row.getCell(headerMap['effec. start date']).value as Date,
-        effective_end_date: row.getCell(headerMap['effec. end date']).value as Date,
         division: row.getCell(headerMap['division']).value?.toString(),
-        fullname: row.getCell(headerMap['fullname']).value?.toString(),
+        name: row.getCell(headerMap['name']).value?.toString(),
+        firstname: row.getCell(headerMap['firstname']).value?.toString(),
         job_level: row.getCell(headerMap['job level']).value?.toString(),
         job_post: row.getCell(headerMap['job post']).value?.toString(),
-        occupation: row.getCell(headerMap['occupation']).value?.toString(),
-        prtr: row.getCell(headerMap['prtr']).value?.toString(),
-        DI: row.getCell(headerMap['di']).value?.toString(),
+        designation: row.getCell(headerMap['designation']).value?.toString(),
         site: row.getCell(headerMap['sit']).value?.toString(),
-        pattern: row.getCell(headerMap['pattern']).value?.toString(),
-        date_of_birth: row.getCell(headerMap['d.o.b']).value as Date,
-        CIN: row.getCell(headerMap['nic no']).value?.toString(),
-        CNAPS: row.getCell(headerMap['cnaps no']).value?.toString(),
-        adrs_street: row.getCell(headerMap['adrs street']).value?.toString(),
-        adrs_locality: row.getCell(headerMap['adrs locality']).value?.toString(),
-        adrs_twnvge: row.getCell(headerMap['adrs twnvge']).value?.toString(),
-        cat_basic: row.getCell(headerMap['cat basic']).value?.toString(),
-        cat_ind: row.getCell(headerMap['cat ind']).value?.toString(),
-        cat_prof: row.getCell(headerMap['cat prof']).value?.toString()
       });
     }
 
-    await this.employeeRepository.save(employees);
+    await this.employeeRepository
+      .createQueryBuilder()
+      .insert()
+      .into(Employee)
+      .values(employees)
+      .orUpdate(
+        [
+          'type',
+          'departement',
+          'section',
+          'line',
+          'gender',
+          'DOE',
+          'division',
+          'name',
+          'firstname',
+          'job_level',
+          'designation',
+          'site',
+        ],
+        ['matricule']
+      )
+      .execute();
     return {
       result: 'success',
       message: 'Master file imported successfully',
@@ -659,22 +713,26 @@ export class EmployeeService {
     return result;
   }
 
-  async search(q: string, site: any) {
-    const allowedSites = this.getAllowedSites(site);
+  async search(q: string, user: any) {
+    const allowedSites = this.getAllowedSites(user.site);
     if (!q) return [];
     const year = new Date().getFullYear();
-    const [data] = await this.employeeRepository
+    const queryBuilder = this.employeeRepository
       .createQueryBuilder('e')
-      // .leftJoin('users', 'u', 'u.employee = e.matricule')
       .where(
-        '(e.matricule LIKE :q OR e.fullname LIKE :q)',
+        '(e.matricule LIKE :q OR e.name LIKE :q OR e.firstname LIKE :q)',
         { q: `%${q}%` },
       )
-      .andWhere('e.site IN (:...allowedSites)', { allowedSites })
-      // .andWhere('u.id IS NULL')
-      .select(['e.id', 'e.matricule', 'e.fullname', 'e.line', 'e.departement', 'e.section', 'e.site', 'e.section', 'e.DOE'])
-      .take(10)
-      .getManyAndCount();
+      .select(['e.id', 'e.matricule', 'e.name', 'e.firstname', 'e.line', 'e.departement', 'e.section', 'e.site', 'e.section', 'e.DOE'])
+      .take(10);
+
+    if (user.role === UserRole.MANAGER) {
+      queryBuilder.andWhere('e.manager = :managerId', { managerId: user.id });
+    } else {
+      queryBuilder.andWhere('e.site IN (:...allowedSites)', { allowedSites });
+    }
+
+    const [data] = await queryBuilder.getManyAndCount();
 
     if (data.length === 0 || !data) return [];
     const date = new Date(data[0].DOE);
@@ -779,14 +837,33 @@ export class EmployeeService {
           }
         }
       }
+      function estDernierJourDuMois(date: Date) {
+        // 1. On récupère l'année et le mois de la date testée
+        const annee = date.getFullYear();
+        const mois = date.getMonth();
+
+        // 2. On crée une date pour le jour suivant
+        const demain = new Date(date);
+        demain.setDate(date.getDate() + 1);
+
+        // 3. Si le mois de "demain" est différent, c'est que "date" était le dernier jour
+        return demain.getMonth() !== mois;
+      }
+      let soldeCumulMensuel = 2.5 * today.getMonth();
+
+      if (estDernierJourDuMois(today)) {
+        soldeCumulMensuel = 2.5 * (today.getMonth() + 1);
+      }
 
       return {
         ...emp,
         solde_cumul: Number(cumulSolde.toFixed(2)),
+        solde_cumul_mensuel: Number(soldeCumulMensuel.toFixed(2)),
         solde_debut: Number(soldeDebut.toFixed(2)),
         solde_pris: Number(pris.toFixed(2)),
         solde_pris_permission: Number(prisPermission.toFixed(2)),
         solde_restant: Number((restant + soldeDebut).toFixed(2)),
+        solde_restant_mensuel: Number((soldeCumulMensuel - pris).toFixed(2)),
       };
     });
 
@@ -796,12 +873,59 @@ export class EmployeeService {
     return results;
   }
 
+  async getActiveEmployeesNotOnLeave(date: Date): Promise<number> {
+    const today = new Date(date).toISOString().split('T')[0]; // YYYY-MM-DD
+
+    return await this.employeeRepository
+      .createQueryBuilder('employee')
+      .where('employee.is_active = :isActive', { isActive: true })
+      .andWhere('employee.is_deleted = :isDeleted', { isDeleted: false })
+      .andWhere(qb => {
+        const subQuery = qb
+          .subQuery()
+          .select('1')
+          .from(Leave, 'leave')
+          .where('leave.employee_id = employee.id')
+          .andWhere('leave.status = :status')
+          .andWhere(':today BETWEEN leave.start_date AND leave.end_date')
+          .getQuery();
+
+        return `NOT EXISTS ${subQuery}`;
+      })
+      .setParameter('status', 'APPROVED') // ou LeaveStatus.APPROVED
+      .setParameter('today', today)
+      .getCount();
+  }
+
+  async getEmployeesOnLeave(date: Date): Promise<number> {
+    const today = new Date(date).toISOString().split('T')[0];
+
+    return await this.employeeRepository
+      .createQueryBuilder('employee')
+      .innerJoin(
+        'employee.leaves',
+        'leave',
+        `
+      leave.status = :status
+      AND :today BETWEEN leave.start_date AND leave.end_date
+      `,
+        {
+          status: 'APPROVED', // ou LeaveStatus.APPROVED
+          today,
+        },
+      )
+      .where('employee.is_active = :isActive', { isActive: true })
+      .andWhere('employee.is_deleted = :isDeleted', { isDeleted: false })
+      .distinct(true) // évite les doublons si un employé a plusieurs leaves
+      .getCount();
+  }
+
   async findOneByMatricule(matricule: string) {
     return this.employeeRepository.findOneBy({ matricule });
   }
 
-  async findOneByFullName(fullname: string) {
-    return this.employeeRepository.findOneBy({ fullname });
+  async findOneByName(name: string) {
+    return this.employeeRepository.findOneBy({ name });
   }
 
   async findByLine(line: string) {

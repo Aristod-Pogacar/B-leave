@@ -1,0 +1,191 @@
+<%- include('partials/head.ejs') %>
+
+    <body>
+        <%- include('partials/sidebar.ejs') %>
+            <%- include('partials/header.ejs') %>
+                <main class="nxl-container">
+                    <div class="nxl-content">
+                        <div class="page-header">
+                            <div class="page-header-left d-flex align-items-center">
+                                <div class="page-header-title">
+                                    <h5 class="m-b-10">Be-Leave</h5>
+                                </div>
+                                <ul class="breadcrumb">
+                                    <li class="breadcrumb-item">Medical service</li>
+                                    <li class="breadcrumb-item">Add new</li>
+                                </ul>
+                            </div>
+                            <div class="page-header-right ms-auto">
+                                <div class="page-header-right-items">
+                                    <div class="d-flex d-md-none">
+                                        <a href="javascript:void(0)" class="page-header-right-close-toggle">
+                                            <i class="feather-arrow-left me-2"></i>
+                                            <span>Back</span>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="d-md-none d-flex align-items-center">
+                                    <a href="javascript:void(0)" class="page-header-right-open-toggle">
+                                        <i class="feather-align-right fs-20"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- [ page-header ] end -->
+                        <div class="bg-white py-3 border-bottom rounded-0 p-md-0 mb-0">
+                            <div class="d-md-none d-flex align-items-center justify-content-between">
+                                <a href="javascript:void(0)" class="page-content-left-open-toggle">
+                                    <i class="feather-align-left fs-20"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <!-- [ Main Content ] start -->
+                        <div class="main-content">
+                            <div class="tab-content">
+                                <div class="tab-pane fade active show" id="overviewTab">
+                                    <div class="row">
+
+                                        <div class="col-xl-12">
+                                            <div class="card stretch stretch-full d-flex">
+                                                <div class="card-header">
+                                                    <h4 class="header">Add new</h4>
+                                                </div>
+                                                <div class="card-body">
+
+                                                    <div class="modal-body">
+                                                        <div class="row">
+                                                            <form action="/smia-ostie/add" method="post"
+                                                                id="addMedicalService">
+
+                                                                <!-- ===== LEFT: FORM ===== -->
+                                                                <div class="col-md-12">
+
+                                                                    <!-- Recherche Employé -->
+                                                                    <div class="mb-0">
+                                                                        <div class="row">
+                                                                            <div class="col-md-12 mb-3">
+                                                                                <label
+                                                                                    class=" form-label">Employee</label>
+                                                                                <input type="text" class="form-control"
+                                                                                    id="employeeSearch"
+                                                                                    autocomplete="off"
+                                                                                    placeholder="Search an employee...">
+                                                                                <input type="text" class="input"
+                                                                                    name="employee" id="employee" hidden
+                                                                                    required>
+                                                                                <ul id="employeeResults"
+                                                                                    class="autocomplete-list ps-0 w-100 z-200">
+                                                                                </ul>
+                                                                            </div>
+                                                                            <div class="col-md-4">
+                                                                                <label for="date"
+                                                                                    class="form-label">Date</label>
+                                                                                <input type="date" class="form-control"
+                                                                                    id="date" name="date" required>
+                                                                            </div>
+                                                                            <div class="col-md-4">
+                                                                                <label for="status"
+                                                                                    class="form-label">Status</label>
+                                                                                <select name="status" id="status"
+                                                                                    class="form-select">
+                                                                                    <option value="normal">Normal
+                                                                                    </option>
+                                                                                    <option value="emergency" selected>
+                                                                                        Emergency
+                                                                                    </option>
+                                                                                </select>
+                                                                            </div>
+                                                                            <div class="col-md-4">
+                                                                                <label for="reason"
+                                                                                    class="form-label">Reason</label>
+                                                                                <input type="text" class="form-control"
+                                                                                    id="reason" name="reason"
+                                                                                    placeholder="Enter reason...">
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                </div>
+                                                            </form>
+
+                                                        </div>
+                                                        <div class="row mt-2 d-none">
+                                                            <div class="col-md-12 text-center">
+                                                                <p id="message" class="fw-bold"></p>
+                                                            </div>
+                                                        </div>
+
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                                <div class="card-footer">
+                                                    <button class="btn btn-primary" type="submit"
+                                                        form="addMedicalService">
+                                                        Add Employee
+                                                    </button>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <%- include('partials/footer.ejs') %>
+    </body>
+    <script>
+
+        var message = "";
+
+        const input = document.getElementById('employeeSearch');
+        const results = document.getElementById('employeeResults');
+        const hiddenInput = document.getElementById('employee');
+        let timeout = null;
+
+        const date = document.getElementById('date');
+
+        date.value = new Date().toISOString().split("T")[0];
+        input.addEventListener('input', () => {
+            clearTimeout(timeout);
+
+            const query = input.value.trim();
+            if (query.length < 2) {
+                results.innerHTML = '';
+                return;
+            }
+
+            timeout = setTimeout(async () => {
+                try {
+                    const res = await fetch(`/employee/finding/search-list?q=${query}`);
+
+                    if (!res.ok) {
+                        console.error('HTTP error', res.status);
+                        return;
+                    }
+
+                    const data = await res.json();
+
+                    results.innerHTML = '';
+                    data.forEach(emp => {
+                        const li = document.createElement('li');
+                        li.classList.add('list-group-item');
+                        // li.classList.add('autocomplete-list-item');
+                        li.textContent = `${emp.matricule} - ${emp.name + " " + emp.firstname}`;
+                        li.onclick = async () => {
+                            console.log("EMP:", emp);
+                            input.value = li.textContent;
+                            hiddenInput.value = emp.matricule;
+                            results.innerHTML = '';
+                        };
+                        results.appendChild(li);
+                    });
+
+                } catch (err) {
+                    console.error('Autocomplete error:', err);
+                }
+            }, 300);
+        });
+    </script>
+
+    </html>

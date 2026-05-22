@@ -63,30 +63,51 @@
                                                                     <!-- Recherche Employé -->
                                                                     <div class="">
                                                                         <div class="row">
-                                                                            <div class="col-md-6 mb-3">
+                                                                            <div class="col-md-3 mb-3">
                                                                                 <label
-                                                                                    class="form-label">Departement</label>
+                                                                                    class="form-label">Section</label>
                                                                                 <select class="form-select"
-                                                                                    name="departement"
-                                                                                    id="departementFilter">
-                                                                                    <% departementList.forEach(function(departement)
+                                                                                    name="section" id="sectionFilter">
+                                                                                    <% sectionList.forEach(function(section)
                                                                                         { %>
-                                                                                        <% if(departement==='HR' ) { %>
+                                                                                        <% if(section==='HR' ) { %>
                                                                                             <option
-                                                                                                value="<%= departement %>"
+                                                                                                value="<%= section %>"
                                                                                                 selected>
-                                                                                                <%= departement %>
+                                                                                                <%= section %>
                                                                                             </option>
                                                                                             <% } else { %>
                                                                                                 <option
-                                                                                                    value="<%= departement %>">
-                                                                                                    <%= departement %>
+                                                                                                    value="<%= section %>">
+                                                                                                    <%= section %>
                                                                                                 </option>
                                                                                                 <% } %>
                                                                                                     <% }); %>
                                                                                 </select>
                                                                             </div>
-                                                                            <div class="col-md-6 mb-3">
+                                                                            <div class="col-md-3 mb-3">
+                                                                                <label
+                                                                                    class="form-label">Division</label>
+                                                                                <select class="form-select"
+                                                                                    name="division" id="divisionFilter">
+                                                                                    <% divisionList.forEach(function(division)
+                                                                                        { %>
+                                                                                        <% if(division==='HR' ) { %>
+                                                                                            <option
+                                                                                                value="<%= division %>"
+                                                                                                selected>
+                                                                                                <%= division %>
+                                                                                            </option>
+                                                                                            <% } else { %>
+                                                                                                <option
+                                                                                                    value="<%= division %>">
+                                                                                                    <%= division %>
+                                                                                                </option>
+                                                                                                <% } %>
+                                                                                                    <% }); %>
+                                                                                </select>
+                                                                            </div>
+                                                                            <div class="col-md-3 mb-3">
                                                                                 <label class="form-label">Line</label>
                                                                                 <select class="form-select" name="line"
                                                                                     id="lineFilter">
@@ -103,6 +124,31 @@
                                                                                                 </option>
                                                                                                 <% } %>
                                                                                                     <% }) %>
+                                                                                </select>
+                                                                            </div>
+                                                                            <div class="col-md-3 mb-3">
+                                                                                <label class="form-label">Site</label>
+                                                                                <select class="form-select" name="site"
+                                                                                    id="siteFilter">
+                                                                                    <% allowedSites.forEach(function(site)
+                                                                                        { %>
+                                                                                        <% const maValeur=site ; const
+                                                                                            index=allowedSites.indexOf(maValeur);
+                                                                                            const maCle=(index !==-1) ?
+                                                                                            KEYS[index] : "Inconnu" ; %>
+                                                                                            <% if(site===user.site) { %>
+                                                                                                <option
+                                                                                                    value="<%= site %>"
+                                                                                                    selected>
+                                                                                                    <%= maCle %>
+                                                                                                </option>
+                                                                                                <% } else { %>
+                                                                                                    <option
+                                                                                                        value="<%= site %>">
+                                                                                                        <%= maCle %>
+                                                                                                    </option>
+                                                                                                    <% } %>
+                                                                                                        <% }); %>
                                                                                 </select>
                                                                             </div>
                                                                         </div>
@@ -131,13 +177,13 @@
                                                                                     class="form-label">Status</label>
                                                                                 <select name="status" id="status"
                                                                                     class="form-select">
-                                                                                    <option value="all">ALL</option>
-                                                                                    <option value="pending">Pending
+                                                                                    <option value="approved">Approved
                                                                                     </option>
-                                                                                    <option value="approved">Approuved
+                                                                                    <option value="pending">Pending
                                                                                     </option>
                                                                                     <option value="rejected">Rejected
                                                                                     </option>
+                                                                                    <option value="all">All</option>
                                                                                 </select>
                                                                             </div>
                                                                         </div>

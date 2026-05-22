@@ -12,11 +12,18 @@ import { CryptoService } from 'src/crypto/crypto.service';
 import { User } from 'src/user/entities/user.entity';
 import { History } from 'src/history/entities/history.entity';
 import { HistoryService } from 'src/history/history.service';
+import { Permission2hService } from 'src/permission2h/permission2h.service';
+import { SmiaOstieService } from 'src/smia_ostie/smia_ostie.service';
+import { Permission2h } from 'src/permission2h/entities/permission2h.entity';
+import { SmiaOstie } from 'src/smia_ostie/entities/smia_ostie.entity';
+import { UserService } from 'src/user/user.service';
+import { JwtService } from '@nestjs/jwt';
+
 
 @Module({
     imports: [
         ConfigModule.forRoot({ isGlobal: true }),
-        TypeOrmModule.forFeature([Employee, Leave, User, History]),
+        TypeOrmModule.forFeature([Employee, Leave, User, History, Permission2h, SmiaOstie, User, Leave]),
     ],
     controllers: [PuppeteerController],
     providers: [
@@ -25,7 +32,13 @@ import { HistoryService } from 'src/history/history.service';
         EmployeeService,
         LeaveService,
         CryptoService,
-        HistoryService],
+        HistoryService,
+        Permission2hService,
+        SmiaOstieService,
+        UserService,
+        JwtService,
+        UserService
+    ],
     exports: [
         PuppeteerService,
         CryptoService,
@@ -33,6 +46,11 @@ import { HistoryService } from 'src/history/history.service';
         LeaveService,
         TypeOrmModule,
         HistoryService,
+        Permission2hService,
+        SmiaOstieService,
+        UserService,
+        JwtService,
+        UserService
     ],
 })
 export class PuppeteerModule { }

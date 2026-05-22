@@ -90,10 +90,10 @@
                                                                                 class="form-label">Status</label>
                                                                             <select name="status" id="status"
                                                                                 class="form-select">
-                                                                                <option value="all">ALL</option>
+                                                                                <option value="all">All</option>
                                                                                 <option value="pending">Pending
                                                                                 </option>
-                                                                                <option value="approved">Approuved
+                                                                                <option value="approved">Approved
                                                                                 </option>
                                                                                 <option value="rejected">Rejected
                                                                                 </option>
@@ -202,7 +202,8 @@
                                                     </div>
                                                 </div>
                                                 <div class="card-footer d-none" <% if (user.role==='SUPERADMIN' ||
-                                                    user.role==='PAYROLL' ) { %> id="footer-export" <% } %>>
+                                                    user.role==='PAYROLL' || user.role=="HR_LEAD" ) { %>
+                                                    id="footer-export" <% } %>>
                                                         <form action="/leave/export-employee-leaves" method="get">
                                                             <input type="hidden" name="employeeId"
                                                                 id="exportEmployeeId">
@@ -337,12 +338,12 @@
                         const li = document.createElement('li');
                         li.classList.add('list-group-item');
                         // li.classList.add('autocomplete-list-item');
-                        li.textContent = `${emp.matricule} - ${emp.fullname}`;
+                        li.textContent = `${emp.matricule} - ${emp.name + " " + emp.firstname}`;
                         li.onclick = async () => {
                             console.log("EMP:", emp);
                             input.value = li.textContent;
                             hiddenInput.value = emp.id;
-                            fullname.textContent = emp.fullname;
+                            fullname.textContent = emp.name + " " + emp.firstname;
                             matricule.textContent = emp.matricule;
                             site.textContent = emp.site;
                             line.textContent = emp.line;

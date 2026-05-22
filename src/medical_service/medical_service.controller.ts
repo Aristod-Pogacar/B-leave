@@ -14,7 +14,7 @@ export class MedicalServiceController {
 
   @Get('list')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HEAD_HR, UserRole.HR_ADMIN)
+  @Roles(UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.PAYROLL, UserRole.HR_LEAD)
   @Render('medical-service-setting')
   async getMedicalService(@Req() req, @Query('search') search: string = '', @Query('page') page: number = 1) {
     const limit = 20;
@@ -44,7 +44,7 @@ export class MedicalServiceController {
 
   @Get('new-medical-service')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.PAYROLL, UserRole.SUPERADMIN, UserRole.HR_ADMIN)
+  @Roles(UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.PAYROLL)
   @Render('new-medical-service')
   async getNewMedicalService(@Req() req) {
     return {
@@ -55,7 +55,7 @@ export class MedicalServiceController {
 
   @Post('new-medical-service')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.PAYROLL, UserRole.SUPERADMIN, UserRole.HR_ADMIN)
+  @Roles(UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.PAYROLL)
   async postNewMedicalService(@Req() req, @Body() body: CreateMedicalServiceDto, @Res() res: any) {
     if (body.name == "") {
       return res.render('new-medical-service', {
@@ -77,13 +77,14 @@ export class MedicalServiceController {
     await this.historyService.create({
       reason: HistoryReason.MEDICAL_SERVICE,
       message: "New medical service " + body.name + " by " + req.session.user.firstName + " " + req.session.user.name,
+      created_by: req.session.user.matricule,
     });
     return res.redirect('/medical-service/list');
   }
 
   @Get('edit-medical-service/:id')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.PAYROLL, UserRole.SUPERADMIN, UserRole.HR_ADMIN)
+  @Roles(UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.PAYROLL)
   @Render('edit-medical-service')
   async getEditMedicalService(@Req() req, @Param('id') id: string) {
     const medicalService = await this.medicalServiceService.findOne(id);
@@ -96,7 +97,7 @@ export class MedicalServiceController {
 
   @Post('edit-medical-service/:id')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.PAYROLL, UserRole.SUPERADMIN, UserRole.HR_ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.PAYROLL, UserRole.SUPERADMIN)
   async postEditMedicalService(@Req() req, @Param('id') id: string, @Body() body: UpdateMedicalServiceDto, @Res() res: any) {
     if (body.name == "") {
       return res.render('edit-medical-service', {
@@ -118,13 +119,14 @@ export class MedicalServiceController {
     await this.historyService.create({
       reason: HistoryReason.MEDICAL_SERVICE,
       message: "Medical service " + body.name + " updated by " + req.session.user.firstName + " " + req.session.user.name,
+      created_by: req.session.user.matricule,
     });
     return res.redirect('/medical-service/list');
   }
 
   @Post("delete-medical-service/:id")
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.PAYROLL, UserRole.SUPERADMIN, UserRole.HR_ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.PAYROLL, UserRole.SUPERADMIN)
   async deleteMedicalService(@Req() req, @Param('id') id: string, @Res() res: any) {
     const medicalService = await this.medicalServiceService.findOne(id);
     if (!medicalService) {
@@ -134,6 +136,7 @@ export class MedicalServiceController {
     await this.historyService.create({
       reason: HistoryReason.MEDICAL_SERVICE,
       message: "Medical service " + medicalService.name + " deleted by " + req.session.user.firstName + " " + req.session.user.name,
+      created_by: req.session.user.matricule,
     });
     return res.redirect('/medical-service/list');
   }

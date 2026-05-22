@@ -3,7 +3,7 @@ import { CreateLeaveDto } from './dto/create-leave.dto';
 import { UpdateLeaveDto } from './dto/update-leave.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Leave, LeaveStatus } from './entities/leave.entity';
-import { Between, In, IsNull, Repository } from 'typeorm';
+import { Between, In, IsNull, Like, Repository } from 'typeorm';
 import { Employee } from 'src/employee/entities/employee.entity';
 import * as express from 'express';
 import * as ExcelJS from 'exceljs';
@@ -15,6 +15,8 @@ import { ConfigService } from '@nestjs/config';
 import { MailerService } from '@nestjs-modules/mailer';
 import { HistoryReason } from 'src/history/entities/history.entity';
 import { HistoryService } from 'src/history/history.service';
+import { Permission2h } from 'src/permission2h/entities/permission2h.entity';
+import { SmiaOstie } from 'src/smia_ostie/entities/smia_ostie.entity';
 
 @Injectable()
 export class LeaveService {
@@ -26,6 +28,10 @@ export class LeaveService {
     private readonly employeeRepository: Repository<Employee>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Permission2h)
+    private readonly permission2hRepository: Repository<Permission2h>,
+    @InjectRepository(SmiaOstie)
+    private readonly smiaOstieRepository: Repository<SmiaOstie>,
     private readonly employeeService: EmployeeService,
     private readonly configService: ConfigService,
     private readonly mailerService: MailerService,
@@ -41,8 +47,67 @@ export class LeaveService {
     return this.leaveRepository.save(leave);
   }
 
-  async getNonApprouvedLeaves(id: string) {
-    return this.leaveRepository.find({ where: { employee: { manager: { id } }, status: LeaveStatus.PENDING }, relations: ['employee'], order: { start_date: 'ASC' } });
+  async getNonApprouvedLeaves(id: string, typeLeaves: string[] = ['Local_Leave_AMD', 'Indisponibilite_AMD']) {
+    return this.leaveRepository.find({
+      where: {
+        employee: {
+          manager: {
+            id: id
+          }
+        },
+        status: LeaveStatus.PENDING,
+        leave_type: In(typeLeaves)
+      },
+      relations: ['employee'],
+      order: { created_at: 'ASC' }
+    });
+  }
+
+  async getPermissions(user: any, startDate: Date, endDate: Date, status: string) {
+    if (user.role == UserRole.MANAGER) {
+      return this.leaveRepository.find({
+        where: {
+          start_date: Between(
+            new Date(startDate),
+            new Date(endDate)
+          ),
+          employee: {
+            manager: {
+              id: user.id
+            }
+          },
+          status: In([
+            LeaveStatus.APPROVED,
+            LeaveStatus.PENDING
+          ]),
+          leave_type: "Permission_AMD"
+        },
+        relations: [
+          'employee',
+          'approver'
+        ]
+      });
+    }
+    const allowedSites = this.getAllowedSites(user.site);
+    return this.leaveRepository.find({
+      where: {
+        start_date: Between(
+          new Date(startDate),
+          new Date(endDate)
+        ),
+        employee: {
+          site: In(allowedSites)
+        },
+        status: In([
+          LeaveStatus.APPROVED,
+          LeaveStatus.PENDING
+        ])
+      },
+      relations: [
+        'employee',
+        'approver'
+      ]
+    });
   }
 
   async approveLeave(leaveId: string, id: string) {
@@ -75,12 +140,113 @@ export class LeaveService {
     return this.leaveRepository.save(leave);
   }
 
-  getLeavesByRange(year: number, startMonth: number, endMonth: number, line: string, departement: string, site: string) {
-    return this.leaveRepository.find({ where: { start_date: Between(new Date(year, startMonth, 1), new Date(year, endMonth, 1)), employee: { line, departement, site }, status: In([LeaveStatus.APPROVED, LeaveStatus.PENDING]) }, relations: ['employee', 'approver'] });
+  async getLeavesByRange(year: number, startMonth: number, endMonth: number, line: string, departement: string, section: string, division: string, site: string, user: any, search: string) {
+    if (user.role == UserRole.MANAGER) {
+      if (search && search.trim() !== "") {
+        return this.leaveRepository.find({
+          where: {
+            start_date: Between(
+              new Date(year, startMonth, 0),
+              new Date(year, endMonth + 1, 0)
+            ),
+            employee: [
+              { manager: { id: user.id }, matricule: Like(`%${search}%`) },
+              { manager: { id: user.id }, name: Like(`%${search}%`) },
+              { manager: { id: user.id }, firstname: Like(`%${search}%`) },
+              { manager: { id: user.id }, division: Like(`%${search}%`) },
+              { manager: { id: user.id }, section: Like(`%${search}%`) },
+            ],
+            status: In([
+              LeaveStatus.APPROVED,
+              LeaveStatus.PENDING
+            ])
+          },
+          relations: [
+            'employee',
+            'approver'
+          ]
+        });
+      }
+      return this.leaveRepository.find({
+        where: {
+          start_date: Between(
+            new Date(year, startMonth, 0),
+            new Date(year, endMonth + 1, 0)
+          ),
+          employee: {
+            manager: {
+              id: user.id
+            }
+          },
+          status: In([
+            LeaveStatus.APPROVED,
+            LeaveStatus.PENDING
+          ])
+        },
+        relations: [
+          'employee',
+          'approver'
+        ]
+      });
+    }
+    if (search && search.trim() !== "") {
+      return this.leaveRepository.find({
+        where: {
+          start_date: Between(
+            new Date(year, startMonth, 0),
+            new Date(year, endMonth + 1, 0)
+          ),
+          employee: [
+            { matricule: Like(`%${search}%`) },
+            { name: Like(`%${search}%`) },
+            { firstname: Like(`%${search}%`) },
+            { division: Like(`%${search}%`) },
+            { section: Like(`%${search}%`) },
+          ],
+          status: In([
+            LeaveStatus.APPROVED,
+            LeaveStatus.PENDING
+          ])
+        },
+        relations: [
+          'employee',
+          'approver'
+        ]
+      });
+    }
+    return this.leaveRepository.find({
+      where: {
+        start_date: Between(
+          new Date(year, startMonth, 0),
+          new Date(year, endMonth + 1, 0)
+        ),
+        employee: {
+          line,
+          section,
+          division,
+          site
+        },
+        status: In([
+          LeaveStatus.APPROVED,
+          LeaveStatus.PENDING
+        ])
+      },
+      relations: [
+        'employee',
+        'approver'
+      ]
+    });
   }
 
   getLeavesByMonthAndLineAndDepartement(year: number, month: number, line: string, departement: string, site: string) {
-    return this.leaveRepository.find({ where: { start_date: Between(new Date(year, month, 1), new Date(year, month, 31)), employee: { line, departement, site }, status: In([LeaveStatus.APPROVED, LeaveStatus.PENDING]) }, relations: ['employee', 'approver'] });
+    return this.leaveRepository.find({
+      where: {
+        start_date: Between(new Date(year, month, 1), new Date(year, month, 31)),
+        employee: { line, departement, site },
+        status: In([LeaveStatus.APPROVED, LeaveStatus.PENDING])
+      },
+      relations: ['employee', 'approver']
+    });
   }
 
   async create(createLeaveDto: CreateLeaveDto, res: express.Response, req: any) {
@@ -112,6 +278,7 @@ export class LeaveService {
     await this.historyService.create({
       reason: HistoryReason.LEAVE,
       message: "New leave " + leaveSaved.id + " by " + req.session.user.firstName + " " + req.session.user.name,
+      created_by: req.session.user.matricule,
     });
     var email: string[] = [];
     const manager = employee.manager;
@@ -130,7 +297,7 @@ export class LeaveService {
           Bonjour Monsieur/Madame,
         </p>
         <p>
-          Un membre de votre équipe ayant la matricule <strong>${employee.matricule} (${employee.fullname})</strong> a envoyé une demande de congé et a besoin de votre approbation sur <a href="http://localhost:3000/leave/approuve-leaves" target="_blank">B-Leave</a>.
+          Un membre de votre équipe ayant la matricule <strong>${employee.matricule} (${employee.name} ${employee.firstname})</strong> a envoyé une demande de congé et a besoin de votre approbation sur <a href="http://localhost:3000/leave/approuve-leaves" target="_blank">B-Leave</a>.
         </p>
         <p>
           <strong>
@@ -150,7 +317,7 @@ export class LeaveService {
           Hello Mister/Misses,
         </p>
         <p>
-          A member of your team with matricule <strong>${employee.matricule} (${employee.fullname})</strong> has taken a leave and need your approval on <a href="http://localhost:3000/leave/approuve-leaves" target="_blank">B-Leave</a>.
+          A member of your team with matricule <strong>${employee.matricule} (${employee.name} ${employee.firstname})</strong> has taken a leave and need your approval on <a href="http://localhost:3000/leave/approuve-leaves" target="_blank">B-Leave</a>.
         </p>
         <p>
           <strong>
@@ -176,29 +343,29 @@ export class LeaveService {
 
   async importLeaves(file: Express.Multer.File) {
     try {
-      console.log("LEAVE SERVICE IMPORT LEAVES");
+      // console.log("LEAVE SERVICE IMPORT LEAVES");
       const workbook = new ExcelJS.Workbook();
       await workbook.xlsx.load(file.buffer as any);
       // await workbook.xlsx.readFile(file.path);await workbook.xlsx.load(file.buffer as any);
 
-      console.log("GETTING WORKSHEET");
+      // console.log("GETTING WORKSHEET");
       const worksheet = workbook.getWorksheet("donne saisie");
-      console.log("WORKSHEET:", worksheet?.name);
+      // console.log("WORKSHEET:", worksheet?.name);
 
       if (!worksheet) {
         const message = 'Aucune feuille trouvée dans le fichier Excel'
-        console.log(message)
+        // console.log(message)
         throw new Error(message);
       }
-      console.log("GETTING HEADER ROW");
+      // console.log("GETTING HEADER ROW");
       const headerRow = worksheet.getRow(1);
-      console.log("HEADER ROW:", headerRow.values);
+      // console.log("HEADER ROW:", headerRow.values);
 
       const headerMap: Record<string, number> = {};
 
       headerRow.eachCell((cell, colNumber) => {
         const headerName = cell.value?.toString().trim().toLowerCase();
-        console.log("COLUMN NAME:", headerName);
+        // console.log("COLUMN NAME:", headerName);
         if (headerName) {
           headerMap[headerName] = colNumber;
         }
@@ -213,7 +380,7 @@ export class LeaveService {
           throw new Error(`Missing column: ${column}`);
         }
       }
-      console.log("HEADER MAP:", headerMap);
+      // console.log("HEADER MAP:", headerMap);
       const leaves: Partial<Leave>[] = [];
 
       for (let i = 2; i <= worksheet.rowCount; i++) {
@@ -228,7 +395,7 @@ export class LeaveService {
           leave_type = "Indisponibilite_AMD";
         }
         if (!employee) {
-          console.log("EMPLOYEE NOT FOUND:", row.getCell(headerMap['mle']).value?.toString());
+          // console.log("EMPLOYEE NOT FOUND:", row.getCell(headerMap['mle']).value?.toString());
           continue;
         }
         const startDate = row.getCell(headerMap['debutcongé']).value as Date;
@@ -249,7 +416,7 @@ export class LeaveService {
         message: 'File readed successfully',
       };
     } catch (error) {
-      console.log("ERROR:", error);
+      // console.log("ERROR:", error);
       return {
         result: 'error',
         message: error.message,
@@ -261,8 +428,8 @@ export class LeaveService {
     if (!employeeId) {
       return null;
     }
-    console.log("Employee ID:", employeeId);
-    console.log("Date:", date.toISOString());
+    // console.log("Employee ID:", employeeId);
+    // console.log("Date:", date.toISOString());
     const [data] = await this.employeeRepository
       .createQueryBuilder('e')
       // .leftJoin('users', 'u', 'u.employee = e.matricule')
@@ -271,11 +438,11 @@ export class LeaveService {
         { id: employeeId },
       )
       // .andWhere('u.id IS NULL')
-      .select(['e.id', 'e.matricule', 'e.fullname', 'e.DOE'])
+      .select(['e.id', 'e.matricule', 'e.name', 'e.firstname', 'e.DOE'])
       .take(10)
       .getManyAndCount();
 
-    console.log("EMPLOYEES:", data);
+    // console.log("EMPLOYEES:", data);
 
     const takenLeaves = await this.leaveRepository
       .createQueryBuilder('leave')
@@ -286,13 +453,13 @@ export class LeaveService {
         'daysTaken'
       )
       .where('employee.id IN (:...employeeIds)', { employeeIds: [employeeId] })
-      .andWhere('leave.status = :status', { status: LeaveStatus.APPROVED })
+      .andWhere('leave.status IN (:...status)', { status: [LeaveStatus.APPROVED, LeaveStatus.PENDING] })
       .andWhere('leave.leave_type = :type', { type: 'Local_Leave_AMD' })
       .andWhere('YEAR(leave.start_date) = :year', { year: date.getFullYear() })
       .andWhere('leave.start_date <= :date', { date: date.toISOString() })
       .groupBy('employee.id')
       .getRawMany();
-    console.log("Data:", takenLeaves);
+    // console.log("Data:", takenLeaves);
     // // return data;
 
     // console.log("takenLeaves:", takenLeaves);
@@ -303,25 +470,10 @@ export class LeaveService {
       takenMap.set(l.employeeId, Number(l.daysTaken));
     });
 
-    // 3️⃣ Calcul solde cumulatif dynamique
-    // const today = new Date();
-
-    // let soldeCumul = this.calculateCumulBalance(date);
-
-    // 4️⃣ Fusion finale
-    // const result = data.map(emp => {
-    //   const pris = takenMap.get(emp.id) || 0;
-    //   const restant = soldeCumul - pris;
-
-    //   return {
-    //     ...emp,
-    //     solde_cumul: Number(soldeCumul.toFixed(2)),
-    //     solde_pris: Number(pris.toFixed(2)),
-    //     solde_restant: Number(restant.toFixed(2)),
-    //   };
-    // });
     const promises = data.map(async (emp) => {
-      const cumulSolde = (await this.getEmployeeSolde(emp.matricule, date)).solde_cumul;
+      const sld = await this.getEmployeeSolde(emp.matricule, date);
+      const cumulSolde = sld.solde_cumul;
+      const cumulSoldeMensuel = sld.solde_cumul_mensuel;
       const pris = takenMap.get(emp.id) || 0;
       const restant = cumulSolde - pris;
 
@@ -343,13 +495,15 @@ export class LeaveService {
       return {
         ...emp,
         solde_cumul: Number(cumulSolde.toFixed(2)),
+        solde_cumul_mensuel: Number(cumulSoldeMensuel.toFixed(2)),
         solde_debut: Number(soldeDebut.toFixed(2)),
         solde_pris: Number(pris.toFixed(2)),
         solde_restant: Number((restant + soldeDebut).toFixed(2)),
+        solde_restant_mensuel: Number((cumulSoldeMensuel - pris + soldeDebut).toFixed(2)),
       };
     });
     const results = await Promise.all(promises);
-    console.log("Results:", results[0]);
+    // console.log("Results:", results[0]);
 
     return results[0];
   }
@@ -357,7 +511,7 @@ export class LeaveService {
   async getEmployeeSolde(matricule: string, at: Date) {
     const year = at.getFullYear();
     const employee = await this.employeeRepository.findOne({ where: { matricule } });
-    if (!employee) return { solde_cumul: 0, solde_pris: 0, solde_restant: 0 };
+    if (!employee) return { solde_cumul: 0, solde_pris: 0, solde_restant: 0, solde_cumul_mensuel: 0 };
 
     const takenLeaves = await this.leaveRepository
       .createQueryBuilder('leave')
@@ -368,7 +522,7 @@ export class LeaveService {
         'daysTaken'
       )
       .where('employee.id = :employeeId', { employeeId: employee.id })
-      .andWhere('leave.status = :status', { status: LeaveStatus.APPROVED })
+      .andWhere('leave.status IN (:...status)', { status: [LeaveStatus.APPROVED, LeaveStatus.PENDING] })
       .andWhere('leave.leave_type = :type', { type: 'Local_Leave_AMD' })
       .andWhere('YEAR(leave.start_date) = :year', { year })
       .andWhere('leave.start_date <= :at', { at })
@@ -381,8 +535,26 @@ export class LeaveService {
     takenLeaves.forEach(l => {
       takenLeavesMap.set(l.employeeId, Number(l.daysTaken));
     });
-    // 3️⃣ Calcul solde cumulatif dynamique
+
+    function estDernierJourDuMois(date: Date) {
+      // 1. On récupère l'année et le mois de la date testée
+      const annee = date.getFullYear();
+      const mois = date.getMonth();
+
+      // 2. On crée une date pour le jour suivant
+      const demain = new Date(date);
+      demain.setDate(date.getDate() + 1);
+
+      // 3. Si le mois de "demain" est différent, c'est que "date" était le dernier jour
+      return demain.getMonth() !== mois;
+    }
+
     let soldeCumul = 0;
+    let soldeCumulMensuel = 2.5 * at.getMonth();
+
+    if (estDernierJourDuMois(at)) {
+      soldeCumulMensuel = 2.5 * (at.getMonth() + 1);
+    }
 
     const getCumul = (date: Date) => {
       let cumul = 0;
@@ -423,6 +595,7 @@ export class LeaveService {
     const result = {
       ...employee,
       solde_cumul: Number(soldeCumul.toFixed(2)),
+      solde_cumul_mensuel: Number(soldeCumulMensuel.toFixed(2)),
       solde_pris: Number(pris.toFixed(2)),
       solde_restant: Number(restant.toFixed(2)),
     };
@@ -449,8 +622,8 @@ export class LeaveService {
     return this.leaveRepository.find();
   }
 
-  findOne(id: string) {
-    return this.leaveRepository.findOne({ where: { id } });
+  async findOne(id: string) {
+    return await this.leaveRepository.findOne({ where: { id }, relations: ['employee'] });
   }
 
   async update(id: string, updateLeaveDto: UpdateLeaveDto) {
@@ -480,8 +653,8 @@ export class LeaveService {
       // skip,
       // take,
     });
-    console.log("Data:", data);
-    console.log("Count:", count);
+    // console.log("Data:", data);
+    // console.log("Count:", count);
     return { data, count };
   }
 
@@ -546,7 +719,7 @@ export class LeaveService {
         'leave.end_date',
         'leave.leave_type',
         'employee.id',
-        'employee.fullname',
+        'employee.name', 'e.firstname',
         'employee.line',
       ])
       .where(
@@ -575,8 +748,8 @@ export class LeaveService {
   }
 
   getDatesBetween(startDate: Date, endDate: Date) {
-    console.log("startDate:", startDate);
-    console.log("endDate:", endDate);
+    // console.log("startDate:", startDate);
+    // console.log("endDate:", endDate);
 
     const dates: Date[] = [];
 
@@ -597,15 +770,15 @@ export class LeaveService {
     // console.log("end month:", em);
     // console.log("end date:", ed);
 
-    console.log("current:", current);
-    console.log("end:", end);
+    // console.log("current:", current);
+    // console.log("end:", end);
 
     while (current <= end) {
       dates.push(new Date(current));
       current.setDate(current.getDate() + 1);
     }
 
-    console.log(dates);
+    // console.log(dates);
 
     return dates;
   }
@@ -623,265 +796,473 @@ export class LeaveService {
     }
   }
 
-  async exportLeavePlanning(user: any, startDate: Date, endDate: Date, line?: string, departement?: string, status: string = 'all') {
-    console.log("USER:", user)
+  async exportLeavePlanning(
+    user: any,
+    startDate: Date,
+    endDate: Date,
+    line?: string,
+    section?: string,
+    division?: string,
+    site?: string,
+    status: string = "all"
+  ) {
     let leaves: Leave[];
     let employees: Employee[];
 
-    let leaveEx: string[] = this.getLeavesByStatus(status);
-
+    const leaveEx = this.getLeavesByStatus(status);
     const dates = this.getDatesBetween(startDate, endDate);
 
     if (user && user.role === UserRole.MANAGER) {
-      employees = await this.employeeRepository.find({ where: { line, departement, manager: { id: user.id } }, order: { matricule: 'ASC' } });
+      employees = await this.employeeRepository.find({
+        where: {
+          line,
+          section,
+          division,
+          site,
+          manager: { id: user.id },
+        },
+        order: { matricule: "ASC" },
+      });
+
       leaves = await this.leaveRepository.find({
-        where: [{
-          start_date: In(dates),
-          employee: { line, departement, manager: { id: user.id } },
-          status: In(leaveEx)
-        }, {
-          end_date: In(dates),
-          employee: { line, departement, manager: { id: user.id } },
-          status: In(leaveEx)
-        }],
-        relations: ['employee', 'approver']
+        where: [
+          {
+            employee: {
+              line,
+              section,
+              division,
+              site,
+              manager: { id: user.id },
+            },
+            status: In(leaveEx),
+          },
+        ],
+        relations: ["employee"],
       });
     } else {
-      employees = await this.employeeRepository.find({ where: { line, departement }, order: { matricule: 'ASC' } });
+      employees = await this.employeeRepository.find({
+        where: {
+          line,
+          section,
+          division,
+          site
+        },
+        order: { matricule: "ASC" },
+      });
+
       leaves = await this.leaveRepository.find({
-        where: [{
-          start_date: In(dates),
-          employee: { line, departement },
-          status: In(leaveEx)
-        }, {
-          end_date: In(dates),
-          employee: { line, departement },
-          status: In(leaveEx)
-        }],
-        relations: ['employee', 'approver']
+        where: [
+          {
+            employee: {
+              line,
+              section,
+              division,
+              site
+            },
+            status: In(leaveEx),
+          },
+        ],
+        relations: ["employee"],
       });
     }
 
-
-    console.log("LEAVES:", leaves);
-
     const workbook = new ExcelJS.Workbook();
     const sheet = workbook.addWorksheet("Leave Planning");
-    const requiredColumns = [
-      'mle',
-      'nom et prenom',
-      'fonction',
-      'codeabs',
-      'debutcongé',
-      'fincongé',
-      'DuréeAbsEffectif',
-      'status',
-      'Approuvé/Refusé par',
-      'Mle Approbateur',
-      'Date Approbation'
-    ];
 
+    /*
+        HEADER
+    */
     const header = [
-      "Matricule",
-      "Fullname",
-      "Departement",
-      "Section",
-      "Line",
-      "Occupation",
-      "DOE",
-      "Statut",
-      // "Solde debut",
-      // "Solde pris",
-      // "Solde cumul",
-      // "Solde restant",
-      // ...dates.map(d => d.toLocaleDateString("en-US", { day: "numeric", month: "short" }))
+      "Employee Code",
+      "Card No (Optional)",
+      "Employee Name (Optional)",
+      ...dates.map((d) =>
+        d.toLocaleDateString("en-GB", {
+          weekday: "short",
+          day: "2-digit",
+          month: "short",
+          year: "2-digit",
+        })
+      ),
     ];
 
-    // sheet.addRow(header);
-    sheet.addRow(requiredColumns);
+    sheet.addRow(header);
 
-    const headerRow = sheet.getRow(1);
+    // const headerRow = sheet.getRow(1);
 
-    headerRow.eachCell(cell => {
-      cell.font = { bold: true };
-      cell.alignment = { vertical: "middle", horizontal: "center" };
+    // headerRow.eachCell((cell) => {
+    //   cell.font = { bold: true, color: { argb: "FFFFFFFF" } };
+    //   cell.alignment = {
+    //     vertical: "middle",
+    //     horizontal: "center",
+    //     wrapText: true,
+    //   };
 
-      cell.fill = {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "FFf7ff18" }
-      };
-    });
-
-    // const sundayColumns = new Set<number>();
-
-    // dates.forEach((date, index) => {
-
-    //   if (date.getDay() === 0) { // dimanche
-
-    //     const columnIndex = index + 9; // 8 colonnes fixes + 1
-
-    //     sundayColumns.add(columnIndex);
-
-    //     sheet.getColumn(columnIndex).eachCell(cell => {
-
-    //       cell.fill = {
-    //         type: "pattern",
-    //         pattern: "solid",
-    //         fgColor: { argb: "FF808080" } // gris foncé
-    //       };
-
-    //     });
-    //   }
-
+    //   cell.fill = {
+    //     type: "pattern",
+    //     pattern: "solid",
+    //     fgColor: { argb: "FF1F4E78" },
+    //   };
     // });
 
-    // const leaveMap = new Map();
+    /*
+        Construire une map :
+        employeeId_date => leaveType
+    */
+    const leaveMap = new Map<string, string>();
 
-    leaves.forEach(l => {
-      var codeabs = '';
-      if (l.leave_type === 'Local_Leave_AMD') {
-        codeabs = 'Congé annuel';
+    leaves.forEach((leave) => {
+      let current = new Date(leave.start_date);
+      const end = new Date(leave.end_date);
+      current.setDate(current.getDate() - 1);
+      end.setDate(end.getDate() - 1);
+
+      while (current <= end) {
+        const key = `${leave.employee.id}_${this.formatDateUTC(current)}`;
+
+        leaveMap.set(key, leave.leave_type);
+
+        current.setDate(current.getDate() + 1);
       }
-      if (l.leave_type === 'Permission_AMD') {
-        codeabs = 'Permission';
-      }
-      if (l.leave_type === 'Indisponibilite_AMD') {
-        codeabs = 'Disponibilité';
-      }
-      // const row = ['mle', 'nom et prenom', 'fonction', 'codeabs', 'debutcongé', 'fincongé'];
-      const row = [
-        l.employee.matricule,
-        l.employee.fullname,
-        l.employee.occupation,
-        codeabs,
-        l.start_date,
-        l.end_date,
-        l.duration,
-        l.status,
-        l.approver ? l.approver.firstName + ' ' + l.approver.name : '',
-        l.approver ? l.approver.matricule : '',
-        l.approved_date ? l.approved_date : ''
-      ];
-      sheet.addRow(row);
-      // let current = new Date(l.start_date);
-      // const end = new Date(l.end_date);
-      // console.log("Leaves:", "" + current + "-" + end);
-      // current.setDate(current.getDate() - 1);
-      // end.setDate(end.getDate() - 1);
-
-      // while (current <= end) {
-
-      //   const key = `${l.employee.id}_${current.toISOString().slice(0, 10)}`;
-
-      // leaveMap.set(key, l.leave_type);
-
-      // current.setDate(current.getDate() + 1);
-      // }
-
     });
 
-    employees.forEach(emp => {
-
+    /*
+        Ajouter lignes employé
+    */
+    employees.forEach((emp) => {
       const rowData = [
         emp.matricule,
-        emp.fullname,
-        emp.departement,
-        emp.section,
-        emp.line,
-        emp.occupation,
-        emp.DOE,
-        emp.type,
-        // emp.solde_debut,
-        // emp.solde_pris,
-        // emp.solde_cumul,
-        // emp.solde_restant
-
+        "",
+        `${emp.name} ${emp.firstname}`,
       ];
 
-      // dates.forEach(date => {
+      dates.forEach((date) => {
+        const key = `${emp.id}_${this.formatDateUTC(date)}`;
+        rowData.push(leaveMap.get(key) || "");
+      });
 
-      //   const key = `${emp.id}_${date.toISOString().slice(0, 10)}`;
+      const row = sheet.addRow(rowData);
 
-      //   rowData.push(leaveMap.get(key) || "");
-
-      // });
-
-      // const row = sheet.addRow(rowData);
-
-      // 🔹 style colonnes infos employé (gris clair)
-      // for (let i = 1; i <= 8; i++) {
-
-      //   const cell = row.getCell(i);
-
-      //   cell.fill = {
+      // style colonnes fixes
+      // for (let i = 1; i <= 3; i++) {
+      //   row.getCell(i).fill = {
       //     type: "pattern",
       //     pattern: "solid",
-      //     fgColor: { argb: "FFEFEFEF" }
+      //     fgColor: { argb: "FFF2F2F2" },
       //   };
-
       // }
 
-      // 🔹 style cellules planning
-      // dates.forEach((date, index) => {
+      // coloration des congés
+      dates.forEach((_, index) => {
+        const cell = row.getCell(index + 4);
+        const value = cell.value as string;
 
-      //   const columnIndex = index + 9;
-      //   const cell = row.getCell(columnIndex);
-      //   const value = cell.value as string;
+        // if (value === "Local_Leave_AMD") {
+        //   cell.fill = {
+        //     type: "pattern",
+        //     pattern: "solid",
+        //     fgColor: { argb: "FF4F81BD" },
+        //   };
+        // }
 
-      // dimanche → gris foncé (prioritaire)
-      // if (sundayColumns.has(columnIndex)) {
+        // if (value === "Permission_AMD") {
+        //   cell.fill = {
+        //     type: "pattern",
+        //     pattern: "solid",
+        //     fgColor: { argb: "FFC0504D" },
+        //   };
+        // }
 
-      //   cell.fill = {
-      //     type: "pattern",
-      //     pattern: "solid",
-      //     fgColor: { argb: "FF808080" }
-      //   };
-
-      //   return;
-      // }
-
-      // couleurs selon type de leave
-      // if (value === "Local_Leave_AMD") {
-
-      //   cell.fill = {
-      //     type: "pattern",
-      //     pattern: "solid",
-      //     fgColor: { argb: "FF4F81BD" }
-      //   };
-
-      // }
-
-      // if (value === "Permission_AMD") {
-
-      //   cell.fill = {
-      //     type: "pattern",
-      //     pattern: "solid",
-      //     fgColor: { argb: "FFC0504D" }
-      //   };
-
-      // }
-
-      // if (value === "Indisponibilite_AMD") {
-
-      //   cell.fill = {
-      //     type: "pattern",
-      //     pattern: "solid",
-      //     fgColor: { argb: "FF9BBB59" }
-      //   };
-
-      // }
-
-      // });
-
+        // if (value === "Indisponibilite_AMD") {
+        //   cell.fill = {
+        //     type: "pattern",
+        //     pattern: "solid",
+        //     fgColor: { argb: "FF9BBB59" },
+        //   };
+        // }
+      });
     });
 
-    sheet.columns.forEach(col => {
-      col.width = 12;
-    });
+    /*
+        largeur colonnes
+    */
+    sheet.getColumn(1).width = 20;
+    sheet.getColumn(2).width = 20;
+    sheet.getColumn(3).width = 30;
+
+    for (let i = 4; i <= header.length; i++) {
+      sheet.getColumn(i).width = 16;
+    }
 
     return workbook;
   }
+
+  private formatDateUTC(date: Date): string {
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+    const day = String(date.getUTCDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  }
+  // async exportLeavePlanning(user: any, startDate: Date, endDate: Date, line?: string, section?: string, division?: string, site?: string, status: string = 'all') {
+  //   console.log("USER:", user)
+  //   let leaves: Leave[];
+  //   let employees: Employee[];
+
+  //   let leaveEx: string[] = this.getLeavesByStatus(status);
+
+  //   const dates = this.getDatesBetween(startDate, endDate);
+
+  //   if (user && user.role === UserRole.MANAGER) {
+  //     employees = await this.employeeRepository.find({ where: { line, section, division, site, manager: { id: user.id } }, order: { matricule: 'ASC' } });
+  //     leaves = await this.leaveRepository.find({
+  //       where: [{
+  //         start_date: In(dates),
+  //         employee: { line, section, division, site, manager: { id: user.id } },
+  //         status: In(leaveEx)
+  //       }, {
+  //         end_date: In(dates),
+  //         employee: { line, section, division, site, manager: { id: user.id } },
+  //         status: In(leaveEx)
+  //       }],
+  //       relations: ['employee', 'approver']
+  //     });
+  //   } else {
+  //     employees = await this.employeeRepository.find({ where: { line, section, division, site }, order: { matricule: 'ASC' } });
+  //     leaves = await this.leaveRepository.find({
+  //       where: [{
+  //         start_date: In(dates),
+  //         employee: { line, section, division, site },
+  //         status: In(leaveEx)
+  //       }, {
+  //         end_date: In(dates),
+  //         employee: { line, section, division, site },
+  //         status: In(leaveEx)
+  //       }],
+  //       relations: ['employee', 'approver']
+  //     });
+  //   }
+
+
+  //   console.log("LEAVES:", leaves);
+
+  //   const workbook = new ExcelJS.Workbook();
+  //   const sheet = workbook.addWorksheet("Leave Planning");
+  //   const requiredColumns = [
+  //     'mle',
+  //     'nom et prenom',
+  //     'fonction',
+  //     'codeabs',
+  //     'debutcongé',
+  //     'fincongé',
+  //     'DuréeAbsEffectif',
+  //     'status',
+  //     'Approuvé/Refusé par',
+  //     'Mle Approbateur',
+  //     'Date Approbation'
+  //   ];
+
+  //   const header = [
+  //     "Matricule",
+  //     "Fullname",
+  //     "Departement",
+  //     "Section",
+  //     "Line",
+  //     "Occupation",
+  //     "DOE",
+  //     "Statut",
+  //     // "Solde debut",
+  //     // "Solde pris",
+  //     // "Solde cumul",
+  //     // "Solde restant",
+  //     // ...dates.map(d => d.toLocaleDateString("en-US", { day: "numeric", month: "short" }))
+  //   ];
+
+  //   // sheet.addRow(header);
+  //   sheet.addRow(requiredColumns);
+
+  //   const headerRow = sheet.getRow(1);
+
+  //   headerRow.eachCell(cell => {
+  //     cell.font = { bold: true };
+  //     cell.alignment = { vertical: "middle", horizontal: "center" };
+
+  //     cell.fill = {
+  //       type: "pattern",
+  //       pattern: "solid",
+  //       fgColor: { argb: "FFf7ff18" }
+  //     };
+  //   });
+
+  //   // const sundayColumns = new Set<number>();
+
+  //   // dates.forEach((date, index) => {
+
+  //   //   if (date.getDay() === 0) { // dimanche
+
+  //   //     const columnIndex = index + 9; // 8 colonnes fixes + 1
+
+  //   //     sundayColumns.add(columnIndex);
+
+  //   //     sheet.getColumn(columnIndex).eachCell(cell => {
+
+  //   //       cell.fill = {
+  //   //         type: "pattern",
+  //   //         pattern: "solid",
+  //   //         fgColor: { argb: "FF808080" } // gris foncé
+  //   //       };
+
+  //   //     });
+  //   //   }
+
+  //   // });
+
+  //   // const leaveMap = new Map();
+
+  //   leaves.forEach(l => {
+  //     var codeabs = '';
+  //     if (l.leave_type === 'Local_Leave_AMD') {
+  //       codeabs = 'Congé annuel';
+  //     }
+  //     if (l.leave_type === 'Permission_AMD') {
+  //       codeabs = 'Permission';
+  //     }
+  //     if (l.leave_type === 'Indisponibilite_AMD') {
+  //       codeabs = 'Disponibilité';
+  //     }
+  //     // const row = ['mle', 'nom et prenom', 'fonction', 'codeabs', 'debutcongé', 'fincongé'];
+  //     const row = [
+  //       l.employee.matricule,
+  //       l.employee.name + " " + l.employee.firstname,
+  //       l.employee.designation,
+  //       codeabs,
+  //       l.start_date,
+  //       l.end_date,
+  //       l.duration,
+  //       l.status,
+  //       l.approver ? l.approver.firstName + ' ' + l.approver.name : '',
+  //       l.approver ? l.approver.matricule : '',
+  //       l.approved_date ? l.approved_date : ''
+  //     ];
+  //     sheet.addRow(row);
+  //     // let current = new Date(l.start_date);
+  //     // const end = new Date(l.end_date);
+  //     // console.log("Leaves:", "" + current + "-" + end);
+  //     // current.setDate(current.getDate() - 1);
+  //     // end.setDate(end.getDate() - 1);
+
+  //     // while (current <= end) {
+
+  //     //   const key = `${l.employee.id}_${current.toISOString().slice(0, 10)}`;
+
+  //     // leaveMap.set(key, l.leave_type);
+
+  //     // current.setDate(current.getDate() + 1);
+  //     // }
+
+  //   });
+
+  //   employees.forEach(emp => {
+
+  //     const rowData = [
+  //       emp.matricule,
+  //       emp.name + " " + emp.firstname,
+  //       emp.departement,
+  //       emp.section,
+  //       emp.line,
+  //       emp.designation,
+  //       emp.DOE,
+  //       emp.type,
+  //       // emp.solde_debut,
+  //       // emp.solde_pris,
+  //       // emp.solde_cumul,
+  //       // emp.solde_restant
+
+  //     ];
+
+  //     // dates.forEach(date => {
+
+  //     //   const key = `${emp.id}_${date.toISOString().slice(0, 10)}`;
+
+  //     //   rowData.push(leaveMap.get(key) || "");
+
+  //     // });
+
+  //     // const row = sheet.addRow(rowData);
+
+  //     // 🔹 style colonnes infos employé (gris clair)
+  //     // for (let i = 1; i <= 8; i++) {
+
+  //     //   const cell = row.getCell(i);
+
+  //     //   cell.fill = {
+  //     //     type: "pattern",
+  //     //     pattern: "solid",
+  //     //     fgColor: { argb: "FFEFEFEF" }
+  //     //   };
+
+  //     // }
+
+  //     // 🔹 style cellules planning
+  //     // dates.forEach((date, index) => {
+
+  //     //   const columnIndex = index + 9;
+  //     //   const cell = row.getCell(columnIndex);
+  //     //   const value = cell.value as string;
+
+  //     // dimanche → gris foncé (prioritaire)
+  //     // if (sundayColumns.has(columnIndex)) {
+
+  //     //   cell.fill = {
+  //     //     type: "pattern",
+  //     //     pattern: "solid",
+  //     //     fgColor: { argb: "FF808080" }
+  //     //   };
+
+  //     //   return;
+  //     // }
+
+  //     // couleurs selon type de leave
+  //     // if (value === "Local_Leave_AMD") {
+
+  //     //   cell.fill = {
+  //     //     type: "pattern",
+  //     //     pattern: "solid",
+  //     //     fgColor: { argb: "FF4F81BD" }
+  //     //   };
+
+  //     // }
+
+  //     // if (value === "Permission_AMD") {
+
+  //     //   cell.fill = {
+  //     //     type: "pattern",
+  //     //     pattern: "solid",
+  //     //     fgColor: { argb: "FFC0504D" }
+  //     //   };
+
+  //     // }
+
+  //     // if (value === "Indisponibilite_AMD") {
+
+  //     //   cell.fill = {
+  //     //     type: "pattern",
+  //     //     pattern: "solid",
+  //     //     fgColor: { argb: "FF9BBB59" }
+  //     //   };
+
+  //     // }
+
+  //     // });
+
+  //   });
+
+  //   sheet.columns.forEach(col => {
+  //     col.width = 12;
+  //   });
+
+  //   return workbook;
+  // }
 
   async exportEmployeeLeaves(employee: Employee, startDate: Date, endDate: Date, status: string) {
     const leaves = await this.leaveRepository.find({
@@ -893,10 +1274,10 @@ export class LeaveService {
       order: { start_date: 'DESC' },
       relations: ['employee', 'approver']
     })
-    console.log("Leaves:", leaves);
+    // console.log("Leaves:", leaves);
 
     const workbook = new ExcelJS.Workbook();
-    const sheet = workbook.addWorksheet("" + employee.fullname);
+    const sheet = workbook.addWorksheet("" + employee.name + " " + employee.firstname);
 
     const header = [
       "Matricule",
@@ -934,7 +1315,7 @@ export class LeaveService {
       const approvedDate = leave.approved_date ? new Date(leave.approved_date).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" }) : ""
       const rowData = [
         leave.employee.matricule,
-        leave.employee.fullname,
+        leave.employee.name + " " + leave.employee.firstname,
         leave.employee.departement,
         leave.employee.section,
         leave.employee.line,
@@ -974,6 +1355,497 @@ export class LeaveService {
     }
   }
 
+  async getMonthlyAbsenceRate() {
+    const now = new Date();
+
+    // Mois courant
+    const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const currentMonthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+    // Mois précédent
+    const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+
+    // total employés actifs
+    const totalEmployees = await this.employeeRepository.count({
+      where: {
+        is_active: true,
+        is_deleted: false,
+      },
+    });
+
+    // absences mois courant
+    const currentAbsenceDays = await this.getLeaveDaysBetween(
+      currentMonthStart,
+      currentMonthEnd,
+    );
+
+    // absences mois précédent
+    const lastAbsenceDays = await this.getLeaveDaysBetween(
+      lastMonthStart,
+      lastMonthEnd,
+    );
+
+    // nombre de jours du mois
+    const daysInCurrentMonth = currentMonthEnd.getDate();
+
+    // taux %
+    const currentRate =
+      (currentAbsenceDays / (totalEmployees * daysInCurrentMonth)) * 100;
+
+    const lastRate =
+      (lastAbsenceDays / (totalEmployees * lastMonthEnd.getDate())) * 100;
+
+    const variation = currentRate - lastRate;
+
+    return {
+      currentRate: currentRate.toFixed(1),
+      lastRate: lastRate.toFixed(1),
+      variation: variation.toFixed(1),
+    };
+  }
+
+  private async getLeaveDaysBetween(
+    start: Date,
+    end: Date,
+    status = [LeaveStatus.APPROVED]
+  ): Promise<number> {
+    const leaves = await this.leaveRepository
+      .createQueryBuilder('leave')
+      .where('leave.status IN (:...status)', {
+        status: status,
+      })
+      .andWhere('leave.leave_type = :type', {
+        type: 'Local_Leave_AMD',
+      })
+      .andWhere('leave.start_date <= :end', { end })
+      .andWhere('leave.end_date >= :start', { start })
+      .getMany();
+
+    // console.log("Leaves:", leaves)
+
+    let total = 0;
+
+    for (const leave of leaves) {
+      const st = new Date(leave.start_date);
+      const en = new Date(leave.end_date);
+      let overlapStart;
+      let overlapEnd;
+      if (st > start) {
+        overlapStart = st;
+      } else {
+        overlapStart = start;
+      }
+
+      if (en < end) {
+        overlapEnd = en;
+      } else {
+        overlapEnd = end;
+      }
+
+      const days = this.compterJours(overlapStart, overlapEnd);
+      total += days;
+    }
+
+
+    return total;
+  }
+
+  private async getLeaveByStatusDaysBetween(
+    start: Date,
+    end: Date,
+    status: string = LeaveStatus.APPROVED,
+    type: string = "Local_Leave_AMD",
+  ): Promise<number> {
+    const leaves = await this.leaveRepository
+      .createQueryBuilder('leave')
+      .where('leave.status = :status', {
+        status,
+      })
+      .andWhere('leave.leave_type = :type', {
+        type,
+      })
+      .andWhere('leave.start_date <= :end', { end })
+      .andWhere('leave.end_date >= :start', { start })
+      .getMany();
+
+    // console.log("Leaves:", leaves)
+
+    let total = 0;
+
+    for (const leave of leaves) {
+      const st = new Date(leave.start_date);
+      const en = new Date(leave.end_date);
+      let overlapStart;
+      let overlapEnd;
+      if (st > start) {
+        overlapStart = st;
+      } else {
+        overlapStart = start;
+      }
+
+      if (en < end) {
+        overlapEnd = en;
+      } else {
+        overlapEnd = end;
+      }
+
+      const days = this.compterJours(overlapStart, overlapEnd);
+      total += days;
+    }
+
+
+    return total;
+  }
+
+  async getLeavesStatsCurrentMonth(date: Date = new Date()) {
+    const now = new Date(date);
+
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+    const qb = this.leaveRepository.createQueryBuilder('leave')
+      .where('leave.start_date <= :monthEnd', { monthEnd })
+      .andWhere('leave.end_date >= :monthStart', { monthStart });
+
+    // total demandes ce mois
+    const totalLeaves = await qb.getCount();
+
+    // leaves approuvés
+    const approvedLeaves = await this.leaveRepository
+      .createQueryBuilder('leave')
+      .where('leave.status = :status', { status: 'APPROVED' })
+      .andWhere('leave.start_date <= :monthEnd', { monthEnd })
+      .andWhere('leave.end_date >= :monthStart', { monthStart })
+      .getCount();
+
+    // leaves en cours aujourd'hui
+    const today = new Date().toISOString().split('T')[0];
+
+    const ongoingLeaves = await this.employeeRepository
+      .createQueryBuilder('employee')
+      .innerJoin(
+        'employee.leaves',
+        'leave',
+        `
+      leave.status = :status
+      AND :today BETWEEN leave.start_date AND leave.end_date
+      `,
+        {
+          status: 'APPROVED',
+          today,
+        },
+      )
+      .distinct(true)
+      .getCount();
+
+    const approvalRate =
+      totalLeaves > 0
+        ? ((approvedLeaves / totalLeaves) * 100).toFixed(0)
+        : 0;
+
+    return {
+      ongoingLeaves,
+      approvedLeaves,
+      totalLeaves,
+      approvalRate,
+    };
+  }
+
+  async getPendingLeavesStats() {
+    const now = new Date();
+
+    const leaves = await this.leaveRepository.find({
+      where: {
+        start_date: Between(
+          new Date(now.getFullYear(), now.getMonth(), 1),
+          new Date(now.getFullYear(), now.getMonth() + 1, 0)
+        ),
+        status: LeaveStatus.PENDING
+
+      },
+      relations: [
+        'employee',
+        'approver'
+      ]
+    })
+    const totalLeaves = leaves.length;
+    // demandes en attente
+    const pendingLeaves = await this.leaveRepository
+      .createQueryBuilder('leave')
+      .where('leave.status = :status', { status: 'PENDING' }) // ou LeaveStatus.PENDING
+      .getCount();
+
+    const pendingRate =
+      totalLeaves > 0
+        ? ((pendingLeaves / totalLeaves) * 100).toFixed(0)
+        : 0;
+
+    return {
+      pendingLeaves,
+      totalLeaves,
+      pendingRate,
+    };
+  }
+
+  async getAbsenceByMonth(year = 2026): Promise<{ month: number; leaveApproved: number; leavePending: number; permissionApproved: number; permissionPending: number; indispoApproved: number; indispoPending: number }[]> {
+    const result: { month: number; leaveApproved: number; leavePending: number; permissionApproved: number; permissionPending: number; indispoApproved: number; indispoPending: number }[] = [];
+
+    for (let month = 0; month < 12; month++) {
+      const monthStart = new Date(year, month, 1);
+      const monthEnd = new Date(year, month + 1, 0);
+
+      const leaveApproved =
+        await this.getLeaveDaysBetween(monthStart, monthEnd, [LeaveStatus.APPROVED]);
+
+      const leavePending =
+        await this.getLeaveDaysBetween(monthStart, monthEnd, [LeaveStatus.PENDING]);
+
+      const permissionApproved =
+        await this.getPermissionDaysBetween(monthStart, monthEnd, [LeaveStatus.APPROVED]);
+
+      const permissionPending =
+        await this.getPermissionDaysBetween(monthStart, monthEnd, [LeaveStatus.PENDING]);
+
+      const indispoApproved =
+        await this.getIndisponibilityDaysBetween(monthStart, monthEnd, [LeaveStatus.APPROVED]);
+
+      const indispoPending =
+        await this.getIndisponibilityDaysBetween(monthStart, monthEnd, [LeaveStatus.PENDING]);
+
+      result.push({
+        month: month + 1,
+        leaveApproved,
+        leavePending,
+        permissionApproved,
+        permissionPending,
+        indispoApproved,
+        indispoPending
+      });
+    }
+
+    return result;
+  }
+  private async getPermissionDaysBetween(
+    start: Date,
+    end: Date,
+    status = [LeaveStatus.APPROVED]
+  ): Promise<number> {
+    const permissions = await this.leaveRepository
+      .createQueryBuilder('leave')
+      .where('leave.start_date <= :end', { end })
+      .andWhere('leave.end_date >= :start', { start })
+      .andWhere('leave.leave_type = :type', {
+        type: 'Permission_AMD',
+      })
+      .andWhere('leave.status IN (:...status)', { status })
+      .getMany();
+
+    let total = 0;
+
+    for (const leave of permissions) {
+      const st = new Date(leave.start_date);
+      const en = new Date(leave.end_date);
+      let overlapStart;
+      let overlapEnd;
+      if (st > start) {
+        overlapStart = st;
+      } else {
+        overlapStart = start;
+      }
+
+      if (en < end) {
+        overlapEnd = en;
+      } else {
+        overlapEnd = end;
+      }
+
+      const days = this.compterJours(overlapStart, overlapEnd);
+      total += days;
+    }
+
+    return total;
+  }
+
+  private compterJours(dateDebut, dateFin) {
+    // On utilise .getTime() pour obtenir la valeur en millisecondes (type number)
+    const msParJour = 1000 * 60 * 60 * 24;
+
+    const debutMs = dateDebut.getTime();
+    const finMs = dateFin.getTime();
+
+    // L'opération est maintenant permise car on manipule des 'number'
+    const differenceMs = Math.abs(finMs - debutMs);
+
+    return Math.round(differenceMs / msParJour) + 1;
+  }
+  private async getIndisponibilityDaysBetween(
+    start: Date,
+    end: Date,
+    status = [LeaveStatus.APPROVED],
+  ): Promise<number> {
+
+    const indisponibilities = await this.leaveRepository
+      .createQueryBuilder('leave')
+      .where('leave.start_date <= :end', { end })
+      .andWhere('leave.end_date >= :start', { start })
+      .andWhere('leave.leave_type = :type', {
+        type: 'Indisponibilite_AMD',
+      })
+      .andWhere('leave.status IN (:...status)', { status })
+      .getMany();
+
+    let total = 0;
+
+    for (const r of indisponibilities) {
+      const st = new Date(r.start_date);
+      const en = new Date(r.end_date);
+      let overlapStart;
+      let overlapEnd;
+      if (st > start) {
+        overlapStart = st;
+      } else {
+        overlapStart = start;
+      }
+
+      if (en < end) {
+        overlapEnd = en;
+      } else {
+        overlapEnd = end;
+      }
+
+      const days = this.compterJours(overlapStart, overlapEnd);
+      total += days;
+    }
+
+    return total;
+  }
+
+  async getLeaveTypesDistribution() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const start = new Date(year, month, 1);
+    const end = new Date(year, month + 1, 0);
+
+    const localLeave = await this.getLeaveDaysBetween(start, end);
+    const permissionAMD = await this.getPermissionDaysBetween(start, end);
+    const indispo = await this.getIndisponibilityDaysBetween(start, end);
+
+    const total =
+      localLeave +
+      permissionAMD +
+      indispo;
+
+    return {
+      total,
+      localLeave,
+      permissionAMD,
+      indispo,
+
+      localPct: total ? ((localLeave / total) * 100).toFixed(0) : 0,
+      permissionPct: total ? ((permissionAMD / total) * 100).toFixed(0) : 0,
+      indispoPct: total ? ((indispo / total) * 100).toFixed(0) : 0,
+    };
+  }
+
+  async getLeaveStatusStats() {
+    const today = new Date();
+    today.setHours(23, 59, 59, 999);
+
+    const localLeavePast = await this.getLeaveByStatusDaysBetween(new Date(today.getFullYear(), 0, 1), today, LeaveStatus.APPROVED, 'Local_Leave_AMD');
+    const permissionPast = await this.getLeaveByStatusDaysBetween(new Date(today.getFullYear(), 0, 1), today, LeaveStatus.APPROVED, 'Permission_AMD');
+    const indispoPast = await this.getLeaveByStatusDaysBetween(new Date(today.getFullYear(), 0, 1), today, LeaveStatus.APPROVED, 'Indisponibilite_AMD');
+
+    const totalPast = localLeavePast + permissionPast + indispoPast;
+
+    const localLeaveFuture = await this.getLeaveByStatusDaysBetween(today, new Date(today.getFullYear(), 11, 31), LeaveStatus.APPROVED, 'Local_Leave_AMD');
+    const permissionFuture = await this.getLeaveByStatusDaysBetween(today, new Date(today.getFullYear(), 11, 31), LeaveStatus.APPROVED, 'Permission_AMD');
+    const indispoFuture = await this.getLeaveByStatusDaysBetween(today, new Date(today.getFullYear(), 11, 31), LeaveStatus.APPROVED, 'Indisponibilite_AMD');
+
+    const localLeavePending = await this.getLeaveByStatusDaysBetween(today, new Date(today.getFullYear(), 11, 31), LeaveStatus.PENDING, 'Local_Leave_AMD');
+    const permissionPending = await this.getLeaveByStatusDaysBetween(today, new Date(today.getFullYear(), 11, 31), LeaveStatus.PENDING, 'Permission_AMD');
+    const indispoPending = await this.getLeaveByStatusDaysBetween(today, new Date(today.getFullYear(), 11, 31), LeaveStatus.PENDING, 'Indisponibilite_AMD');
+
+    const totalPending = localLeavePending + permissionPending + indispoPending;
+    const totalFuture = localLeaveFuture + permissionFuture + indispoFuture + totalPending;
+
+    const localLeaveRejected = await this.getLeaveByStatusDaysBetween(new Date(today.getFullYear(), 0, 1), new Date(today.getFullYear(), 11, 31), LeaveStatus.REJECTED, 'Local_Leave_AMD');
+    const permissionRejected = await this.getLeaveByStatusDaysBetween(new Date(today.getFullYear(), 0, 1), new Date(today.getFullYear(), 11, 31), LeaveStatus.REJECTED, 'Permission_AMD');
+    const indispoRejected = await this.getLeaveByStatusDaysBetween(new Date(today.getFullYear(), 0, 1), new Date(today.getFullYear(), 11, 31), LeaveStatus.REJECTED, 'Indisponibilite_AMD');
+
+    const totalRejected = localLeaveRejected + permissionRejected + indispoRejected;
+
+    const total = totalPast + totalFuture;
+
+    return {
+      totalPast,
+      totalFuture,
+      totalRejected,
+      total,
+
+      totalPastPct: total ? ((totalPast / total) * 100).toFixed(0) : 0,
+      totalFuturePct: total ? ((totalFuture / total) * 100).toFixed(0) : 0,
+      totalRejectedPct: total ? ((totalRejected / total) * 100).toFixed(0) : 0,
+    };
+  }
+
+  async getAbsenceBySection() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const sections = await this.employeeRepository
+      .createQueryBuilder("employee")
+      .select("employee.section", "section")
+      .addSelect("COUNT(employee.id)", "total")
+      .where("employee.is_active = true")
+      .groupBy("employee.section")
+      .getRawMany();
+
+    const result: SectionAbsenceStat[] = [];
+
+    for (const s of sections) {
+      const absent = await this.leaveRepository
+        .createQueryBuilder("leave")
+        .innerJoin("leave.employee", "employee")
+        .where("employee.section = :section", {
+          section: s.section,
+        })
+        .andWhere("leave.status = :status", {
+          status: LeaveStatus.APPROVED,
+        })
+        .andWhere(":today BETWEEN leave.start_date AND leave.end_date", {
+          today,
+        })
+        .getCount();
+
+      const total = Number(s.total);
+
+      result.push({
+        section: s.section,
+        employees: total,
+        absent,
+        pct: ((absent / total) * 100).toFixed(0),
+      });
+    }
+
+    return result.sort(
+      (a, b) => Number(b.pct) - Number(a.pct)
+    );
+  }
+
 }
 
+export interface MonthlyAbsenceStat {
+  month: number;
+  leave: number;
+  permission: number;
+  indispo: number;
+}
 
+export interface SectionAbsenceStat {
+  section: string;
+  employees: number;
+  absent: number;
+  pct: string;
+}

@@ -2,37 +2,68 @@
 
     <div id="employeeColumn" class="employee-column"></div>
 
-    <div id="datesContainer" class="dates-container">
+    <div id="datesContainer" class="dates-container pb-2">
         <div id="datesGrid" class="dates-grid"></div>
     </div>
 
 </div>
+
+<!-- Légende -->
+<div class="leave-legend mt-2 px-5 py-3">
+    <span class="leave-legend-chip">
+        <span class="leave-legend-chip-dot" style="background:#1a237e; border-left:3px solid #3949ab;"></span>
+        Local Leave
+    </span>
+    <span class="leave-legend-chip">
+        <span class="leave-legend-chip-dot" style="background:#b71c1c; border-left:3px solid #e53935;"></span>
+        Indisponibilite
+    </span>
+    <span class="leave-legend-chip">
+        <span class="leave-legend-chip-dot" style="background:#1b5e20; border-left:3px solid #43a047;"></span>
+        Permission
+    </span>
+    <span class="leave-legend-chip">
+        <span class="leave-legend-chip-dot" style="background:#ebebeb; border-left:3px solid #bdbdbd;"></span>
+        Pending
+    </span>
+</div>
+
 <script>
+    function clean(d) {
+        const c = new Date(d);
+        c.setHours(0, 0, 0, 0);
+        return c;
+    }
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+    const tooltipList = [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el))
     const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
-    const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl))
+    const popoverList = [...popoverTriggerList].map(el => new bootstrap.Popover(el))
+
     const isoDate = new Date().toISOString().split("T")[0];
     const employeeColumn = document.getElementById("employeeColumn");
     const datesContainer = document.getElementById("datesContainer");
     const datesGrid = document.getElementById("datesGrid");
+    const searchInput = document.getElementById("search");
+
+    let searchTimeout = null;
+    searchInput.addEventListener("input", () => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(loadPlanning, 400);
+    });
 
     const dDay = new Date();
-    const startD = new Date(dDay);
+    var startD = new Date(dDay);
     startD.setDate(startD.getDate() - 15);
-    const endD = new Date(dDay);
+    var endD = new Date(dDay);
     endD.setDate(endD.getDate() + 60);
-    if (dDay.getMonth() === 0) {
-        startD = new Date(dDay.getFullYear(), 0, 1);
-    }
-    if (dDay.getMonth() === 11) {
-        endD = new Date(dDay.getFullYear(), 11, 31);
-    }
+    if (dDay.getMonth() === 0) startD = new Date(dDay.getFullYear(), 0, 1);
+    if (dDay.getMonth() === 11) endD = new Date(dDay.getFullYear(), 11, 31);
 
     const startDateFilter = document.getElementById("startDateFilter");
     const endDateFilter = document.getElementById("endDateFilter");
 
-    let solde = 0;
+    const titre = document.title;
+    console.log(titre);
 
     startDateFilter.value = startD.toISOString().split("T")[0];
     endDateFilter.value = endD.toISOString().split("T")[0];
@@ -41,425 +72,317 @@
     endDateFilter.addEventListener("change", loadPlanning);
 
     const query = new URLSearchParams(window.location.search);
-
     const defaultLine = query.get("line") || "NULL";
     const defaultSite = query.get("site") || "RABE";
     const defaultDepartement = query.get("departement") || "HR";
+    const defaultSection = query.get("section") || "HR";
+    const defaultDivision = query.get("division") || "Administration";
 
     let employees = [];
     let leaves = [];
-
-    const year = 2026;
-    // let currentStartDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
     let currentStartDate = new Date();
     currentStartDate.setDate(currentStartDate.getDate() - 15);
     let currentEndDate = new Date(new Date().getFullYear(), new Date().getMonth() + 2, 0);
-    const startMonth = new Date().getMonth() + 1;
-    const endMonth = startMonth + 2;
 
     const lineElement = document.getElementById("lineFilter");
     const departementElement = document.getElementById("departementFilter");
+    const sectionElement = document.getElementById("sectionFilter");
+    const divisionElement = document.getElementById("divisionFilter");
     const siteElement = document.getElementById("siteFilter");
 
     lineElement.addEventListener("change", loadPlanning);
     departementElement.addEventListener("change", loadPlanning);
+    sectionElement.addEventListener("change", loadPlanning);
+    divisionElement.addEventListener("change", loadPlanning);
     siteElement.addEventListener("change", loadPlanning);
 
     let firstTime = true;
 
     async function loadPlanning() {
+        if (titre.trim() == 'B-Leave || Dashboard') {
+            const today = new Date();
+            startD = new Date(today.getFullYear(), today.getMonth(), 1);
+            endD = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            console.log("Titre:", titre)
+        } else {
+            startD = new Date(startDateFilter.value);
+            endD = new Date(endDateFilter.value);
+        }
 
         var line = lineElement.value || defaultLine;
         var departement = departementElement.value || defaultDepartement;
+        var section = sectionElement.value;
+        var division = divisionElement.value;
         var site = siteElement.value;
+        var search = searchInput.value.trim();
 
         if (firstTime) {
             line = defaultLine;
             departement = defaultDepartement;
+            section = defaultSection;
+            division = defaultDivision;
             firstTime = false;
             lineElement.value = defaultLine;
             departementElement.value = defaultDepartement;
+            sectionElement.value = defaultSection;
+            divisionElement.value = defaultDivision;
         }
 
         const year = startD.getFullYear();
         const startMonth = startD.getMonth();
         const endMonth = endD.getMonth();
-        const skip = 0;
-        const take = 1000;
 
-        const employeeUrl = `/employee/find-all?line=${line}&departement=${departement}&site=${site}&skip=${skip}&take=${take}`;
-
+        const employeeUrl = `/employee/find-all?line=${line}&section=${section}&division=${division}&site=${site}&skip=0&take=1000&search=${encodeURIComponent(search)}`;
         const res = await fetch(employeeUrl);
-
-        if (!res.ok) {
-            console.error("Erreur API");
-            return;
-        }
+        if (!res.ok) { console.error("Erreur API"); return; }
 
         const data = await res.json();
-
         employees = data.data;
 
-        const leaveUrl = `/leave/range?year=${year}&startMonth=${startMonth}&endMonth=${endMonth}&line=${line}&departement=${departement}&site=${site}`;
-
+        const leaveUrl = `/leave/range?year=${year}&startMonth=${startMonth}&endMonth=${endMonth}&line=${line}&section=${section}&division=${division}&site=${site}&search=${encodeURIComponent(search)}`;
         const resLeave = await fetch(leaveUrl);
+        console.log('Leave URL:', leaveUrl)
 
         leaves = await resLeave.json();
-
-        // leaves = data.leaves;
+        console.log('Leaves:', leaves)
 
         renderEmployees();
         renderCalendar();
     }
 
     function renderEmployees() {
-
         employeeColumn.innerHTML = "";
 
-        // Header
         employeeColumn.innerHTML += `
   <div class="employee-row header-row">
     <div class="header-cell">EMPLOYEES</div>
-    <div class="header-cell">TAKEN</div>
-    <div class="header-cell">LEFT</div>
-    <div class="header-cell">CUMUL</div>
-    <div class="header-cell">START</div>
-  </div>
-`;
+    <div class="header-cell" title="Taken leaves">TAKEN LEAVES</div>
+    <div class="header-cell" title="Current balance">CURRENT BALANCE</div>
+    <div class="header-cell" title="Entitlement">ENTITLEMENT</div>
+    <div class="header-cell" title="Carried forward">CARRIED F...</div>
+  </div>`;
 
-        employees.forEach(emp => {
-
-            // Exemple de calcul (à adapter selon tes données)
+        employees.forEach((emp, i) => {
             const cumule = emp.solde_cumul || 0;
             const prises = emp.solde_pris || 0;
             const restant = emp.solde_restant || 0;
 
+            const soldeColor = restant < 0
+                ? 'color:#b71c1c;font-weight:600;'
+                : restant === 0 ? 'color:#9499b8;' : '';
+
             employeeColumn.innerHTML += `
     <div class="employee-row">
       <div class="employee-cell leave-bar-text">
-        <a href="/employee/details/${emp.id}">${emp.matricule} - ${emp.fullname}</a>
-    </div>
+        <a href="/employee/details/${emp.id}" title="${emp.matricule} – ${emp.name} ${emp.firstname}">
+          ${emp.matricule} – ${emp.name} ${emp.firstname}
+        </a>
+      </div>
       <div class="employee-cell text-center">${prises}</div>
-      <div class="employee-cell text-center">${restant}</div>
+      <div class="employee-cell text-center" style="${soldeColor}">${restant}</div>
       <div class="employee-cell text-center">${cumule}</div>
       <div class="employee-cell text-center">${emp.solde_debut}</div>
-    </div>
-  `;
+    </div>`;
         });
     }
 
     function renderCalendar() {
-
-        currentStartDate = new Date(startDateFilter.value);
-        currentEndDate = new Date(endDateFilter.value);
-
+        if (titre.trim() == 'B-Leave || Dashboard') {
+            const today = new Date();
+            startD = new Date(today.getFullYear(), today.getMonth(), 1);
+            endD = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            console.log("Titre:", titre)
+            currentStartDate = new Date(startD);
+            currentEndDate = new Date(endD);
+        } else {
+            currentStartDate = new Date(startDateFilter.value);
+            currentEndDate = new Date(endDateFilter.value);
+        }
         datesGrid.innerHTML = "";
 
         const days = generateDays(currentStartDate, currentEndDate);
         datesGrid.style.gridTemplateColumns = `repeat(${days.length}, 40px)`;
 
+        const toDay = getCleanDate(new Date());
+
+        // Day headers
         days.forEach(day => {
+            const d = getCleanDate(day);
             const cell = document.createElement("div");
-            const toDay = new Date();
-            toDay.setHours(0);
-            toDay.setMinutes(0);
-            toDay.setSeconds(0);
-            toDay.setMilliseconds(0);
-
-            day.setHours(0);
-            day.setMinutes(0);
-            day.setSeconds(0);
-            day.setMilliseconds(0);
-
             cell.classList.add("day-header");
-            // cell.className = "day-header";
-            if (day >= toDay && day <= toDay) {
+            cell.title = d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+            if (+d === +toDay) {
                 cell.classList.add("header-today");
                 cell.dataset.date = isoDate;
             }
+            if (d.getDay() === 6) cell.classList.add("day-off-saturday");
+            if (d.getDay() === 0) cell.classList.add("day-off-sunday");
 
-            if (day.getDay() === 6) {
-                cell.classList.add("day-off-saturday");
-            }
-
-            if (day.getDay() === 0) {
-                cell.classList.add("day-off-sunday");
-            }
-
-            const month = day.toLocaleString("default", { month: "short" });
-            const date = day.getDate();
-
-            cell.innerHTML = `<div>${month}</div><div>${date}</div>`;
-            const tooltip = new bootstrap.Tooltip(cell, {
-                title: day.toLocaleDateString('fr-FR', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric'
-                }),
-                placement: "top",
-                trigger: "hover focus",
-                container: "body"
-            });
+            const dayNames = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
+            cell.innerHTML = `<div>${dayNames[d.getDay()]}</div><div>${d.getDate()}</div>`;
             datesGrid.appendChild(cell);
         });
 
         let z = 100;
+        const today = clean(new Date());
+        const array = [];
         employees.forEach(emp => {
-
             days.forEach(day => {
-
+                const d = clean(day);
                 const cell = document.createElement("div");
-                leaves.forEach(leave => {
-                    const start_date = new Date(leave.start_date);
-                    const end_date = new Date(leave.start_date);
-                    const start_date_1 = new Date(start_date);
-                    const true_end_date = new Date(leave.end_date);
-                    true_end_date.setDate(true_end_date.getDate());
-                    start_date_1.setDate(start_date.getDate() - 1);
-                    cell.classList.add("day-cell");
-                    if (leave.employee.id == emp.id && day >= start_date_1 && day <= end_date && leave.leave_type != "Medical_Leave_AMD") {
-                        cell.classList.add("leave-" + leave.leave_type.replace(/\s+/g, "_"));
-                        if (leave.approved_date == null) {
-                            cell.classList.add("not-approved");
-                        }
-                        const numberOfDays = getNumberOfDays(leave.start_date, leave.end_date);
-                        const widthPerDay = 40;
-                        cell.style.width = (numberOfDays * widthPerDay) + 'px';
-                        cell.style.zIndex = z;
-                        z++;
-                        cell.setAttribute("data-bs-toggle", "popover");
-                        cell.setAttribute("data-bs-title", day.toLocaleDateString("fr-FR", {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric'
-                        }));
-                        cell.setAttribute("data-bs-cell-type", "leave");
-                        // start_date.setDate(start_date.getDate() + 1)
-                        cell.setAttribute("data-bs-leave", leave.leave_type + " (" + start_date.toLocaleDateString("fr-FR", {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric'
-                        }) + " - " + true_end_date.toLocaleDateString("fr-FR", {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric'
-                        }) + ")");
-                        const wrapper = document.createElement('div');
-                        wrapper.style.width = "100%";
-                        wrapper.style.height = "100%";
-                        wrapper.innerHTML = leave.leave_type
-                        wrapper.setAttribute("data-bs-toggle", "popover");
-                        wrapper.setAttribute("data-bs-title", emp.fullname);
-                        wrapper.setAttribute("data-bs-html", "true");
-                        var onehr_status = "NOT SENT";
-                        var onehr_status_class = "text-danger";
-                        if (leave.onehr_status) {
-                            onehr_status = `SENT`;
-                            onehr_status_class = "text-success";
-                        }
-                        var approver = "-";
-                        if (leave.approver) {
-                            approver = `${leave.approver.firstName}`;
-                        }
-                        wrapper.setAttribute("data-bs-content", `<b>Matricule:</b> ${emp.matricule}<br><b>Leave Type:</b> ${leave.leave_type}
-                            <br><b>Start Date:</b> ${start_date.toLocaleDateString('fr-FR', {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric'
-                        })}<br><b>End Date:</b> ${true_end_date.toLocaleDateString('fr-FR', {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric'
-                        })}
-                            <br><b>Approver:</b> ${approver}
-                            <br><b>OneHR:</b> <span class="${onehr_status_class}">${onehr_status}</span><br>`);
-                        wrapper.setAttribute("data-bs-placement", "top");
-                        wrapper.classList.add("leave-bar-text");
-                        new bootstrap.Popover(wrapper, {
-                            container: 'body'
-                        });
-                        cell.appendChild(wrapper);
-                    }
-                    const toDay = new Date();
-                    toDay.setHours(0);
-                    toDay.setMinutes(0);
-                    toDay.setSeconds(0);
-                    toDay.setMilliseconds(0);
+                cell.classList.add("day-cell");
 
-                    day.setHours(0);
-                    day.setMinutes(0);
-                    day.setSeconds(0);
-                    day.setMilliseconds(0);
+                if (+d === +today) cell.classList.add("today");
+                if (d.getDay() === 6) cell.classList.add("day-off-saturday");
+                if (d.getDay() === 0) cell.classList.add("day-off-sunday");
 
-                    if (day >= toDay && day <= toDay) {
-                        cell.classList.add("today");
-                    }
+                // trouver uniquement le leave qui commence aujourd'hui
+                // const leave = leaves.find(l => {
+                //     if (l.employee.id !== emp.id) return false;
+                //     if (l.leave_type === "Medical_Leave_AMD") return false;
 
-                    if (day.getDay() === 6) {
-                        cell.classList.add("day-off-saturday");
-                    }
+                //     const start = clean(new Date(l.start_date));
+                //     return +start === +d;
+                // });
+                const leave = leaves.find(l => {
+                    if (l.employee.id !== emp.id) return false;
+                    if (l.leave_type === "Medical_Leave_AMD") return false;
 
-                    if (day.getDay() === 0) {
-                        cell.classList.add("day-off-sunday");
-                    }
+                    const start = clean(new Date(l.start_date));
+                    const end = clean(new Date(l.end_date));
+
+                    // le jour courant doit être dans l'intervalle du leave
+                    return d >= start && d <= end;
                 });
+                if (leave && !array.includes(leave)) {
+                    array.push(leave);
+                    const start = clean(new Date(leave.start_date));
+                    const end = clean(new Date(leave.end_date));
 
-                if (cell.getAttribute("data-bs-cell-type") == "leave") {
-                    // const tooltip = new bootstrap.Tooltip(cell, {
-                    //     title: "" + cell.getAttribute("data-bs-leave"),
-                    //     placement: "bottom",
-                    //     trigger: "hover focus",
-                    //     container: "body"
-                    // });
-                } else {
-                    const tooltip = new bootstrap.Tooltip(cell, {
-                        title: day.toLocaleDateString('fr-FR', {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric',
-                        }),
-                        placement: "bottom",
-                        trigger: "hover focus",
-                        container: "body"
+                    let sss = clean(new Date(leave.start_date));
+                    let eee = clean(new Date(leave.end_date));
+
+                    const dateStartFilter = clean(new Date(startDateFilter.value));
+                    const dateEndFilter = clean(new Date(endDateFilter.value));
+
+                    if (dateStartFilter > sss) sss = dateStartFilter;
+                    if (dateEndFilter < eee) eee = dateEndFilter;
+                    const nb = getNumberOfDays(sss, eee);
+                    console.log("nb", nb);
+
+                    const typeKey = leave.leave_type.replace(/\s+/g, "_");
+
+                    cell.classList.add("leave-" + typeKey);
+
+                    if (!leave.approved_date) {
+                        cell.classList.add("not-approved");
+                    }
+
+                    cell.style.width = `${nb * 40}px`;
+                    cell.style.zIndex = z++;
+                    cell.setAttribute("data-bs-cell-type", "leave");
+
+                    const labels = {
+                        Local_Leave_AMD: "Local",
+                        Indisponibilite_AMD: "Indispo",
+                        Permission_AMD: "Permission"
+                    };
+
+                    const approver =
+                        leave.approver?.firstName || "–";
+
+                    const onehrHTML = leave.onehr_status
+                        ? `<span style="color:#2e7d32">✓ Sent</span>`
+                        : `<span style="color:#c62828">✗ Not sent</span>`;
+
+                    const wrapper = document.createElement("div");
+                    wrapper.style.cssText =
+                        "width:100%;height:100%;display:flex;align-items:center;";
+                    wrapper.classList.add("leave-bar-text");
+
+                    wrapper.textContent =
+                        labels[typeKey] || leave.leave_type;
+
+                    wrapper.setAttribute("data-bs-toggle", "popover");
+                    wrapper.setAttribute("data-bs-html", "true");
+                    wrapper.setAttribute("data-bs-placement", "top");
+                    wrapper.setAttribute(
+                        "data-bs-title",
+                        `${emp.name} ${emp.firstname}`
+                    );
+
+                    wrapper.setAttribute(
+                        "data-bs-content",
+                        `<div style="font-size:12px;line-height:1.9">
+                            <b>Type:</b> ${leave.leave_type}<br>
+                            <b>From:</b> ${start.toLocaleDateString("en-GB")}<br>
+                            <b>To:</b> ${end.toLocaleDateString("en-GB")}<br>
+                            <b>Duration:</b> ${leave.duration} day(s)<br>
+                            <b>Approver:</b> ${approver}<br>
+                            <b>OneHR:</b> ${onehrHTML}
+                        </div>`
+                    );
+
+                    new bootstrap.Popover(wrapper, {
+                        container: "body",
+                        customClass: "leave-popover"
                     });
-                    cell.addEventListener('click', () => {
-                        tooltip.hide();
-                    });
+
+                    cell.appendChild(wrapper);
                 }
 
                 datesGrid.appendChild(cell);
             });
-
         });
-
     }
 
-    function scrollToToday() {
-        const container = document.querySelector(".dates-container");
-        const today = new Date().toISOString().split("T")[0];
-
-        const todayCell = document.querySelector(`[data-date="${today}"]`);
-
-        if (todayCell) {
-            const left = todayCell.offsetLeft;
-
-            container.scrollTo({
-                left: left - 600,
-                behavior: "auto"
-            });
-        }
-    }
-    function getNumberOfDays(startDateStr, endDateStr) {
-        const start = new Date(startDateStr);
-        const end = new Date(endDateStr);
-        const diffTime = end - start;
-        const diffDays = diffTime / (1000 * 60 * 60 * 24);
-        return diffDays + 1;
-    }
-    // datesContainer.addEventListener("scroll", () => {
-
-    //     const scrollLeft = datesContainer.scrollLeft;
-    //     const maxScroll = datesContainer.scrollWidth - datesContainer.clientWidth;
-
-    //     employeeColumn.scrollTop = datesContainer.scrollTop;
-
-    //     // 👉 Si on arrive à droite
-    //     if (scrollLeft >= maxScroll - 5) {
-    //         addNextMonth();
-    //     }
-
-    //     // 👉 Si on arrive à gauche
-    //     if (scrollLeft <= 5) {
-    //         addPreviousMonth();
-    //     }
-    // });
-
-    employeeColumn.addEventListener("scroll", () => {
-        datesContainer.scrollTop = employeeColumn.scrollTop;
-    });
-    function waitForTodayAndScroll() {
-        const container = document.querySelector(".dates-container");
-        const today = new Date().toISOString().split("T")[0];
-
-        const observer = new MutationObserver(() => {
-            const todayCell = document.querySelector(`[data-date="${today}"]`);
-            if (todayCell) {
-                scrollToToday();
-                observer.disconnect();
-            }
-        });
-
-        observer.observe(document.querySelector("#datesGrid"), {
-            childList: true,
-            subtree: true
-        });
+    /* ── Helpers ── */
+    function getCleanDate(d) {
+        const c = new Date(d);
+        c.setHours(0, 0, 0, 0);
+        return c;
     }
 
     function generateDays(startDate, endDate) {
         const days = [];
         let current = new Date(startDate);
-
         while (current <= endDate) {
             days.push(new Date(current));
             current.setDate(current.getDate() + 1);
         }
-
         return days;
     }
-    async function addNextMonth() {
 
-        const nextMonthStart = new Date(currentEndDate.getFullYear(), currentEndDate.getMonth() + 1, 1);
-        const nextMonthEnd = new Date(nextMonthStart.getFullYear(), nextMonthStart.getMonth() + 1, 0);
-
-        await loadLeavesForRange(nextMonthStart, nextMonthEnd);
-
-        currentEndDate = nextMonthEnd;
-
-        renderCalendar();
+    function getNumberOfDays(startDateStr, endDateStr) {
+        const s = new Date(startDateStr);
+        const e = new Date(endDateStr);
+        return Math.round((e - s) / (1000 * 60 * 60 * 24)) + 1;
     }
 
-    async function addPreviousMonth() {
-
-        const prevMonthStart = new Date(currentStartDate.getFullYear(), currentStartDate.getMonth() - 1, 1);
-        const prevMonthEnd = new Date(currentStartDate.getFullYear(), currentStartDate.getMonth(), 0);
-
-        await loadLeavesForRange(prevMonthStart, prevMonthEnd);
-
-        currentStartDate = prevMonthStart;
-
-        renderCalendar();
-
-        setTimeout(() => {
-            datesContainer.scrollLeft = 200;
-        }, 50);
+    function scrollToToday() {
+        const container = document.querySelector(".dates-container");
+        const todayCell = document.querySelector(`[data-date="${isoDate}"]`);
+        if (todayCell) {
+            container.scrollTo({ left: todayCell.offsetLeft - 600, behavior: "auto" });
+        }
     }
 
-    async function loadLeavesForRange(startDate, endDate) {
-
-        const line = lineElement.value || defaultLine;
-        const departement = departementElement.value || defaultDepartement;
-
-        const newYear = startDate.getFullYear();
-        const newStartMonth = startDate.getMonth();
-        const newEndMonth = endDate.getMonth();
-
-        const leaveUrl = `/leave/month-line-departement?year=${newYear}&month=${newStartMonth}&line=${line}&departement=${departement}`;
-
-        const res = await fetch(leaveUrl);
-
-        if (!res.ok) return;
-
-        const newLeaves = await res.json();
-
-        // 🔥 fusionner sans doublons
-        newLeaves.forEach(newLeave => {
-            const exists = leaves.some(l => l.id === newLeave.id);
-            if (!exists) {
-                leaves.push(newLeave);
-            }
+    function waitForTodayAndScroll() {
+        const observer = new MutationObserver(() => {
+            const todayCell = document.querySelector(`[data-date="${isoDate}"]`);
+            if (todayCell) { scrollToToday(); observer.disconnect(); }
         });
+        observer.observe(datesGrid, { childList: true, subtree: true });
     }
+
+    datesContainer.addEventListener("scroll", () => {
+        employeeColumn.scrollTop = datesContainer.scrollTop;
+    });
+    employeeColumn.addEventListener("scroll", () => {
+        datesContainer.scrollTop = employeeColumn.scrollTop;
+    });
+
     loadPlanning();
     waitForTodayAndScroll();
-
 </script>

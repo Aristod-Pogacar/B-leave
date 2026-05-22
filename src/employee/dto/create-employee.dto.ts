@@ -22,42 +22,21 @@ export class CreateEmployeeDto {
     @IsEnum(['M', 'F'])
     gender!: string;
 
-    @IsString()
-    @IsNotEmpty()
-    @IsEnum(['BK', 'CS'])
-    pay_mode!: string;
-
     @IsDate()
     @IsNotEmpty()
     DOE!: Date;
-
-    @IsDate()
-    @IsNotEmpty()
-    DOC!: Date;
-
-    @IsDate()
-    @IsOptional()
-    DOR?: Date;
-
-    @IsDate()
-    @IsNotEmpty()
-    effective_start_date!: Date;
-
-    @IsDate()
-    @IsOptional()
-    effective_end_date?: Date;
 
     @IsString()
     @IsNotEmpty()
     division!: string;
 
     @IsString()
-    @IsOptional()
-    div!: string;
+    @IsNotEmpty()
+    name!: string;
 
     @IsString()
-    @IsNotEmpty()
-    fullname!: string;
+    @IsOptional()
+    firstname?: string;
 
     @IsString()
     @IsNotEmpty()
@@ -65,63 +44,11 @@ export class CreateEmployeeDto {
 
     @IsString()
     @IsNotEmpty()
-    job_post!: string;
-
-    @IsString()
-    @IsNotEmpty()
-    occupation!: string;
-
-    @IsString()
-    @IsNotEmpty()
-    prtr!: string;
-
-    @IsString()
-    @IsNotEmpty()
-    DI!: string;
+    designation!: string;
 
     @IsString()
     @IsNotEmpty()
     site!: string;
-
-    @IsString()
-    @IsNotEmpty()
-    pattern!: string;
-
-    @IsDate()
-    @IsNotEmpty()
-    date_of_birth!: Date;
-
-    @IsString()
-    @IsNotEmpty()
-    CIN!: string;
-
-    @IsString()
-    @IsNotEmpty()
-    CNAPS!: string;
-
-    @IsString()
-    @IsNotEmpty()
-    adrs_street!: string;
-
-    @IsString()
-    @IsNotEmpty()
-    adrs_locality!: string;
-
-    @IsString()
-    @IsNotEmpty()
-    adrs_twnvge!: string;
-
-    @IsString()
-    @IsNotEmpty()
-    cat_basic!: string;
-
-    @IsString()
-    @IsNotEmpty()
-    cat_ind!: string;
-
-    @IsString()
-    @IsNotEmpty()
-    cat_prof!: string;
 
     @IsString()
     @IsNotEmpty()

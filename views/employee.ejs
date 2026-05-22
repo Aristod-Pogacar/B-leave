@@ -48,13 +48,17 @@
                                         <div class="col-12">
                                             <div class="card stretch stretch-full d-flex">
                                                 <div class="card-header">
-                                                    <h4 class="header">Employee details - <%= employee.fullname %>
+                                                    <h4 class="header">
+                                                        Employee details - <%= employee.name %>
+                                                            <%= employee.firstname %>
                                                     </h4>
-                                                    <button type="submit" form="userForm" class="btn btn-primary"
-                                                        onclick="window.location.href='/employee/edit/<%= employee.id %>';"
-                                                        id="submit">
-                                                        Edit
-                                                    </button>
+                                                    <% if(user.role==='SUPERADMIN' || user.role==='ADMIN' ) { %>
+                                                        <button type="submit" form="userForm" class="btn btn-primary"
+                                                            onclick="window.location.href='/employee/edit/<%= employee.id %>';"
+                                                            id="submit">
+                                                            Edit
+                                                        </button>
+                                                        <% } %>
                                                 </div>
                                                 <div class="card-body">
 
@@ -79,109 +83,19 @@
                                                                                         <%= employee.matricule %>
                                                                                     </div>
                                                                                 </div>
-                                                                                <div class="col-md-7 mb-3">
+                                                                                <div class="col-md-8 mb-3">
                                                                                     <label class="form-label">Full
                                                                                         name</label>
                                                                                     <div class="form-control">
-                                                                                        <%= employee.fullname %>
+                                                                                        <%= employee.name %>
+                                                                                            <%= employee.firstname %>
                                                                                     </div>
                                                                                 </div>
-                                                                                <div class="col-md-3 mb-3">
-                                                                                    <label class="form-label">Date
-                                                                                        of
-                                                                                        birth</label>
-                                                                                    <div class="form-control">
-                                                                                        <%= employee.date_of_birth %>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-
-                                                                        <!-- Recherche Employé -->
-                                                                        <div class="">
-                                                                            <div class="row">
-                                                                                <div class="col-md-4 mb-3">
+                                                                                <div class="col-md-2 mb-3">
                                                                                     <label
                                                                                         class="form-label">Gender</label>
                                                                                     <div class="form-control">
-                                                                                        <% if(employee.gender==='M' ) {
-                                                                                            %>
-                                                                                            Male
-                                                                                            <% } else { %>
-                                                                                                Female
-                                                                                                <% } %>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div class="col-md-4 mb-3">
-                                                                                    <label
-                                                                                        class="form-label">CIN</label>
-                                                                                    <div class="form-control">
-                                                                                        <%= employee.CIN %>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div class="col-md-4 mb-3">
-                                                                                    <label
-                                                                                        class="form-label">CNAPS</label>
-                                                                                    <div class="form-control">
-                                                                                        <%= employee.CNAPS %>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-
-                                                                        <div class="">
-                                                                            <div class="row">
-                                                                            </div>
-                                                                        </div>
-
-                                                                        <div class="">
-                                                                            <div class="row">
-                                                                                <div class="col-md-4 mb-3">
-                                                                                    <label class="form-label">Street
-                                                                                        adress</label>
-                                                                                    <div class="form-control">
-                                                                                        <%= employee.adrs_street %>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div class="col-md-4 mb-3">
-                                                                                    <label
-                                                                                        class="form-label">Locality</label>
-                                                                                    <div class="form-control">
-                                                                                        <%= employee.adrs_locality %>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div class="col-md-4 mb-3">
-                                                                                    <label
-                                                                                        class="form-label">Town/Village</label>
-                                                                                    <div class="form-control">
-                                                                                        <%= employee.adrs_twnvge %>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-
-                                                                        <div class="">
-                                                                            <div class="row">
-                                                                                <div class="col-md-4 mb-3">
-                                                                                    <label class="form-label">Basic
-                                                                                        category</label>
-                                                                                    <div class="form-control">
-                                                                                        <%= employee.cat_basic %>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div class="col-md-4 mb-3">
-                                                                                    <label class="form-label">Industrial
-                                                                                        category</label>
-                                                                                    <div class="form-control">
-                                                                                        <%= employee.cat_ind %>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div class="col-md-4 mb-3">
-                                                                                    <label
-                                                                                        class="form-label">Professional
-                                                                                        category</label>
-                                                                                    <div class="form-control">
-                                                                                        <%= employee.cat_prof %>
+                                                                                        <%= employee.gender %>
                                                                                     </div>
                                                                                 </div>
                                                                             </div>
@@ -224,9 +138,9 @@
                                                                                 </div>
                                                                                 <div class="col-md-4 mb-3">
                                                                                     <label
-                                                                                        class="form-label">Occupation</label>
+                                                                                        class="form-label">Designation</label>
                                                                                     <div class="form-control">
-                                                                                        <%= employee.occupation %>
+                                                                                        <%= employee.designation %>
                                                                                     </div>
                                                                                 </div>
                                                                                 <div class="col-md-4 mb-3">
@@ -243,13 +157,6 @@
                                                                             <div class="row">
                                                                                 <div class="col-md-4 mb-3">
                                                                                     <label class="form-label">Job
-                                                                                        post</label>
-                                                                                    <div class="form-control">
-                                                                                        <%= employee.job_post %>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div class="col-md-4 mb-3">
-                                                                                    <label class="form-label">Job
                                                                                         level</label>
                                                                                     <div class="form-control">
                                                                                         <%= employee.job_level %>
@@ -262,29 +169,11 @@
                                                                                         <%= employee.type %>
                                                                                     </div>
                                                                                 </div>
-                                                                            </div>
-                                                                        </div>
-
-                                                                        <div class="">
-                                                                            <div class="row">
                                                                                 <div class="col-md-4 mb-3">
                                                                                     <label
-                                                                                        class="form-label">PRTR</label>
+                                                                                        class="form-label">DOE</label>
                                                                                     <div class="form-control">
-                                                                                        <%= employee.prtr %>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div class="col-md-4 mb-3">
-                                                                                    <label class="form-label">DI</label>
-                                                                                    <div class="form-control">
-                                                                                        <%= employee.di %>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div class="col-md-4 mb-3">
-                                                                                    <label
-                                                                                        class="form-label">Pattern</label>
-                                                                                    <div class="form-control">
-                                                                                        <%= employee.pattern %>
+                                                                                        <%= employee.DOE %>
                                                                                     </div>
                                                                                 </div>
                                                                             </div>
@@ -297,6 +186,8 @@
                                                                                         class="form-label">Manager</label>
                                                                                     <div class="form-control">
                                                                                         <%= employee.manager?
+                                                                                            employee.manager?.matricule
+                                                                                            + " - " +
                                                                                             employee.manager?.firstName
                                                                                             + " " +
                                                                                             employee.manager?.name : "-"
@@ -305,62 +196,6 @@
                                                                                 </div>
                                                                             </div>
                                                                         </div>
-                                                                        <div class="">
-                                                                            <div class="row">
-                                                                                <div class="col-md-4 mb-3">
-                                                                                    <label
-                                                                                        class="form-label">DOE</label>
-                                                                                    <div class="form-control">
-                                                                                        <%= employee.DOE %>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div class="col-md-4 mb-3">
-                                                                                    <label
-                                                                                        class="form-label">DOC</label>
-                                                                                    <div class="form-control">
-                                                                                        <%= employee.DOC %>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div class="col-md-4 mb-3">
-                                                                                    <label
-                                                                                        class="form-label">DOR</label>
-                                                                                    <div class="form-control">
-                                                                                        <%= employee.DOR %>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-
-                                                                        <div class="">
-                                                                            <div class="row">
-                                                                                <div class="col-md-4 mb-3">
-                                                                                    <label class="form-label">Effective
-                                                                                        start date</label>
-                                                                                    <div class="form-control">
-                                                                                        <%= employee.effective_start_date
-                                                                                            %>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div class="col-md-4 mb-3">
-                                                                                    <label class="form-label">Effective
-                                                                                        end
-                                                                                        date</label>
-                                                                                    <div class="form-control">
-                                                                                        <%= employee.effective_end_date?
-                                                                                            employee.effective_end_date
-                                                                                            : "-" %>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div class="col-md-4 mb-3">
-                                                                                    <label class="form-label">Pay
-                                                                                        mode</label>
-                                                                                    <div class="form-control">
-                                                                                        <%= employee.pay_mode %>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-
                                                             </div>
 
                                                         </div>

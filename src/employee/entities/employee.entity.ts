@@ -25,32 +25,17 @@ export class Employee {
     @Column()
     gender!: string;
 
-    @Column()
-    pay_mode!: string;
-
     @Column({ type: 'date' })
     DOE!: Date;
-
-    @Column({ type: 'date' })
-    DOC!: Date;
-
-    @Column({ type: 'date', nullable: true })
-    DOR!: Date | null;
-
-    @Column({ type: 'date' })
-    effective_start_date!: Date;
-
-    @Column({ type: 'date', nullable: true })
-    effective_end_date!: Date | null;
 
     @Column()
     division!: string;
 
     @Column()
-    div!: string;
+    name!: string;
 
-    @Column()
-    fullname!: string;
+    @Column({ nullable: true })
+    firstname?: string;
 
     @Column()
     job_level!: string;
@@ -59,46 +44,10 @@ export class Employee {
     job_post!: string;
 
     @Column()
-    occupation!: string;
-
-    @Column()
-    prtr!: string;
-
-    @Column()
-    DI!: string;
+    designation!: string;
 
     @Column()
     site!: string;
-
-    @Column()
-    pattern!: string;
-
-    @Column({ type: 'date' })
-    date_of_birth!: Date;
-
-    @Column()
-    CIN!: string;
-
-    @Column()
-    CNAPS!: string;
-
-    @Column()
-    adrs_street!: string;
-
-    @Column()
-    adrs_locality!: string;
-
-    @Column()
-    adrs_twnvge!: string;
-
-    @Column()
-    cat_basic!: string;
-
-    @Column()
-    cat_ind!: string;
-
-    @Column()
-    cat_prof!: string;
 
     @Column()
     type!: string;
@@ -109,17 +58,17 @@ export class Employee {
     @Column({ default: true })
     is_active!: boolean;
 
-    @OneToMany(() => Leave, leave => leave.employee)
+    @OneToMany(() => Leave, leave => leave.employee, { onDelete: 'NO ACTION' })
     leaves: Leave[];
 
-    @OneToMany(() => Permission2h, permission2h => permission2h.employee)
+    @OneToMany(() => Permission2h, permission2h => permission2h.employee, { onDelete: 'NO ACTION' })
     permission2h: Permission2h[];
 
-    @OneToMany(() => SmiaOstie, smia_ostie => smia_ostie.employee)
+    @OneToMany(() => SmiaOstie, smia_ostie => smia_ostie.employee, { onDelete: 'NO ACTION' })
     smia_ostie: SmiaOstie[];
 
     @Index()
-    @ManyToOne(() => User, user => user.employees, { nullable: true })
+    @ManyToOne(() => User, user => user.employees, { nullable: true, onDelete: 'SET NULL' })
     @JoinColumn({ name: 'manager_id' })
     manager: User;
 
@@ -128,4 +77,10 @@ export class Employee {
 
     @Column()
     onehr_password!: string;
+
+    @Column({ type: 'int', nullable: true, unique: true })
+    fingerprintId?: number | null;
+
+    @Column({ type: 'varchar', nullable: true })
+    deviceId?: string | null;
 }

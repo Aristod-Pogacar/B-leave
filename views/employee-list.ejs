@@ -53,8 +53,8 @@
                                                                 <tr>
                                                                     <th style="width: 10%;">Matricule</th>
                                                                     <th style="width: 30%;">Fullname</th>
-                                                                    <th style="width: 10%;">Departement</th>
-                                                                    <th style="width: 10%;">Occupation</th>
+                                                                    <th style="width: 10%;">Section</th>
+                                                                    <th style="width: 10%;">Designation</th>
                                                                     <th style="width: 30%;">Manager</th>
                                                                 </tr>
                                                             </thead>
@@ -67,14 +67,15 @@
                                                                         <td style="width: 30%;">
                                                                             <a
                                                                                 href="/employee/details/<%= employee.id %>">
-                                                                                <%= employee.fullname %>
+                                                                                <%= employee.name %>
+                                                                                    <%= employee.firstname %>
                                                                             </a>
                                                                         </td>
                                                                         <td style="width: 10%;">
-                                                                            <%= employee.departement %>
+                                                                            <%= employee.section %>
                                                                         </td>
                                                                         <td style="width: 10%;">
-                                                                            <%= employee.occupation %>
+                                                                            <%= employee.designation %>
                                                                         </td>
                                                                         <td style="width: 30%;">
                                                                             <%= employee.manager?.firstName %>

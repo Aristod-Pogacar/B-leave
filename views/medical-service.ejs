@@ -12,7 +12,7 @@
                                 </div>
                                 <ul class="breadcrumb">
                                     <li class="breadcrumb-item">Medical service</li>
-                                    <li class="breadcrumb-item">List</li>
+                                    <li class="breadcrumb-item">Employee consultations list</li>
                                 </ul>
                             </div>
                         </div>
@@ -24,7 +24,7 @@
                                         <div class="col-12">
                                             <div class="card stretch stretch-full">
                                                 <div class="card-header">
-                                                    <h5 class="card-title">Medical Service list</h5>
+                                                    <h5 class="card-title">Employee consultations list</h5>
 
                                                     <!-- Filtres -->
                                                     <form method="GET" action="/smia-ostie/list"
@@ -61,26 +61,43 @@
                                                         <table class="table table-hover mb-0">
                                                             <thead>
                                                                 <tr>
-                                                                    <th>Matricule</th>
-                                                                    <th>Fullname</th>
-                                                                    <th>Date</th>
-                                                                    <th>Reason</th>
+                                                                    <th style="width: 15%;">Matricule</th>
+                                                                    <th style="width: 40%;">Fullname</th>
+                                                                    <th style="width: 20%;">Date</th>
+                                                                    <th style="width: 15%;">Reason</th>
+                                                                    <th style="width: 10%;">Status</th>
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
-                                                                <% data.forEach(d=> { %>
+                                                                <% data.forEach(d=> {
+                                                                    var leaveTypeClass = "";
+                                                                    if (d.status === "normal") {
+                                                                    leaveTypeClass = "bg-soft-primary text-primary";
+                                                                    } else if (d.status === "emergency") {
+                                                                    leaveTypeClass = "bg-soft-danger text-danger";
+                                                                    }
+                                                                    %>
                                                                     <tr>
-                                                                        <td>
+                                                                        <td style="width: 15%;">
                                                                             <%= d.employee.matricule %>
                                                                         </td>
-                                                                        <td>
-                                                                            <%= d.employee.fullname %>
+                                                                        <td style="width: 40%;">
+                                                                            <%= d.employee.name %>
+                                                                                <%= d.employee.firstname %>
                                                                         </td>
-                                                                        <td>
-                                                                            <%= d.date %>
+                                                                        <td style="width: 20%;">
+                                                                            <%= d.date.toLocaleDateString('en-GB', {
+                                                                                weekday: 'long' , year: 'numeric' ,
+                                                                                month: 'long' , day: 'numeric' }) %>
                                                                         </td>
-                                                                        <td>
+                                                                        <td
+                                                                            style="width: 15%; overflow-wrap: break-word;">
                                                                             <%= d.reason %>
+                                                                        </td>
+                                                                        <td style="width: 10%;">
+                                                                            <span class="badge <%= leaveTypeClass %>">
+                                                                                <%= d.status %>
+                                                                            </span>
                                                                         </td>
                                                                     </tr>
                                                                     <% }) %>
@@ -174,6 +191,21 @@
                                                             <% } %>
                                                     </div>
 
+                                                </div>
+                                                <div class="card-footer" <% if (user.role==='SUPERADMIN' ||
+                                                    user.role==='PAYROLL' || user.role=="HR_LEAD" ) { %>
+                                                    id="footer-export" <% } %>>
+                                                        <form action="/smia-ostie/export" method="get">
+                                                            <input type="text" name="search" value="<%= search %>"
+                                                                hidden>
+                                                            <input type="date" name="startDate" value="<%= startDate %>"
+                                                                hidden>
+                                                            <input type="date" name="endDate" value="<%= endDate %>"
+                                                                hidden>
+                                                            <button class="btn btn-primary" type="submit">
+                                                                Export as Excel file
+                                                            </button>
+                                                        </form>
                                                 </div>
                                             </div>
                                         </div>

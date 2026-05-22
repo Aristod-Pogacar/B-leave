@@ -49,6 +49,24 @@
                                             <div class="card stretch stretch-full d-flex">
                                                 <div class="card-header">
                                                     <h4 class="header">My Team</h4>
+                                                    <!-- Filtres -->
+                                                    <form method="GET" action="/employee/my-team"
+                                                        class="d-flex align-items-end gap-3 mt-2 flex-wrap">
+                                                        <div>
+                                                            <label class="form-label mb-1">Recherche</label>
+                                                            <input type="text" name="search" class="form-control"
+                                                                placeholder="Matricule, nom..." value="<%= search %>" />
+                                                        </div>
+                                                        <div class="d-flex gap-2">
+                                                            <button type="submit" class="btn btn-primary">
+                                                                <i class="feather-search me-1"></i> Filtrer
+                                                            </button>
+                                                            <a href="/employee/my-team"
+                                                                class="btn btn-outline-secondary ms-2">
+                                                                <i class="feather-x me-1"></i> Reset
+                                                            </a>
+                                                        </div>
+                                                    </form>
                                                 </div>
                                                 <div class="card-body">
 
@@ -59,8 +77,8 @@
                                                             <div class="col-md-12">
                                                                 <div class="row">
                                                                     <div class="col-12">
-                                                                        <div class="row mt-4">
-                                                                            <div class="col-12 pt-3">
+                                                                        <div class="row">
+                                                                            <div class="col-12">
                                                                                 <div class="table-responsive overflow-y-auto"
                                                                                     style="max-height: 500px;" id="">
                                                                                     <table
@@ -69,12 +87,16 @@
                                                                                         <thead
                                                                                             class="table-light z-100 w-100">
                                                                                             <tr>
-                                                                                                <th style="width: 20%;">
-                                                                                                    Matricule
-                                                                                                </th>
-                                                                                                <th style="width: 80%;">
-                                                                                                    Fullname
-                                                                                                </th>
+                                                                                                <th style="width: 10%;">
+                                                                                                    Matricule</th>
+                                                                                                <th style="width: 30%;">
+                                                                                                    Fullname</th>
+                                                                                                <th style="width: 10%;">
+                                                                                                    Section</th>
+                                                                                                <th style="width: 10%;">
+                                                                                                    Designation</th>
+                                                                                                <th style="width: 30%;">
+                                                                                                    Manager</th>
                                                                                             </tr>
                                                                                         </thead>
                                                                                         <tbody
@@ -84,15 +106,51 @@
                                                                                                 %>
                                                                                                 <tr>
                                                                                                     <td
-                                                                                                        style="width: 20%;">
-                                                                                                        <%=emp.matricule%>
+                                                                                                        style="width: 10%;">
+                                                                                                        <%= emp.matricule
+                                                                                                            %>
                                                                                                     </td>
                                                                                                     <td
-                                                                                                        style="width: 80%;">
-                                                                                                        <%=emp.fullname%>
+                                                                                                        style="width: 30%;">
+                                                                                                        <a
+                                                                                                            href="/employee/details/<%= emp.id %>">
+                                                                                                            <%= emp.name
+                                                                                                                %>
+                                                                                                                <%= emp.firstname
+                                                                                                                    %>
+                                                                                                        </a>
+                                                                                                    </td>
+                                                                                                    <td
+                                                                                                        style="width: 10%;">
+                                                                                                        <%= emp.section
+                                                                                                            %>
+                                                                                                    </td>
+                                                                                                    <td
+                                                                                                        style="width: 10%;">
+                                                                                                        <%= emp.designation
+                                                                                                            %>
+                                                                                                    </td>
+                                                                                                    <td
+                                                                                                        style="width: 30%;">
+                                                                                                        <%= emp.manager?.firstName
+                                                                                                            %>
+                                                                                                            <%= emp.manager?.lastName
+                                                                                                                %>
                                                                                                     </td>
                                                                                                 </tr>
                                                                                                 <% }) %>
+                                                                                                    <% if
+                                                                                                        (employees.length===0)
+                                                                                                        { %>
+                                                                                                        <tr>
+                                                                                                            <td colspan="5"
+                                                                                                                class="text-center text-muted py-4">
+                                                                                                                Aucun
+                                                                                                                résultat
+                                                                                                                trouvé.
+                                                                                                            </td>
+                                                                                                        </tr>
+                                                                                                        <% } %>
                                                                                         </tbody>
                                                                                     </table>
                                                                                 </div>

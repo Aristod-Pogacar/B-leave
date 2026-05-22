@@ -125,4 +125,43 @@ export class UserService {
       access_token: this.jwtService.sign(payload)
     };
   }
+
+  async getUsersDashboardStats() {
+    const users = await this.userRepo.find({
+      where: {
+        isDeleted: false
+      },
+      order: {
+        createdAt: "DESC"
+      }
+    });
+
+    const admins = users.filter(
+      u =>
+        u.role === UserRole.ADMIN ||
+        u.role === UserRole.SUPERADMIN
+    ).length;
+
+    const hrManagers = users.filter(
+      u => u.role === UserRole.HR_LEAD
+    ).length;
+
+    const managers = users.filter(
+      u => u.role === UserRole.MANAGER
+    ).length;
+
+    const payrolls = users.filter(
+      u => u.role === UserRole.PAYROLL
+    ).length;
+
+    return {
+      users: users.slice(0, 5), // seulement les 5 premiers
+      stats: {
+        admins,
+        hrManagers,
+        managers,
+        payrolls
+      }
+    };
+  }
 }

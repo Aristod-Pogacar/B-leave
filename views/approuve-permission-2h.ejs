@@ -48,7 +48,7 @@
                                         <div class="col-12">
                                             <div class="card stretch stretch-full">
                                                 <div class="card-header">
-                                                    <h5 class="card-title">Approve leaves</h5>
+                                                    <h5 class="card-title">Approve permissions 2h</h5>
                                                     <div
                                                         class="col-10 task-header d-md-flex align-items-center justify-content-between">
                                                         <div class="me-4 w-75">
@@ -65,11 +65,12 @@
                                                             <thead>
                                                                 <tr>
                                                                     <th style="width: 10%;">Matricule</th>
-                                                                    <th style="width: 30%;">Fullname</th>
-                                                                    <th style="width: 10%;">Date</th>
+                                                                    <th style="width: 40%;">Fullname</th>
+                                                                    <th style="width: 20%;">Applied at</th>
                                                                     <th style="width: 10%;">Start time</th>
                                                                     <th style="width: 10%;">End time</th>
-                                                                    <th class="text-center">Action</th>
+                                                                    <th class="text-center" style="width: 10%;">Action
+                                                                    </th>
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
@@ -78,11 +79,14 @@
                                                                         <td style="width: 10%;">
                                                                             <%= d.employee.matricule %>
                                                                         </td>
-                                                                        <td style="width: 30%;">
-                                                                            <%= d.employee.fullname %>
+                                                                        <td style="width: 40%;">
+                                                                            <%= d.employee.name %>
+                                                                                <%= d.employee.firstname %>
                                                                         </td>
-                                                                        <td style="width: 10%;">
-                                                                            <%= d.date %>
+                                                                        <td style="width: 20%;">
+                                                                            <%= d.applied_at.toLocaleDateString('en-GB',
+                                                                                { weekday: 'long' , year: 'numeric' ,
+                                                                                month: 'long' , day: 'numeric' }) %>
                                                                         </td>
                                                                         <td style="width: 10%;">
                                                                             <%= d.expectedStartTime %>

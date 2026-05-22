@@ -79,6 +79,7 @@ export class Permission2hService {
     limit: number,
     startDate: string,
     endDate: string,
+    site: string,
     user: any,
   ) {
     const skip = (page - 1) * limit;
@@ -95,7 +96,8 @@ export class Permission2hService {
       query.andWhere(
         `(
         employee.matricule LIKE :search
-        OR employee.fullname LIKE :search
+        OR employee.name LIKE :search
+        OR employee.firstname LIKE :search
         OR p.id LIKE :search
         OR p.reason LIKE :search
         OR p.expectedStartTime LIKE :search
@@ -104,6 +106,10 @@ export class Permission2hService {
       )`,
         { search: `%${search}%` },
       );
+    }
+
+    if (site && site !== 'all') {
+      query.andWhere('employee.site = :site', { site });
     }
 
     if (startDate) {
@@ -126,6 +132,56 @@ export class Permission2hService {
       totalPages: Math.ceil(total / limit),
       currentPage: page,
     };
+  }
+  async getToExport(
+    search: string,
+    startDate: string,
+    endDate: string,
+    site: string,
+    user: any,
+  ) {
+
+    const query = this.permission2hRepository
+      .createQueryBuilder('p')
+      .leftJoinAndSelect('p.employee', 'employee');
+
+    if (user.role === UserRole.MANAGER) {
+      query.andWhere('employee.manager = :manager', { manager: user.id });
+    }
+
+    if (search) {
+      query.andWhere(
+        `(
+        employee.matricule LIKE :search
+        OR employee.name LIKE :search
+        OR employee.firstname LIKE :search
+        OR p.id LIKE :search
+        OR p.reason LIKE :search
+        OR p.expectedStartTime LIKE :search
+        OR p.expectedEndTime LIKE :search
+        OR DATE(p.date) LIKE :search
+      )`,
+        { search: `%${search}%` },
+      );
+    }
+
+    if (site && site !== 'all') {
+      query.andWhere('employee.site = :site', { site });
+    }
+
+    if (startDate) {
+      query.andWhere('DATE(p.date) >= :startDate', { startDate });
+    }
+
+    if (endDate) {
+      query.andWhere('DATE(p.date) <= :endDate', { endDate });
+    }
+
+    const [data, total] = await query
+      .orderBy('p.date', 'DESC')
+      .getManyAndCount();
+
+    return { data, total };
   }
 
   async paginatePermission2hById(
@@ -191,7 +247,8 @@ export class Permission2hService {
     const permission = await this.permission2hRepository.save(entity);
     await this.historyService.create({
       reason: HistoryReason.PERMISSION_2H,
-      message: "Permission 2h " + permission.date + " of " + permission.employee.fullname + " requested by QUIOSQUE",
+      message: "Permission 2h " + permission.date + " of " + permission.employee.name + " " + permission.employee.firstname + " requested by QUIOSQUE",
+      created_by: dto.employee,
     });
 
     var email: string[] = [];
@@ -204,15 +261,15 @@ export class Permission2hService {
       if (emailAdress && emailPassword) {
         await this.mailerService.sendMail({
           to: email,
-          subject: 'Consultation médicale',
-          text: 'Consultation médicale',
+          subject: 'Permission 2h',
+          text: 'Permission 2h',
           html: `
       <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333; line-height: 1.6;">
         <p>
           Bonjour Monsieur/Madame,
         </p>
         <p>
-          Nous souhaitons vous informer que l'employé(e) avec la matricule <strong>${employee.matricule} (${employee.fullname})</strong> a pris une permission de deux heures.
+          Nous souhaitons vous informer que l'employé(e) avec la matricule <strong>${employee.matricule} (${employee.name} ${employee.firstname})</strong> a pris une permission de deux heures.
         </p>
         <p>
           <strong>
@@ -230,7 +287,7 @@ export class Permission2hService {
           Hello Mister/Misses,
         </p>
         <p>
-          We would like to inform you that the employee with matricule <strong>${employee.matricule} (${employee.fullname})</strong> has taken a two-hour leave.
+          We would like to inform you that the employee with matricule <strong>${employee.matricule} (${employee.name} ${employee.firstname})</strong> has taken a two-hour leave.
         </p>
         <p>
           <strong>
@@ -324,7 +381,7 @@ export class Permission2hService {
     data.forEach((p) => {
       worksheet.addRow([
         p.employee.matricule,
-        p.employee.fullname,
+        p.employee.name + " " + p.employee.firstname,
         p.employee.site,
         p.reason,
         p.date,

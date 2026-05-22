@@ -5,6 +5,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import session from 'express-session';
 import { join } from 'path';
 import { ValidationPipe } from '@nestjs/common';
+import { WsAdapter } from '@nestjs/platform-ws';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -32,7 +33,7 @@ async function bootstrap() {
   //   next();
   // });
   app.useGlobalFilters(new NotFoundFilter());
-
+  app.useWebSocketAdapter(new WsAdapter(app));
   app.use((req: any, res: any, next: any) => {
     if (res.locals.user) {
       res.locals.user = req.session.user;

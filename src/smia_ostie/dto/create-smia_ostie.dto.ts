@@ -12,4 +12,8 @@ export class CreateSmiaOstieDto {
     @IsOptional()
     @IsString()
     reason?: string;
+
+    @IsOptional()
+    @IsString()
+    status?: string;
 }

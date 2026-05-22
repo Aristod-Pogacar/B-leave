@@ -11,29 +11,33 @@ import { Roles } from 'src/user/role.decorator';
 export class SmiaOstieController {
   constructor(private readonly smiaOstieService: SmiaOstieService) { }
 
-  // @Get('export')
-  // @UseGuards(SessionAuthGuard, RolesGuard)
-  // @Roles(UserRole.ADMIN, UserRole.HR_ADMIN, UserRole.PAYROLL_OFFICER)
-  // async export(
-  //   @Res() res: Response,
-  //   @Query('date') date: string,
-  //   @Query('site') site: string,
-  // ) {
-  //   const data = await this.smiaOstieService.getSmiaOstie(date, site);
-  //   console.log('DATA:', data);
+  @Get('export')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HR_LEAD)
+  async export(
+    @Res() res: any,
+    @Req() req,
+    @Query('search') search: string = '',
+    @Query('page') page: number = 1,
+    @Query('startDate') startDate: string = new Date().toISOString().split('T')[0],
+    @Query('endDate') endDate: string = new Date().toISOString().split('T')[0],
+  ) {
+    const data = await this.smiaOstieService.toExport(search, req.session.user, startDate, endDate);
+    console.log('DATA:', data);
 
-  //   await this.smiaOstieService.exportSmiaOstieToExcel(data, res, date);
-  // }
+    await this.smiaOstieService.exportSmiaOstieToExcel(data, res, startDate, endDate);
+  }
+
   @Get('list')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HEAD_HR, UserRole.HR_ADMIN, UserRole.MANAGER, UserRole.PAYROLL)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HR_LEAD, UserRole.MANAGER, UserRole.PAYROLL)
   @Render('medical-service')
   async getMedicalService(
     @Req() req,
     @Query('search') search: string = '',
     @Query('page') page: number = 1,
-    @Query('startDate') startDate: string = '',
-    @Query('endDate') endDate: string = '',
+    @Query('startDate') startDate: string = new Date().toISOString().split('T')[0],
+    @Query('endDate') endDate: string = new Date().toISOString().split('T')[0],
   ) {
     const limit = 20;
     const { data, total, totalPages } = await this.smiaOstieService.paginateMedicalService(
@@ -70,6 +74,28 @@ export class SmiaOstieController {
     };
   }
 
+  @Get('add')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
+  @Render('add-medical-service')
+  async getAddMedicalService(
+    @Req() req,
+  ) {
+    return {
+      title: 'Add Medical Service',
+      user: req.session.user,
+    };
+  }
+
+  @Post('add')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
+  async add(@Res() res: any, @Body() createSmiaOstieDto: CreateSmiaOstieDto) {
+    await this.smiaOstieService.create(createSmiaOstieDto);
+    const message = "Employee consulation added successfully.";
+    res.redirect('/smia-ostie/list?message=' + message);
+  }
+
   @Post()
   create(@Body() createSmiaOstieDto: CreateSmiaOstieDto) {
     return this.smiaOstieService.create(createSmiaOstieDto);
@@ -92,17 +118,17 @@ export class SmiaOstieController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.smiaOstieService.findOne(+id);
+    return this.smiaOstieService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateSmiaOstieDto: UpdateSmiaOstieDto) {
-    return this.smiaOstieService.update(+id, updateSmiaOstieDto);
+    return this.smiaOstieService.update(id, updateSmiaOstieDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.smiaOstieService.remove(+id);
+    return this.smiaOstieService.remove(id);
   }
 
   @Get('stats/week')

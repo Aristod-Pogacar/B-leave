@@ -260,7 +260,7 @@
                                 const tr = document.createElement('tr');
                                 tr.innerHTML = `
                                     <td style="width: 20%;">${emp.matricule}</td>
-                                    <td style="width: 80%;">${emp.fullname}</td>
+                                    <td style="width: 80%;">${emp.name + ' ' + emp.firstname}</td>
                                 `;
                                 assignedEmployeesList.appendChild(tr);
                             });
@@ -356,7 +356,7 @@
                     <input type="checkbox" name="employeeIds" value="${emp.id}" ${isChecked ? 'checked' : ''}>
                 </td>
                 <td style="width: 15%;">${emp.matricule}</td>
-                <td style="width: 80%;">${emp.fullname}</td>
+                <td style="width: 80%;">${emp.name + ' ' + emp.firstname}</td>
             `;
             if (isChecked) {
                 tr.style.backgroundColor = "#dff7fc";

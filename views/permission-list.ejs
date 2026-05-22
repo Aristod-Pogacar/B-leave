@@ -1,0 +1,158 @@
+<%- include('partials/head.ejs') %>
+
+    <body>
+        <%- include('partials/sidebar.ejs') %>
+            <%- include('partials/header.ejs') %>
+                <main class="nxl-container">
+                    <div class="nxl-content">
+                        <div class="page-header">
+                            <div class="page-header-left d-flex align-items-center">
+                                <div class="page-header-title">
+                                    <h5 class="m-b-10">B-Leave</h5>
+                                </div>
+                                <ul class="breadcrumb">
+                                    <li class="breadcrumb-item">Permissions</li>
+                                    <li class="breadcrumb-item">Permissions list</li>
+                                </ul>
+                            </div>
+                            <div class="page-header-right ms-auto">
+                                <div class="page-header-right-items">
+                                    <div class="d-flex d-md-none">
+                                        <a href="javascript:void(0)" class="page-header-right-close-toggle">
+                                            <i class="feather-arrow-left me-2"></i>
+                                            <span>Back</span>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="d-md-none d-flex align-items-center">
+                                    <a href="javascript:void(0)" class="page-header-right-open-toggle">
+                                        <i class="feather-align-right fs-20"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- [ page-header ] end -->
+                        <div class="bg-white py-3 border-bottom rounded-0 p-md-0 mb-0">
+                            <div class="d-md-none d-flex align-items-center justify-content-between">
+                                <a href="javascript:void(0)" class="page-content-left-open-toggle">
+                                    <i class="feather-align-left fs-20"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <!-- [ Main Content ] start -->
+                        <div class="main-content">
+                            <div class="tab-content">
+                                <div class="tab-pane fade active show" id="overviewTab">
+                                    <div class="row">
+
+                                        <div class="col-12">
+                                            <div class="card stretch stretch-full">
+                                                <div class="card-header">
+                                                    <h5 class="card-title">Permissions list</h5>
+
+                                                    <!-- Filtres -->
+                                                    <form method="GET" action=""
+                                                        class="d-flex align-items-end gap-5 mt-2 flex-wrap">
+                                                        <div>
+                                                            <label class="form-label mb-1">Start date</label>
+                                                            <input type="date" name="startDate" class="form-control"
+                                                                value="<%= startDate %>" />
+                                                        </div>
+                                                        <div>
+                                                            <label class="form-label mb-1">End date</label>
+                                                            <input type="date" name="endDate" class="form-control"
+                                                                value="<%= endDate %>" />
+                                                        </div>
+                                                        <div class="d-flex gap-2">
+                                                            <button type="submit" class="btn btn-primary">
+                                                                <i class="feather-search me-1"></i> Filtrer
+                                                            </button>
+                                                            <a href="?" class="btn btn-outline-secondary">
+                                                                <i class="feather-x me-1"></i> Reset
+                                                            </a>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                                <div class="card-body custom-card-action p-0">
+                                                    <% if (locals.error) { %>
+                                                        <div class="alert alert-danger" role="alert" id="message">
+                                                            <%= error %>
+                                                        </div>
+                                                        <% } %>
+                                                            <% if (locals.message) { %>
+                                                                <div class="alert alert-success" role="alert"
+                                                                    id="message">
+                                                                    <%= message %>
+                                                                </div>
+                                                                <% } %>
+                                                                    <div class="table-responsive mb-3">
+                                                                        <table class="table table-hover mb-0">
+                                                                            <thead>
+                                                                                <tr>
+                                                                                    <th style="width: 10%;">
+                                                                                        Matricule</th>
+                                                                                    <th style="width: 30%;">Fullname
+                                                                                    </th>
+                                                                                    <th style="width: 10%;">Applied at
+                                                                                    </th>
+                                                                                    <th style="width: 10%;">Start date
+                                                                                    </th>
+                                                                                    <th style="width: 10%;">Duration
+                                                                                    </th>
+                                                                                    <th style="width: 10%;">Reason</th>
+                                                                                    <th class="text-center"
+                                                                                        style="width: 10%;">Approver
+                                                                                    </th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                                <% leaves.forEach(leave=> { %>
+                                                                                    <tr>
+                                                                                        <td style="width: 10%;">
+                                                                                            <%= leave.employee.matricule
+                                                                                                %>
+                                                                                        </td>
+                                                                                        <td style="width: 30%;">
+                                                                                            <a
+                                                                                                href="/employee/details/<%= leave.employee.id %>">
+                                                                                                <%= leave.employee.name
+                                                                                                    %>
+                                                                                                    <%= leave.employee.firstname
+                                                                                                        %>
+                                                                                            </a>
+                                                                                        </td>
+                                                                                        <td style="width: 10%;">
+                                                                                            <%= new
+                                                                                                Date(leave.created_at).toLocaleDateString('fr-FR')
+                                                                                                %>
+                                                                                        </td>
+                                                                                        <td style="width: 10%;">
+                                                                                            <%= new
+                                                                                                Date(leave.start_date).toLocaleDateString('fr-FR')
+                                                                                                %>
+                                                                                        </td>
+                                                                                        <td style="width: 10%;">
+                                                                                            <%= leave.duration %> day(s)
+                                                                                        </td>
+                                                                                        <td style="width: 10%;">
+                                                                                            <%= leave.reason %>
+                                                                                        </td>
+                                                                                        <td style="width: 10%;">
+                                                                                            <%= leave.approver?.name %>
+                                                                                                <%= leave.approver?.firstName
+                                                                                                    %>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                    <% }) %>
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <%- include('partials/footer.ejs') %>

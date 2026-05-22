@@ -89,7 +89,8 @@ export class TaskService {
                         await this.leaveService.doneLeave(leave);
                         await this.historyService.create({
                           reason: HistoryReason.LEAVE,
-                          message: "New leave " + leave.start_date + " to " + leave.end_date + " of " + leave.employee.fullname + " send to OneHR by AUTOMATION PUPPETEER",
+                          message: "New leave " + leave.start_date + " to " + leave.end_date + " of " + leave.employee.name + " " + leave.employee.firstname + " send to OneHR by AUTOMATION PUPPETEER",
+                          created_by: "AUTOMATION PUPPETEER",
                         });
                         // await this.leaveService.save(data);
                         await this.manager.closeSession(sessionId);
