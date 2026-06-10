@@ -30,6 +30,275 @@
             .bar-chart>.bar-col div {
                 transition: height .4s ease;
             }
+
+            .chart-wrapper {
+                display: flex;
+                gap: 12px;
+                align-items: stretch;
+                height: 260px;
+            }
+
+            .chart-y-axis {
+                width: 40px;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                font-size: 11px;
+                color: var(--text-3);
+                text-align: right;
+                padding-bottom: 24px;
+            }
+
+            .bar-chart {
+                flex: 1;
+                display: flex;
+                align-items: flex-end;
+                gap: 14px;
+                height: 100%;
+            }
+
+            .bar-col {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                height: 100%;
+            }
+
+            .bar-group {
+                width: 100%;
+                height: 100%;
+                display: flex;
+                align-items: flex-end;
+                gap: 4px;
+            }
+
+            .bar {
+                flex: 1;
+                border-radius: 4px 4px 0 0;
+                min-height: 4px;
+                transition: height .3s;
+            }
+
+            .bar-label-x {
+                margin-top: 8px;
+                font-size: 12px;
+            }
+
+            /* 
+            .modal-overlay {
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, .4);
+                display: none;
+                justify-content: center;
+                align-items: center;
+                z-index: 9999;
+            }
+
+            .modal-overlay.show {
+                display: flex;
+            }
+
+            .modal-content {
+                width: 900px;
+                max-width: 90%;
+                background: white;
+                border-radius: 10px;
+                padding: 20px;
+            }
+
+            .modal-header {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 20px;
+            } */
+
+            .manager-row {
+                transition: all .2s;
+            }
+
+            .manager-row:hover {
+                background: var(--surface-2);
+                border-radius: var(--radius-sm);
+            }
+
+            .modal-transparente {
+                background-color: rgba(0, 0, 0, 0) !important;
+                /* Fond noir à 50% de transparence */
+                border: none;
+                /* Supprime la bordure par défaut de Bootstrap */
+                backdrop-filter: blur(5px);
+                /* Optionnel : ajoute un effet de flou super moderne à l'arrière-plan */
+            }
+
+            .kpi-card-modal {
+                background: rgba(255, 255, 255, .04);
+                border: 1px solid rgba(255, 255, 255, .08);
+                border-radius: 18px;
+                padding: 20px;
+                transition: all .2s ease;
+                height: 100%;
+            }
+
+            .kpi-card-modal:hover {
+                transform: translateY(-4px);
+                border-color: rgba(255, 255, 255, .15);
+            }
+
+            .kpi-header-modal {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .kpi-title-modal {
+                color: #d1d5db;
+                font-size: .9rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: .5px;
+            }
+
+            .kpi-value-modal {
+                font-size: 2.3rem;
+                font-weight: 700;
+                color: #fff;
+                margin-top: 15px;
+                line-height: 1;
+            }
+
+            .kpi-subtitle-modal {
+                color: #9ca3af;
+                margin-top: 6px;
+                font-size: .85rem;
+            }
+
+            .kpi-footer-modal {
+                margin-top: 24px;
+            }
+
+            .kpi-progress-label-modal {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 8px;
+                color: #9ca3af;
+                font-size: .8rem;
+            }
+
+            .progress-bar-modal {
+                height: 8px;
+                background: rgba(255, 255, 255, .08);
+                border-radius: 999px;
+                overflow: hidden;
+            }
+
+            .progress-fill-modal {
+                height: 100%;
+                border-radius: 999px;
+                transition: width .4s ease;
+            }
+
+            .kpi-card-modal {
+                background: #fff;
+                border: none;
+                border-radius: 18px;
+                padding: 20px;
+                height: 100%;
+
+                box-shadow:
+                    0 4px 12px rgba(0, 0, 0, .08),
+                    0 2px 4px rgba(0, 0, 0, .04);
+
+                transition: all .25s ease;
+            }
+
+            .kpi-card-modal:hover {
+                transform: translateY(-4px);
+
+                box-shadow:
+                    0 12px 24px rgba(0, 0, 0, .12),
+                    0 4px 8px rgba(0, 0, 0, .08);
+            }
+
+            .kpi-title-modal {
+                color: #6b7280;
+                font-size: .85rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: .5px;
+            }
+
+            .kpi-value-modal {
+                font-size: 2.5rem;
+                font-weight: 700;
+                color: #111827;
+                margin-top: 15px;
+                line-height: 1;
+            }
+
+            .kpi-subtitle-modal {
+                color: #9ca3af;
+                margin-top: 6px;
+                font-size: .85rem;
+            }
+
+            .progress-bar-modal {
+                height: 8px;
+                background: #e5e7eb;
+                border-radius: 999px;
+                overflow: hidden;
+            }
+
+            .modal-transparente .modal-header {
+                border-bottom: none !important;
+            }
+
+            .modal-transparente .modal-footer {
+                border-top: none !important;
+            }
+
+            .modal-transparente .modal-body,
+            .modal-transparente .card-body {
+                background: transparent;
+            }
+
+            .kpi-card-hover:hover {
+                cursor: pointer;
+                transform: translateY(-4px);
+
+                box-shadow:
+                    0 4px 8px rgba(0, 0, 0, .12),
+                    0 2px 4px rgba(0, 0, 0, .08);
+            }
+
+            /* Modal */
+            #employeeCountModal .modal-content {
+                background: transparent;
+                border: none;
+                box-shadow: none !important;
+            }
+
+            /* Supprime les traits Bootstrap */
+            #employeeCountModal .modal-header {
+                border-bottom: none;
+                padding-bottom: 0;
+            }
+
+            #employeeCountModal .modal-footer {
+                border-top: none;
+                background: transparent;
+            }
+
+            #employeeCountModal .modal-body,
+            #employeeCountModal .card-body {
+                background: transparent;
+            }
+
+            /* Bouton fermeture visible sur fond sombre */
+            #employeeCountModal .btn-close {
+                filter: invert(1);
+            }
         </style>
         <%- include('partials/sidebar.ejs') %>
             <%- include('partials/header.ejs') %>
@@ -68,22 +337,17 @@
                             <!-- KPI CARDS -->
                             <div class="kpi-grid">
                                 <!-- Employés -->
-                                <div class="kpi-card">
+                                <div class="kpi-card kpi-card-hover" data-bs-toggle="modal"
+                                    data-bs-target="#employeeCountModal" style="cursor:pointer">
                                     <div class="kpi-top">
                                         <div class="kpi-icon" style="background:var(--primary-light)">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="#1a56db" stroke-width="2">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="#01057d" stroke-width="2">
                                                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                                                 <circle cx="9" cy="7" r="4" />
                                                 <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
                                                 <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                                             </svg>
                                         </div>
-                                        <svg class="kpi-more" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                            stroke="currentColor" stroke-width="2">
-                                            <circle cx="12" cy="12" r="1" />
-                                            <circle cx="19" cy="12" r="1" />
-                                            <circle cx="5" cy="12" r="1" />
-                                        </svg>
                                     </div>
                                     <div class="kpi-value">
                                         <%= totalEmployees %>
@@ -97,7 +361,7 @@
                                                 </span></div>
                                             <div class="progress-bar">
                                                 <div class="progress-fill"
-                                                    style="width:<%= (activeEmployees / totalEmployees) * 100 %>%;background:#1a56db">
+                                                    style="width:<%= (activeEmployees / totalEmployees) * 100 %>%;background:#01057d">
                                                 </div>
                                             </div>
                                         </div>
@@ -117,43 +381,43 @@
                                 </div>
 
                                 <!-- Taux d'absence -->
-                                <div class="kpi-card">
+                                <div class="kpi-card kpi-card-hover" data-bs-toggle="modal"
+                                    data-bs-target="#absenceRateModal" style="cursor:pointer">
                                     <div class="kpi-top">
                                         <div class="kpi-icon" style="background:var(--danger-light)">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="#c81e1e" stroke-width="2">
                                                 <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
                                             </svg>
                                         </div>
-                                        <svg class="kpi-more" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                            stroke="currentColor" stroke-width="2">
-                                            <circle cx="12" cy="12" r="1" />
-                                            <circle cx="19" cy="12" r="1" />
-                                            <circle cx="5" cy="12" r="1" />
-                                        </svg>
                                     </div>
                                     <div class="kpi-value">
-                                        <%= currentRate %>%
+                                        <%= monthlyGlobalAbsenceRate.currentRate %>%
                                     </div>
-                                    <div class="kpi-label">Overall absence rate</div>
+                                    <div class="kpi-label">This month absence rate</div>
                                     <div class="kpi-footer">
                                         <div class="kpi-progress-wrap">
                                             <div class="kpi-progress-label"><span>Objective &lt; 5%</span><span>
-                                                    <%= variation> 0 ? '+' : '-' %><%= variation %>% vs
+                                                    <%= monthlyGlobalAbsenceRate.variation> 0 ? '+' : '' %><%=
+                                                            monthlyGlobalAbsenceRate.variation %>% vs
                                                             <span id="kpi-month"></span>
                                                 </span></div>
                                             <div class="progress-bar">
                                                 <div class="progress-fill"
-                                                    style="width:<%= currentRate %>%;background:#c81e1e"></div>
+                                                    style="width:<%= monthlyGlobalAbsenceRate.currentRate %>%;background:#c81e1e">
+                                                </div>
                                             </div>
                                         </div>
-                                        <span class="trend trend-down" style="margin-left:12px">
-                                            <%= variation> 0 ? '↑' : '↓' %>
+                                        <span
+                                            class="trend trend-<%= monthlyGlobalAbsenceRate.variation> 0 ? 'down' : 'up' %>"
+                                            style="margin-left:12px">
+                                            <%= monthlyGlobalAbsenceRate.variation> 0 ? '↑' : '↓' %>
                                         </span>
                                     </div>
                                 </div>
 
                                 <!-- Leaves en cours -->
-                                <div class="kpi-card">
+                                <div class="kpi-card kpi-card-hover" data-bs-toggle="modal"
+                                    data-bs-target="#ongoingLeavesModal" style="cursor:pointer">
                                     <div class="kpi-top">
                                         <div class="kpi-icon" style="background:var(--warning-light)">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2">
@@ -163,12 +427,6 @@
                                                 <line x1="3" y1="10" x2="21" y2="10" />
                                             </svg>
                                         </div>
-                                        <svg class="kpi-more" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                            stroke="currentColor" stroke-width="2">
-                                            <circle cx="12" cy="12" r="1" />
-                                            <circle cx="19" cy="12" r="1" />
-                                            <circle cx="5" cy="12" r="1" />
-                                        </svg>
                                     </div>
                                     <div class="kpi-value">
                                         <%= ongoingLeaves %>
@@ -192,7 +450,8 @@
                                 </div>
 
                                 <!-- Demandes en attente -->
-                                <div class="kpi-card">
+                                <div class="kpi-card kpi-card-hover" data-bs-toggle="modal"
+                                    data-bs-target="#pendingLeavesModal" style="cursor:pointer">
                                     <div class="kpi-top">
                                         <div class="kpi-icon" style="background:var(--success-light)">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="#057a55" stroke-width="2">
@@ -200,12 +459,6 @@
                                                 <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
                                             </svg>
                                         </div>
-                                        <svg class="kpi-more" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                            stroke="currentColor" stroke-width="2">
-                                            <circle cx="12" cy="12" r="1" />
-                                            <circle cx="19" cy="12" r="1" />
-                                            <circle cx="5" cy="12" r="1" />
-                                        </svg>
                                     </div>
                                     <div class="kpi-value">
                                         <%= pendingLeaves %>
@@ -238,29 +491,25 @@
                                             </div>
                                             <div class="card-subtitle">Cumulative absence days by category</div>
                                         </div>
-                                        <div class="card-actions">
-                                            <div class="card-dot" style="background:#ef4444" title="Supprimer">
-                                            </div>
-                                            <div class="card-dot" style="background:#f59e0b" title="Actualiser">
-                                            </div>
-                                            <div class="card-dot" style="background:#10b981" title="Agrandir"></div>
-                                        </div>
                                     </div>
                                     <div class="card-body">
                                         <div
                                             style="display:flex;align-items:center;gap:20px;margin-bottom:16px;flex-wrap:wrap;">
                                             <span
                                                 style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-2)"><span
-                                                    style="width:10px;height:10px;border-radius:2px;background:#1a56db;display:inline-block"></span>Local
+                                                    style="width:10px;height:10px;border-radius:2px;background:#01057d;display:inline-block"></span>Local
                                                 Leave</span>
                                             <span
                                                 style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-2)"><span
-                                                    style="width:10px;height:10px;border-radius:2px;background:#059669;display:inline-block"></span>Permission</span>
+                                                    style="width:10px;height:10px;border-radius:2px;background:#108e05;display:inline-block"></span>Permission</span>
                                             <span
                                                 style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-2)"><span
-                                                    style="width:10px;height:10px;border-radius:2px;background:#f59e0b;display:inline-block"></span>Indisponibilite</span>
+                                                    style="width:10px;height:10px;border-radius:2px;background:#b00718;display:inline-block"></span>Indisponibilite</span>
                                         </div>
-                                        <div id="absence-chart" class="bar-chart"></div>
+                                        <div class="chart-wrapper">
+                                            <div class="chart-y-axis" id="chart-y-axis"></div>
+                                            <div id="absence-chart" class="bar-chart"></div>
+                                        </div>
                                         <div style="margin-top:4px;font-size:11px;color:var(--text-3);text-align:right">
                                             Colored segments are approved, gray segments are pending</div>
                                         <!-- Footer stats -->
@@ -367,22 +616,22 @@
                                                     <circle cx="120" cy="120" r="90" fill="none" stroke="var(--bg)"
                                                         stroke-width="28" />
 
-                                                    <circle cx="120" cy="120" r="90" fill="none" stroke="#1a56db"
+                                                    <circle cx="120" cy="120" r="90" fill="none" stroke="#01057d"
                                                         stroke-width="28"
                                                         stroke-dasharray="<%= localDash %> <%= circumference %>"
-                                                        transform="rotate(-90 120 120)" />
+                                                        transform="rotate(-90 120 120)" title="Local Leave" />
 
-                                                    <circle cx="120" cy="120" r="90" fill="none" stroke="#059669"
+                                                    <circle cx="120" cy="120" r="90" fill="none" stroke="#108e05"
                                                         stroke-width="28"
                                                         stroke-dasharray="<%= permissionDash %> <%= circumference %>"
                                                         stroke-dashoffset="-<%= localDash %>"
-                                                        transform="rotate(-90 120 120)" />
+                                                        transform="rotate(-90 120 120)" title="Permission" />
 
-                                                    <circle cx="120" cy="120" r="90" fill="none" stroke="#f59e0b"
+                                                    <circle cx="120" cy="120" r="90" fill="none" stroke="#b00718"
                                                         stroke-width="28"
                                                         stroke-dasharray="<%= indispoDash %> <%= circumference %>"
                                                         stroke-dashoffset="-<%= localDash + permissionDash %>"
-                                                        transform="rotate(-90 120 120)" />
+                                                        transform="rotate(-90 120 120)" title="Indisponibilite" />
 
                                                     <text x="120" y="115" text-anchor="middle" font-size="30"
                                                         font-weight="600">
@@ -400,7 +649,7 @@
 
                                             <div class="legend-list" style="width:100%">
                                                 <div class="legend-item">
-                                                    <span class="legend-dot" style="background:#1a56db"></span>
+                                                    <span class="legend-dot" style="background:#01057d"></span>
                                                     Local Leave
                                                     <span class="legend-val">
                                                         <%= leaveTypes.localLeave %>j
@@ -411,7 +660,7 @@
                                                 </div>
 
                                                 <div class="legend-item">
-                                                    <span class="legend-dot" style="background:#059669"></span>
+                                                    <span class="legend-dot" style="background:#108e05"></span>
                                                     Permission
                                                     <span class="legend-val">
                                                         <%= leaveTypes.permissionAMD %>j
@@ -422,7 +671,7 @@
                                                 </div>
 
                                                 <div class="legend-item">
-                                                    <span class="legend-dot" style="background:#f59e0b"></span>
+                                                    <span class="legend-dot" style="background:#b00718"></span>
                                                     Indisponibilite
                                                     <span class="legend-val">
                                                         <%= leaveTypes.indispo %>j
@@ -604,18 +853,20 @@
                                 <div class="card">
                                     <div class="card-header">
                                         <div class="card-title">
-                                            Absences by section
+                                            Absences by manager
                                         </div>
                                     </div>
 
                                     <div class="card-body">
 
-                                        <% const colors=[ "#1a56db" , "#059669" , "#f59e0b" , "#c81e1e" , "#8b5cf6" ];
-                                            %>
+                                        <% const colors=["#01057d","#108e05","#b00718","#c81e1e","#8b5cf6"]; %>
 
-                                            <% sectionStats.forEach((section, i)=> { %>
+                                            <% managerStats.forEach((manager, i)=> { %>
 
-                                                <div class="progress-row">
+                                                <div class="progress-row manager-row"
+                                                    data-manager-id="<%= manager.id %>"
+                                                    data-manager-name="<%= manager.manager %>" data-bs-toggle="modal"
+                                                    data-bs-target="#managerModal" style="cursor:pointer">
 
                                                     <div class="progress-info">
                                                         <div class="progress-logo">
@@ -627,29 +878,27 @@
 
                                                         <div>
                                                             <div class="progress-name">
-                                                                <%= section.section %>
+                                                                <%= manager.manager %>
                                                             </div>
 
                                                             <div class="progress-sub">
-                                                                <%= section.employees %> employees • <%= section.absent
-                                                                        %>
-                                                                        absents
+                                                                <%= manager.absent %> absents
                                                             </div>
                                                         </div>
                                                     </div>
 
                                                     <div class="progress-track">
                                                         <div class="progress-fill2" style="
-                            width:<%= section.pct %>%;
-                            background:<%= colors[i % colors.length] %>
-                        ">
+                    width:<%= manager.pct %>%;
+                    background:<%= colors[i % colors.length] %>
+                ">
                                                         </div>
                                                     </div>
 
                                                     <div class="progress-pct" style="
-                        color:<%= colors[i % colors.length] %>
-                    ">
-                                                        <%= section.pct %>%
+                color:<%= colors[i % colors.length] %>
+            ">
+                                                        <%= manager.pct %>%
                                                     </div>
 
                                                 </div>
@@ -661,9 +910,125 @@
                                         <a href="/leave/planning-view">Voir dans le planning</a>
                                     </div> -->
                                 </div>
+                                <div class="card d-none">
+                                    <div class="card-header">
+                                        <div class="card-title">
+                                            Absences by entity
+                                        </div>
+                                    </div>
+
+                                    <div class="card-body">
+
+                                        <% sectionStats.forEach((section, i)=> { %>
+
+                                            <div class="progress-row">
+
+                                                <div class="progress-info">
+                                                    <div class="progress-logo">
+                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                            stroke="currentColor" stroke-width="2">
+                                                            <circle cx="12" cy="12" r="10" />
+                                                        </svg>
+                                                    </div>
+
+                                                    <div>
+                                                        <div class="progress-name">
+                                                            <%= section.section %>
+                                                        </div>
+
+                                                        <div class="progress-sub">
+                                                            <%= section.employees %> employees • <%= section.absent %>
+                                                                    absents
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="progress-track">
+                                                    <div class="progress-fill2" style="
+                            width:<%= section.pct %>%;
+                            background:<%= colors[i % colors.length] %>
+                        ">
+                                                    </div>
+                                                </div>
+
+                                                <div class="progress-pct" style="
+                        color:<%= colors[i % colors.length] %>
+                    ">
+                                                    <%= section.pct %>%
+                                                </div>
+
+                                            </div>
+
+                                            <% }) %>
+
+                                    </div>
+                                    <!-- <div class="card-footer">
+                                        <a href="/leave/planning-view">Voir dans le planning</a>
+                                    </div> -->
+                                </div>
 
                                 <!-- Service médical stats -->
                                 <div class="card">
+                                    <div class="card-header">
+                                        <div class="card-title">
+                                            Medical consultations by manager
+                                        </div>
+                                    </div>
+
+                                    <div class="card-body">
+
+                                        <% medicalByManagerStats.forEach((section, i)=> { %>
+
+                                            <div class="progress-row medical-service-row"
+                                                data-medical-service-id="<%= section.id %>"
+                                                data-medical-service-name="<%= section.manager %>"
+                                                data-bs-toggle="modal" data-bs-target="#medicalServiceModal"
+                                                style="cursor:pointer">
+
+                                                <div class="progress-info">
+                                                    <div class="progress-logo">
+                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                            stroke="currentColor" stroke-width="2">
+                                                            <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                                                        </svg>
+                                                    </div>
+
+                                                    <div>
+                                                        <div class="progress-name">
+                                                            <%= section.manager %>
+                                                        </div>
+
+                                                        <div class="progress-sub">
+                                                            <%= section.consultation %> consultation(s)
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="progress-track">
+                                                    <div class="progress-fill2" style="
+                            width:<%= section.pct %>%;
+                            background:<%= colors[i % colors.length] %>;
+                        ">
+                                                    </div>
+                                                </div>
+
+                                                <div class="progress-pct" style="
+                        color:<%= colors[i % colors.length] %>;
+                    ">
+                                                    <%= section.pct %>%
+                                                </div>
+
+                                            </div>
+
+                                            <% }) %>
+
+                                    </div>
+
+                                    <!-- <div class="card-footer">
+                                        <a href="/smia-ostie/list">Voir toutes les consultations</a>
+                                    </div> -->
+                                </div>
+                                <div class="card d-none">
                                     <div class="card-header">
                                         <div class="card-title">
                                             Medical consultations by section
@@ -725,7 +1090,7 @@
                                     || "" }`.toUpperCase(); } function getAvatarClass(i){ const colors=[ "av-blue"
                                     , "av-green" , "av-amber" , "av-purple" ]; return colors[i % colors.length]; }
                                     function getStatusColor(user){ if(user.isBlocked) return "#c81e1e" ;
-                                    if(user.isSuspended) return "#f59e0b" ; if(user.isActive) return "#059669" ;
+                                    if(user.isSuspended) return "#b00718" ; if(user.isActive) return "#108e05" ;
                                     return "#9ca3af" ; } %>
                                     <div class="card">
                                         <div class="card-header">
@@ -783,12 +1148,8 @@
                                                             </span>
                                                         </div>
 
-                                                        <div style="
-                    display:flex;
-                    justify-content:space-between;
-                    font-size:12px;
-                    margin-top:4px;
-                ">
+                                                        <div
+                                                            style="display:flex;justify-content:space-between;font-size:12px;margin-top:4px;">
                                                             <span style="color:var(--text-3)">
                                                                 HR Leads
                                                             </span>
@@ -886,100 +1247,198 @@
                             ),
                             1
                         );
-                        monthlyStats.forEach((m, i) => {
+                        //                         monthlyStats.forEach((m, i) => {
 
-                            const isFuture = i > currentMonth;
+                        //                             const isFuture = i > currentMonth;
+
+                        //                             const barCol = document.createElement("div");
+                        //                             barCol.className = "bar-col";
+
+                        //                             const wrapper = document.createElement("div");
+                        //                             wrapper.style.cssText = `
+                        //             width:100%;
+                        //             display:flex;
+                        //             flex-direction:column;
+                        //             gap:2px;
+                        //             height:100%;
+                        //             justify-content:flex-end;
+                        //         `;
+
+                        //                             const leaveApproved = document.createElement("div");
+                        //                             leaveApproved.style.cssText = `
+                        //     width:100%;
+                        //     height:${(m.leaveApproved / max) * 100}%;
+                        //     background:#01057d;
+                        //     opacity:.85;
+                        // `;
+
+                        //                             const leavePending = document.createElement("div");
+                        //                             leavePending.style.cssText = `
+                        //     width:100%;
+                        //     height:${(m.leavePending / max) * 100}%;
+                        //     background:var(--border);
+                        //     opacity:.85;
+                        // `;
+
+                        //                             const permissionApproved = document.createElement("div");
+                        //                             permissionApproved.style.cssText = `
+                        //     width:100%;
+                        //     height:${(m.permissionApproved / max) * 100}%;
+                        //     background:#108e05;
+                        //     opacity:.85;
+                        // `;
+
+                        //                             const permissionPending = document.createElement("div");
+                        //                             permissionPending.style.cssText = `
+                        //     width:100%;
+                        //     height:${(m.permissionPending / max) * 100}%;
+                        //     background:var(--border);
+                        //     opacity:.85;
+                        // `;
+
+                        //                             const indispoApproved = document.createElement("div");
+                        //                             indispoApproved.style.cssText = `
+                        //     width:100%;
+                        //     height:${(m.indispoApproved / max) * 100}%;
+                        //     background:#b00718;
+                        //     opacity:.85;
+                        // `;
+
+                        //                             const indispoPending = document.createElement("div");
+                        //                             indispoPending.style.cssText = `
+                        //     width:100%;
+                        //     height:${(m.indispoPending / max) * 100}%;
+                        //     background:var(--border);
+                        //     opacity:.85;
+                        // `;
+
+                        //                             const label = document.createElement("span");
+                        //                             label.className = "bar-label-x";
+                        //                             label.innerText = months[i];
+
+                        //                             if (i === currentMonth) {
+                        //                                 label.style.fontWeight = "600";
+                        //                                 label.style.color = "var(--primary)";
+                        //                             }
+
+                        //                             leavePending.classList.add("bar-pending");
+                        //                             permissionPending.classList.add("bar-pending");
+                        //                             indispoPending.classList.add("bar-pending");
+
+                        //                             leavePending.title = `${m.leavePending}day(s) Leaves Pending`;
+                        //                             permissionPending.title = `${m.permissionPending}day(s) Permissions Pending`;
+                        //                             indispoPending.title = `${m.indispoPending}day(s) Indisponibilities Pending`;
+
+                        //                             leaveApproved.title = `${m.leaveApproved}day(s) Leaves Approved`;
+                        //                             permissionApproved.title = `${m.permissionApproved}day(s) Permissions Approved`;
+                        //                             indispoApproved.title = `${m.indispoApproved}day(s) Indisponibilities Approved`;
+
+                        //                             wrapper.appendChild(indispoPending);
+                        //                             wrapper.appendChild(permissionPending);
+                        //                             wrapper.appendChild(leavePending);
+                        //                             wrapper.appendChild(indispoApproved);
+                        //                             wrapper.appendChild(permissionApproved);
+                        //                             wrapper.appendChild(leaveApproved);
+
+                        //                             barCol.appendChild(wrapper);
+                        //                             barCol.appendChild(label);
+
+                        //                             chart.appendChild(barCol);
+                        //                         });
+                        const yAxis = document.getElementById("chart-y-axis");
+
+                        // reset
+                        chart.innerHTML = "";
+                        yAxis.innerHTML = "";
+
+                        // graduation
+                        for (let i = 5; i >= 0; i--) {
+                            const tick = document.createElement("div");
+                            tick.innerText = Math.round((max / 5) * i);
+                            yAxis.appendChild(tick);
+                        }
+
+                        monthlyStats.forEach((m, i) => {
 
                             const barCol = document.createElement("div");
                             barCol.className = "bar-col";
 
-                            const wrapper = document.createElement("div");
-                            wrapper.style.cssText = `
-            width:100%;
+                            const group = document.createElement("div");
+                            group.className = "bar-group";
+
+                            function createStack(approved, pending, color, labelText) {
+                                const stack = document.createElement("div");
+                                stack.style.cssText = `
+            flex:1;
+            height:100%;
             display:flex;
             flex-direction:column;
-            gap:2px;
-            height:100%;
             justify-content:flex-end;
+            gap:2px;
         `;
 
-                            const leaveApproved = document.createElement("div");
-                            leaveApproved.style.cssText = `
-    width:100%;
-    height:${(m.leaveApproved / max) * 100}%;
-    background:#1a56db;
-    opacity:.85;
-`;
+                                const pendingBar = document.createElement("div");
+                                pendingBar.style.cssText = `
+            height:${(pending / max) * 100}%;
+            background:var(--border);
+            border-radius:3px 3px 0 0;
+            min-height:${pending > 0 ? "4px" : "0"};
+        `;
+                                pendingBar.title = `${pending} day(s) ${labelText} Pending`;
 
-                            const leavePending = document.createElement("div");
-                            leavePending.style.cssText = `
-    width:100%;
-    height:${(m.leavePending / max) * 100}%;
-    background:var(--border);
-    opacity:.85;
-`;
+                                const approvedBar = document.createElement("div");
+                                approvedBar.style.cssText = `
+            height:${(approved / max) * 100}%;
+            background:${color};
+            border-radius:3px 3px 0 0;
+            min-height:${approved > 0 ? "4px" : "0"};
+        `;
+                                approvedBar.title = `${approved} day(s) ${labelText} Approved`;
 
-                            const permissionApproved = document.createElement("div");
-                            permissionApproved.style.cssText = `
-    width:100%;
-    height:${(m.permissionApproved / max) * 100}%;
-    background:#059669;
-    opacity:.85;
-`;
+                                stack.appendChild(pendingBar);
+                                stack.appendChild(approvedBar);
 
-                            const permissionPending = document.createElement("div");
-                            permissionPending.style.cssText = `
-    width:100%;
-    height:${(m.permissionPending / max) * 100}%;
-    background:var(--border);
-    opacity:.85;
-`;
+                                return stack;
+                            }
 
-                            const indispoApproved = document.createElement("div");
-                            indispoApproved.style.cssText = `
-    width:100%;
-    height:${(m.indispoApproved / max) * 100}%;
-    background:#f59e0b;
-    opacity:.85;
-`;
+                            // 3 barres côte à côte
+                            group.appendChild(
+                                createStack(
+                                    m.leaveApproved,
+                                    m.leavePending,
+                                    "#01057d",
+                                    "Leave"
+                                )
+                            );
 
-                            const indispoPending = document.createElement("div");
-                            indispoPending.style.cssText = `
-    width:100%;
-    height:${(m.indispoPending / max) * 100}%;
-    background:var(--border);
-    opacity:.85;
-`;
+                            group.appendChild(
+                                createStack(
+                                    m.permissionApproved,
+                                    m.permissionPending,
+                                    "#108e05",
+                                    "Permission"
+                                )
+                            );
+
+                            group.appendChild(
+                                createStack(
+                                    m.indispoApproved,
+                                    m.indispoPending,
+                                    "#b00718",
+                                    "Indisponibilite"
+                                )
+                            );
 
                             const label = document.createElement("span");
                             label.className = "bar-label-x";
                             label.innerText = months[i];
 
                             if (i === currentMonth) {
-                                label.style.fontWeight = "600";
                                 label.style.color = "var(--primary)";
+                                label.style.fontWeight = "600";
                             }
 
-                            leavePending.classList.add("bar-pending");
-                            permissionPending.classList.add("bar-pending");
-                            indispoPending.classList.add("bar-pending");
-
-                            leavePending.title = `${m.leavePending}day(s) Leaves Pending`;
-                            permissionPending.title = `${m.permissionPending}day(s) Permissions Pending`;
-                            indispoPending.title = `${m.indispoPending}day(s) Indisponibilities Pending`;
-
-                            leaveApproved.title = `${m.leaveApproved}day(s) Leaves Approved`;
-                            permissionApproved.title = `${m.permissionApproved}day(s) Permissions Approved`;
-                            indispoApproved.title = `${m.indispoApproved}day(s) Indisponibilities Approved`;
-
-                            wrapper.appendChild(indispoPending);
-                            wrapper.appendChild(permissionPending);
-                            wrapper.appendChild(leavePending);
-                            wrapper.appendChild(indispoApproved);
-                            wrapper.appendChild(permissionApproved);
-                            wrapper.appendChild(leaveApproved);
-
-                            barCol.appendChild(wrapper);
+                            barCol.appendChild(group);
                             barCol.appendChild(label);
 
                             chart.appendChild(barCol);
@@ -987,6 +1446,542 @@
 
                     });
                 </script>
+                <script>
+                    // const managerModal = new bootstrap.Modal(
+                    //     document.getElementById('managerModal')
+                    // );
+                    document.querySelectorAll('.manager-row')
+                        .forEach(row => {
+
+                            row.addEventListener('click', async () => {
+
+                                const managerId = row.dataset.managerId;
+                                const managerName = row.dataset.managerName;
+
+                                document.getElementById('managerModalTitle')
+                                    .innerText = "Absences in the team of " + managerName;
+
+                                const response = await fetch(
+                                    `/leave/manager/${managerId}/absences`
+                                );
+
+                                const data = await response.json();
+
+                                const body =
+                                    document.getElementById('managerModalBody');
+
+                                body.innerHTML = '';
+                                if (data.length == 0) {
+                                    body.innerHTML = `
+                                        <div class="text-center">
+                                            <p>No absences found for this team</p>
+                                        </div>
+                                    `;
+                                    return;
+                                }
+
+                                data.forEach(leave => {
+
+                                    body.innerHTML = `
+    <table class="table table-striped table-hover mb-0">
+        <thead>
+            <tr>
+                <th>Employee</th>
+                <th>Type</th>
+                <th>Start Date</th>
+                <th>Duration</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${data.map(leave => `
+                <tr>
+                    <td>${leave.employee.firstname} ${leave.employee.name}</td>
+                    <td>${leave.leave_type}</td>
+                    <td>${new Date(leave.start_date).toLocaleDateString('fr-FR')}</td>
+                    <td>${leave.duration}</td>
+                </tr>
+            `).join('')}
+        </tbody>
+    </table>
+`;
+                                });
+                                // managerModal.show();
+                            });
+
+                        });
+                </script>
+                <script>
+                    // const managerModal = new bootstrap.Modal(
+                    //     document.getElementById('managerModal')
+                    // );
+                    document.querySelectorAll('.medical-service-row')
+                        .forEach(row => {
+
+                            row.addEventListener('click', async () => {
+
+                                const medicalServiceId = row.dataset.medicalServiceId;
+                                const medicalServiceName = row.dataset.medicalServiceName;
+
+                                document.getElementById('medicalServiceModalTitle')
+                                    .innerText = "Consultations in the team of " + medicalServiceName;
+
+                                const response = await fetch(
+                                    `/smia-ostie/manager/${medicalServiceId}/medical-services`
+                                );
+
+                                const data = await response.json();
+
+                                const body =
+                                    document.getElementById('medicalServiceModalBody');
+
+                                body.innerHTML = '';
+                                if (data.length == 0) {
+                                    body.innerHTML = `
+                                        <div class="text-center">
+                                            <p>No consultations found for this team</p>
+                                        </div>
+                                    `;
+                                    return;
+                                }
+                                data.forEach(medicalService => {
+
+                                    body.innerHTML = `
+    <table class="table table-striped table-hover mb-0">
+        <thead>
+            <tr>
+                <th>Employee</th>
+                <th>Reason</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${data.map(medicalService => `
+                <tr>
+                    <td>${medicalService.employee.firstname} ${medicalService.employee.name}</td>
+                    <td>${medicalService.reason}</td>
+                    <td>${new Date(medicalService.date).toLocaleDateString('fr-FR')}</td>
+                </tr>
+            `).join('')}
+        </tbody>
+    </table>
+`;
+                                });
+                                // managerModal.show();
+                            });
+
+                        });
+                </script>
+                <div class="modal fade" id="medicalServiceModal" tabindex="-1"
+                    aria-labelledby="medicalServiceModalTitle" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="medicalServiceModalTitle">
+                                    Consultations of today
+                                </h5>
+
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                                </button>
+                            </div>
+
+                            <div class="modal-body" id="medicalServiceModalBody">
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="modal fade" id="managerModal" tabindex="-1" aria-labelledby="managerModalTitle"
+                    aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="managerModalTitle">
+                                    Manager
+                                </h5>
+
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                                </button>
+                            </div>
+
+                            <div class="modal-body" id="managerModalBody">
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <% const totalEmp=employeesBySection.reduce( (sum, item)=> sum + Number(item.count),
+                    0
+                    );
+                    %>
+
+                    <div class="modal fade" id="employeeCountModal" tabindex="-1"
+                        aria-labelledby="employeeCountModalTitle" aria-hidden="true">
+
+                        <div class="modal-dialog modal-fullscreen modal-dialog-scrollable">
+                            <div class="modal-content border-0 shadow modal-transparente">
+
+                                <div class="modal-header">
+                                    <div>
+                                        <h5 class="modal-title text-light">
+                                            Employee Count by Section
+                                        </h5>
+
+                                        <small class="text-light">
+                                            Total: <%= totalEmp %> employees
+                                        </small>
+                                    </div>
+
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal">
+                                    </button>
+                                </div>
+
+                                <div class="modal-body">
+
+                                    <div class="row g-3">
+
+                                        <% employeesBySection.forEach((item, i)=> {
+
+                                            const count = Number(item.count);
+
+                                            const pct = totalEmp > 0
+                                            ? ((count / totalEmp) * 100).toFixed(1)
+                                            : 0;
+                                            %>
+
+                                            <div class="col-6 col-sm-4 col-md-3 col-xl-2">
+
+                                                <div class="kpi-card-modal h-100">
+
+                                                    <div class="kpi-header-modal">
+                                                        <div class="kpi-title-modal">
+                                                            <%= item.section %>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="kpi-value-modal">
+                                                        <%= count %>
+                                                    </div>
+
+                                                    <div class="kpi-subtitle-modal">
+                                                        Employees
+                                                    </div>
+
+                                                    <div class="kpi-footer-modal">
+
+                                                        <div class="kpi-progress-wrap-modal">
+
+                                                            <div class="kpi-progress-label-modal">
+                                                                <span>Share</span>
+                                                                <span>
+                                                                    <%= pct %>%
+                                                                </span>
+                                                            </div>
+
+                                                            <div class="progress-bar-modal">
+                                                                <div class="progress-fill-modal" style="
+                                    width:<%= pct %>%;
+                                    background:<%= colors[i % colors.length] %>;
+                                ">
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+
+                                            <% }) %>
+
+                                    </div>
+
+                                </div>
+
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                        Close
+                                    </button>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="modal fade" id="absenceRateModal" tabindex="-1" aria-labelledby="absenceRateModalTitle"
+                        aria-hidden="true">
+
+                        <div class="modal-dialog modal-fullscreen modal-dialog-scrollable">
+                            <div class="modal-content border-0 shadow modal-transparente">
+
+                                <div class="modal-header">
+                                    <div>
+                                        <h5 class="modal-title text-light">
+                                            Monthly absence rate by section
+                                        </h5>
+
+                                        <small class="text-light">
+                                            Absences rate for the month of <%= new Date().toLocaleString('en-US', {
+                                                month: 'long' }) %>
+                                        </small>
+                                    </div>
+
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal">
+                                    </button>
+                                </div>
+
+                                <div class="modal-body">
+
+                                    <div class="row g-3">
+
+                                        <% absenceRateBySection.forEach((item, i)=> {
+                                            %>
+
+                                            <div class="col-6 col-sm-4 col-md-3 col-xl-2">
+
+                                                <div class="kpi-card-modal h-100">
+
+                                                    <div class="kpi-header-modal">
+                                                        <div class="kpi-title-modal">
+                                                            <%= item.section %>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="kpi-value-modal">
+                                                        <%= item.days %>
+                                                    </div>
+
+                                                    <div class="kpi-subtitle-modal">
+                                                        Days absent
+                                                    </div>
+
+                                                    <div class="kpi-footer-modal">
+
+                                                        <div class="kpi-progress-wrap-modal">
+
+                                                            <div class="kpi-progress-label-modal">
+                                                                <span>Rate</span>
+                                                                <span>
+                                                                    <%= item.rate %>%
+                                                                </span>
+                                                            </div>
+
+                                                            <div class="progress-bar-modal">
+                                                                <div class="progress-fill-modal" style="
+                                    width:<%= item.rate %>%;
+                                    background:<%= colors[i % colors.length] %>;
+                                ">
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+
+                                            <% }) %>
+
+                                    </div>
+
+                                </div>
+
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                        Close
+                                    </button>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal fade" id="ongoingLeavesModal" tabindex="-1"
+                        aria-labelledby="ongoingLeavesModalTitle" aria-hidden="true">
+
+                        <div class="modal-dialog modal-fullscreen modal-dialog-scrollable">
+                            <div class="modal-content border-0 shadow modal-transparente">
+
+                                <div class="modal-header">
+                                    <div>
+                                        <h5 class="modal-title text-light">
+                                            Ongoing leaves by section
+                                        </h5>
+
+                                        <small class="text-light">
+                                            Ongoing leaves for today
+                                        </small>
+                                    </div>
+
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal">
+                                    </button>
+                                </div>
+
+                                <div class="modal-body">
+
+                                    <div class="row g-3">
+
+                                        <% ongoingLeavesBySection.forEach((item, i)=> {
+                                            %>
+
+                                            <div class="col-6 col-sm-4 col-md-3 col-xl-2">
+
+                                                <div class="kpi-card-modal h-100">
+
+                                                    <div class="kpi-header-modal">
+                                                        <div class="kpi-title-modal">
+                                                            <%= item.section %>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="kpi-value-modal">
+                                                        <%= item.ongoingEmployees %>
+                                                    </div>
+
+                                                    <div class="kpi-subtitle-modal">
+                                                        Employees absent
+                                                    </div>
+
+                                                    <div class="kpi-footer-modal">
+
+                                                        <div class="kpi-progress-wrap-modal">
+
+                                                            <div class="kpi-progress-label-modal">
+                                                                <span>Absence Rate</span>
+                                                                <span>
+                                                                    <%= item.rate %>%
+                                                                </span>
+                                                            </div>
+
+                                                            <div class="progress-bar-modal">
+                                                                <div class="progress-fill-modal" style="
+                                    width:<%= item.rate %>%;
+                                    background:<%= colors[i % colors.length] %>;
+                                ">
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+
+                                            <% }) %>
+
+                                    </div>
+
+                                </div>
+
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                        Close
+                                    </button>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal fade" id="pendingLeavesModal" tabindex="-1"
+                        aria-labelledby="pendingLeavesModalTitle" aria-hidden="true">
+
+                        <div class="modal-dialog modal-fullscreen modal-dialog-scrollable">
+                            <div class="modal-content border-0 shadow modal-transparente">
+
+                                <div class="modal-header">
+                                    <div>
+                                        <h5 class="modal-title text-light">
+                                            Pending leaves by section
+                                        </h5>
+
+                                        <small class="text-light">
+                                            Pending leaves for today
+                                        </small>
+                                    </div>
+
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal">
+                                    </button>
+                                </div>
+
+                                <div class="modal-body">
+
+                                    <div class="row g-3">
+
+                                        <% pendingLeavesBySection.forEach((item, i)=> {
+                                            %>
+
+                                            <div class="col-6 col-sm-4 col-md-3 col-xl-2">
+
+                                                <div class="kpi-card-modal h-100">
+
+                                                    <div class="kpi-header-modal">
+                                                        <div class="kpi-title-modal">
+                                                            <%= item.section %>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="kpi-value-modal">
+                                                        <%= item.pendingCount %>
+                                                    </div>
+
+                                                    <div class="kpi-subtitle-modal">
+                                                        Pending leaves
+                                                    </div>
+
+                                                    <div class="kpi-footer-modal">
+
+                                                        <div class="kpi-progress-wrap-modal">
+
+                                                            <div class="kpi-progress-label-modal">
+                                                                <span>Pending Rate</span>
+                                                                <span>
+                                                                    <%= item.rate %>%
+                                                                </span>
+                                                            </div>
+
+                                                            <div class="progress-bar-modal">
+                                                                <div class="progress-fill-modal" style="
+                                    width:<%= item.rate %>%;
+                                    background:<%= colors[i % colors.length] %>;
+                                ">
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+
+                                            <% }) %>
+
+                                    </div>
+
+                                </div>
+
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                        Close
+                                    </button>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
     </body>
 
     </html>

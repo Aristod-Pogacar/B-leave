@@ -1,0 +1,167 @@
+<%- include('partials/head.ejs') %>
+
+    <body>
+        <%- include('partials/sidebar.ejs') %>
+            <%- include('partials/header.ejs') %>
+
+                <main class="nxl-container">
+                    <div class="nxl-content">
+
+                        <div class="page-header">
+                            <div class="page-header-left d-flex align-items-center">
+                                <div class="page-header-title">
+                                    <h5 class="m-b-10">Be-Leave</h5>
+                                </div>
+                                <ul class="breadcrumb">
+                                    <li class="breadcrumb-item">Account</li>
+                                    <li class="breadcrumb-item">Modifier le profil</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="main-content py-4">
+                            <div class="container-fluid">
+                                <div class="row justify-content-center">
+                                    <div class="col-12 col-lg-9 col-xl-7">
+
+                                        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+
+                                            <!-- Banner + avatar -->
+                                            <div class="position-relative"
+                                                style="height:110px; background: linear-gradient(135deg, #1a56db 0%, #0091ff 100%);">
+                                                <div class="position-absolute" style="bottom:-40px; left:32px;">
+                                                    <div class="d-flex align-items-center justify-content-center rounded-circle border border-4 border-white shadow-sm"
+                                                        style="width:80px; height:80px; background:#1a56db; color:#fff; font-size:26px; font-weight:600; letter-spacing:-1px;">
+                                                        <%= user.firstName.charAt(0).toUpperCase() %>
+                                                            <%= user.name.charAt(0).toUpperCase() %>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Card header -->
+                                            <div class="card-body pt-5 pb-3 px-4">
+                                                <div class="d-flex align-items-center justify-content-between mt-2">
+                                                    <div>
+                                                        <h4 class="mb-1 fw-semibold" style="font-size:1.2rem;">
+                                                            <%= user.firstName %>
+                                                                <%= user.name %>
+                                                        </h4>
+                                                        <p class="mb-0" style="font-size:13px; color:#9ca3af;">Edit
+                                                            your profile information</p>
+                                                    </div>
+                                                    <a href="/user/edit-password"
+                                                        class="btn btn-outline-secondary btn-sm rounded-3 px-3"
+                                                        style="font-size:13px;">
+                                                        <i class="feather-lock me-1" style="font-size:13px;"></i>
+                                                        Change password
+                                                    </a>
+                                                </div>
+                                            </div>
+
+                                            <hr class="mx-4 my-0" style="opacity:.08;">
+
+                                            <!-- Form -->
+                                            <div class="card-body px-4 py-3">
+                                                <p class="text-uppercase mb-3"
+                                                    style="font-size:11px; letter-spacing:.07em; color:#9ca3af; font-weight:500;">
+                                                    Personal informations
+                                                </p>
+
+                                                <form id="userForm" method="POST" action="/user/save-profile">
+                                                    <div class="row g-3">
+
+                                                        <div class="col-12 col-sm-6">
+                                                            <label class="form-label"
+                                                                style="font-size:12px; color:#6b7280; font-weight:500;">Name</label>
+                                                            <input type="text" class="form-control rounded-3" id="name"
+                                                                name="name" placeholder="Your name"
+                                                                value="<%= user.name %>" required
+                                                                style="font-size:14px; border-color:#e5e7eb;">
+                                                        </div>
+
+                                                        <div class="col-12 col-sm-6">
+                                                            <label class="form-label"
+                                                                style="font-size:12px; color:#6b7280; font-weight:500;">Firstname</label>
+                                                            <input type="text" class="form-control rounded-3"
+                                                                id="firstName" name="firstName"
+                                                                placeholder="Your firstname"
+                                                                value="<%= user.firstName %>" required
+                                                                style="font-size:14px; border-color:#e5e7eb;">
+                                                        </div>
+
+                                                        <div class="col-12 col-sm-6">
+                                                            <label class="form-label"
+                                                                style="font-size:12px; color:#6b7280; font-weight:500;">Email</label>
+                                                            <input type="email" class="form-control rounded-3"
+                                                                id="email" name="email" placeholder="exemple@mail.com"
+                                                                value="<%= user.email %>" required
+                                                                style="font-size:14px; border-color:#e5e7eb;">
+                                                        </div>
+
+                                                        <div class="col-12 col-sm-6">
+                                                            <label class="form-label"
+                                                                style="font-size:12px; color:#6b7280; font-weight:500;">Phone</label>
+                                                            <input type="text" class="form-control rounded-3" id="phone"
+                                                                name="phone" placeholder="Your phone number"
+                                                                value="<%= user.phone %>" required
+                                                                style="font-size:14px; border-color:#e5e7eb;">
+                                                        </div>
+
+                                                        <div class="col-12 col-sm-6">
+                                                            <label class="form-label"
+                                                                style="font-size:12px; color:#6b7280; font-weight:500;">
+                                                                Role
+                                                                <span class="ms-1 badge rounded-pill"
+                                                                    style="font-size:10px; background:#f3f4f6; color:#9ca3af; font-weight:400;">not
+                                                                    modifiable</span>
+                                                            </label>
+                                                            <input type="text" class="form-control rounded-3" id="role"
+                                                                name="role" value="<%= user.role %>" readonly
+                                                                style="font-size:14px; border-color:#e5e7eb; background:#f9fafb; color:#9ca3af;">
+                                                        </div>
+
+                                                        <div class="col-12 col-sm-6">
+                                                            <label class="form-label"
+                                                                style="font-size:12px; color:#6b7280; font-weight:500;">
+                                                                Site
+                                                                <span class="ms-1 badge rounded-pill"
+                                                                    style="font-size:10px; background:#f3f4f6; color:#9ca3af; font-weight:400;">not
+                                                                    modifiable</span>
+                                                            </label>
+                                                            <input type="text" class="form-control rounded-3" id="site"
+                                                                name="site" value="<%= user.site %>" readonly
+                                                                style="font-size:14px; border-color:#e5e7eb; background:#f9fafb; color:#9ca3af;">
+                                                        </div>
+
+                                                    </div>
+                                                </form>
+                                            </div>
+
+                                            <!-- Footer -->
+                                            <div
+                                                class="card-footer bg-transparent border-0 px-4 pb-4 pt-2 d-flex gap-2 justify-content-end">
+                                                <a href="/user/my-profil"
+                                                    class="btn btn-outline-secondary rounded-3 px-4"
+                                                    style="font-size:13px;">
+                                                    Cancel
+                                                </a>
+                                                <button type="submit" form="userForm"
+                                                    class="btn btn-primary rounded-3 px-4" style="font-size:13px;">
+                                                    <i class="feather-save me-1" style="font-size:13px;"></i>
+                                                    Save
+                                                </button>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <%- include('partials/footer.ejs') %>
+                </main>
+
+    </body>
+
+    </html>

@@ -9,6 +9,7 @@ import { Roles } from './role.decorator';
 import { AuthService } from 'src/auth/auth.service';
 import { HistoryService } from 'src/history/history.service';
 import { HistoryReason } from 'src/history/entities/history.entity';
+import * as bcrypt from 'bcrypt';
 
 @Controller('user')
 export class UserController {
@@ -51,6 +52,49 @@ export class UserController {
       );
       return key!; // Le '!' indique à TS qu'on est sûr de trouver la clé
     });
+  }
+
+  @Post('save-password')
+  async saveMyPassword(@Body() body: any, @Res() res: any, @Req() req: any) {
+    const user = await this.userService.findOne(req.session.user.id);
+    if (!user) {
+      return res.redirect('/');
+    }
+    console.log("BODY", body);
+    if (body.newPassword != body.confirmPassword) {
+      const userSite = req.session.user.site;
+      const sites = this.getAllowedSitesForNewUsers(userSite)
+      const allowedKeys = this.enumAllowed(userSite);
+      return res.render('edit-password', {
+        title: 'Edit password',
+        user: user,
+        userRole: UserRole,
+        sites: sites,
+        allowedKeys: allowedKeys,
+        error: 'New password and confirm password do not match'
+      });
+    }
+    const match = await bcrypt.compare(body.actualPassword, user.password);
+    if (!match) {
+      const userSite = req.session.user.site;
+      const sites = this.getAllowedSitesForNewUsers(userSite)
+      const allowedKeys = this.enumAllowed(userSite);
+      return res.render('edit-password', {
+        title: 'Edit password',
+        user: user,
+        userRole: UserRole,
+        sites: sites,
+        allowedKeys: allowedKeys,
+        error: 'Actual password do not match'
+      });
+    }
+    await this.userService.updatePassword(req.session.user.id, body);
+    await this.historyService.create({
+      reason: HistoryReason.USER,
+      message: "Password changed for " + user.firstName + " " + user.name + " by " + req.session.user.firstName + " " + req.session.user.name,
+      created_by: req.session.user.matricule,
+    });
+    return res.redirect('/user/my-profil?success=true');
   }
 
   @Post('connect-admin-user')
@@ -278,6 +322,58 @@ export class UserController {
       created_by: req.session.user.matricule,
     });
     return res.redirect('/user/list');
+  }
+
+  @Get('my-profil')
+  @UseGuards(AuthGuard)
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.HR_LEAD, UserRole.MANAGER, UserRole.PAYROLL)
+  @Render('my-profil')
+  async getMyProfile(@Req() req: any) {
+    return {
+      title: 'My profile',
+      user: req.session.user
+    };
+  }
+
+  @Get('edit-profil')
+  @UseGuards(AuthGuard)
+  @Render('edit-profil')
+  async editMyProfile(@Req() req: any) {
+    return {
+      title: 'Edit profile',
+      user: req.session.user
+    };
+  }
+
+  @Get('edit-password')
+  @UseGuards(AuthGuard)
+  @Render('edit-password')
+  async editMyPassword(@Req() req: any) {
+    return {
+      title: 'Edit password',
+      user: req.session.user
+    };
+  }
+
+  @UseGuards(AuthGuard)
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.HR_LEAD, UserRole.MANAGER, UserRole.PAYROLL)
+  @Post('save-profile')
+  async saveMyProfile(@Body() updateUserDto: UpdateUserDto, @Res() res: any, @Req() req: any) {
+    const user = await this.userService.findOne(req.session.user.id);
+    if (!user) {
+      return res.redirect('/');
+    }
+    await this.userService.update(req.session.user.id, updateUserDto);
+    const updatedUser = await this.userService.findOne(req.session.user.id);
+    req.session.user = updatedUser;
+    await this.historyService.create({
+      reason: HistoryReason.USER,
+      message: "User " + user.firstName + " " + user.name + " updated by " + req.session.user.firstName + " " + req.session.user.name,
+      created_by: req.session.user.matricule,
+    });
+    return res.redirect('/user/my-profil?success=true');
   }
 
   @Post()

@@ -27,6 +27,13 @@ export class LeaveController {
     return leave;
   }
 
+  @Get('history/:matricule')
+  async findAllHistory(@Param('matricule') matricule: string) {
+    console.log("MATRICULE", matricule);
+    const leaves = await this.leaveService.findAllHistory(matricule);
+    return leaves;
+  }
+
   @Get()
   findAll() {
     return this.leaveService.findAll();

@@ -3,7 +3,7 @@ import { CreateLeaveDto } from './dto/create-leave.dto';
 import { UpdateLeaveDto } from './dto/update-leave.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Leave, LeaveStatus } from './entities/leave.entity';
-import { Between, In, IsNull, Like, Repository } from 'typeorm';
+import { Between, In, IsNull, LessThanOrEqual, Like, MoreThanOrEqual, Repository } from 'typeorm';
 import { Employee } from 'src/employee/entities/employee.entity';
 import * as express from 'express';
 import * as ExcelJS from 'exceljs';
@@ -101,7 +101,8 @@ export class LeaveService {
         status: In([
           LeaveStatus.APPROVED,
           LeaveStatus.PENDING
-        ])
+        ]),
+        leave_type: 'Permission_AMD'
       },
       relations: [
         'employee',
@@ -456,10 +457,9 @@ export class LeaveService {
       .andWhere('leave.status IN (:...status)', { status: [LeaveStatus.APPROVED, LeaveStatus.PENDING] })
       .andWhere('leave.leave_type = :type', { type: 'Local_Leave_AMD' })
       .andWhere('YEAR(leave.start_date) = :year', { year: date.getFullYear() })
-      .andWhere('leave.start_date <= :date', { date: date.toISOString() })
+      // .andWhere('leave.start_date <= :date', { date: date.toISOString() })
       .groupBy('employee.id')
       .getRawMany();
-    // console.log("Data:", takenLeaves);
     // // return data;
 
     // console.log("takenLeaves:", takenLeaves);
@@ -1832,6 +1832,484 @@ export class LeaveService {
     return result.sort(
       (a, b) => Number(b.pct) - Number(a.pct)
     );
+  }
+
+  async getAbsenceByManager(): Promise<any[]> {
+
+    const today = new Date();
+
+    const employees = await this.employeeRepository.find({
+      relations: {
+        manager: true,
+      }
+    });
+
+    const leaves = await this.leaveRepository.find({
+      where: { status: LeaveStatus.APPROVED },
+      relations: {
+        employee: true,
+      }
+    });
+
+    const managerMap = new Map();
+
+    // Initialisation des managers
+    employees.forEach(employee => {
+
+      if (!employee.manager) return;
+
+      const managerId = employee.manager.id;
+
+      if (!managerMap.has(managerId)) {
+
+        managerMap.set(managerId, {
+          manager: employee.manager.name + ' ' + employee.manager.firstName,
+          id: employee.manager.id,
+          employees: 0,
+          absent: 0,
+          employeeIds: [],
+        });
+
+      }
+
+      const entry = managerMap.get(managerId);
+
+      entry.employees += 1;
+      entry.employeeIds.push(employee.id);
+    });
+
+    // Détection des absents
+    leaves.forEach(leave => {
+
+      const start = new Date(leave.start_date);
+      const end = new Date(leave.end_date);
+      start.setHours(0, 0, 0, 0);
+      end.setHours(23, 59, 59, 999);
+
+      const isAbsentToday =
+        today >= start &&
+        today <= end;
+
+      if (!isAbsentToday) return;
+
+      managerMap.forEach(entry => {
+
+        if (
+          entry.employeeIds.includes(leave.employee?.id)
+        ) {
+          entry.absent += 1;
+        }
+
+      });
+
+    });
+
+    // Calcul du %
+    const result = Array.from(managerMap.values()).map(entry => ({
+
+      manager: entry.manager,
+
+      employees: entry.employees,
+
+      absent: entry.absent,
+
+      id: entry.id,
+
+      pct:
+        entry.employees > 0
+          ? Math.round((entry.absent / entry.employees) * 100)
+          : 0
+
+    }));
+
+    // Trier du plus absent au moins absent
+    result.sort((a, b) => b.pct - a.pct);
+
+    return result;
+  }
+
+  async getMonthlyLeaveDistributionBySection() {
+
+    const today = new Date();
+
+    const monthStart = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      1,
+    );
+
+    const monthEnd = new Date(
+      today.getFullYear(),
+      today.getMonth() + 1,
+      0,
+    );
+
+    // Toutes les sections existantes
+    const sections = await this.employeeRepository
+      .createQueryBuilder('employee')
+      .select('employee.section', 'section')
+      .where('employee.is_deleted = false')
+      .andWhere('employee.is_active = true')
+      .groupBy('employee.section')
+      .orderBy('employee.section', 'ASC')
+      .getRawMany();
+
+    // Tous les congés du mois (même chevauchants)
+    const leaves = await this.leaveRepository
+      .createQueryBuilder('leave')
+      .leftJoinAndSelect('leave.employee', 'employee')
+      .where('leave.status = :status', {
+        status: LeaveStatus.APPROVED,
+      })
+      .andWhere(
+        'leave.start_date <= :monthEnd',
+        { monthEnd },
+      )
+      .andWhere(
+        'leave.end_date >= :monthStart',
+        { monthStart },
+      )
+      .getMany();
+
+    const sectionDays = new Map<string, number>();
+
+    let totalDays = 0;
+
+    for (const leave of leaves) {
+      const start = new Date(leave.start_date);
+      const end = new Date(leave.end_date);
+      const effectiveStart =
+        start > monthStart
+          ? start
+          : monthStart;
+
+      const effectiveEnd =
+        end < monthEnd
+          ? end
+          : monthEnd;
+
+      const days =
+        this.compterJours(effectiveStart, effectiveEnd);
+
+      const section =
+        leave.employee?.section || 'Unknown';
+
+      sectionDays.set(
+        section,
+        (sectionDays.get(section) || 0) + days,
+      );
+
+      totalDays += days;
+    }
+
+    return sections
+      .map(({ section }) => {
+
+        const days =
+          sectionDays.get(section) || 0;
+
+        const rate =
+          totalDays > 0
+            ? Number(
+              (
+                (days / totalDays) *
+                100
+              ).toFixed(1)
+            )
+            : 0;
+
+        return {
+          section,
+          days,
+          rate,
+        };
+      })
+      .sort((a, b) => b.days - a.days);
+  }
+
+  async getManagerAbsences(managerId: string) {
+    const employees = await this.employeeRepository.find({
+      where: {
+        manager: {
+          id: managerId
+        }
+      },
+      relations: {
+        manager: true
+      }
+    });
+
+    const employeeIds = employees.map(e => e.id);
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const leaves = await this.leaveRepository.find({
+      where: {
+        employee: {
+          id: In(employeeIds)
+        },
+        start_date: LessThanOrEqual(today),
+        end_date: MoreThanOrEqual(today),
+        status: LeaveStatus.APPROVED
+      },
+      relations: {
+        employee: true
+      },
+      order: {
+        start_date: 'DESC'
+      }
+    });
+
+    return leaves;
+  }
+
+  private async calculateAbsenceRateForMonth(
+    year: number,
+    month: number,
+  ): Promise<number> {
+
+    const monthStart = new Date(year, month, 1);
+
+    const monthEnd = new Date(
+      year,
+      month + 1,
+      0,
+    );
+
+    const daysInMonth = monthEnd.getDate();
+
+    const totalEmployees =
+      await this.employeeRepository.count({
+        where: {
+          is_active: true,
+          is_deleted: false,
+        },
+      });
+
+    const leaves = await this.leaveRepository
+      .createQueryBuilder('leave')
+      .where('leave.status = :status', {
+        status: LeaveStatus.APPROVED,
+      })
+      .andWhere(
+        'leave.start_date <= :monthEnd',
+        { monthEnd },
+      )
+      .andWhere(
+        'leave.end_date >= :monthStart',
+        { monthStart },
+      )
+      .getMany();
+
+    let totalAbsenceDays = 0;
+
+    for (const leave of leaves) {
+
+      const startDate =
+        new Date(leave.start_date);
+
+      const endDate =
+        new Date(leave.end_date);
+
+      const effectiveStart =
+        startDate > monthStart
+          ? startDate
+          : monthStart;
+
+      const effectiveEnd =
+        endDate < monthEnd
+          ? endDate
+          : monthEnd;
+
+      const absenceDays =
+        Math.floor(
+          (
+            effectiveEnd.getTime() -
+            effectiveStart.getTime()
+          ) /
+          (1000 * 60 * 60 * 24)
+        ) + 1;
+
+      totalAbsenceDays += absenceDays;
+    }
+
+    const totalAvailableDays =
+      totalEmployees * daysInMonth;
+
+    return totalAvailableDays > 0
+      ? Number(
+        (
+          (totalAbsenceDays /
+            totalAvailableDays) *
+          100
+        ).toFixed(2),
+      )
+      : 0;
+  }
+
+  async getOngoingLeavesBySection() {
+
+    const today = new Date();
+
+    const sections = await this.employeeRepository
+      .createQueryBuilder('employee')
+      .select('employee.section', 'section')
+      .addSelect('COUNT(employee.id)', 'totalEmployees')
+      .where('employee.is_active = true')
+      .andWhere('employee.is_deleted = false')
+      .groupBy('employee.section')
+      .orderBy('employee.section', 'ASC')
+      .getRawMany();
+
+    const ongoingLeaves = await this.leaveRepository
+      .createQueryBuilder('leave')
+      .innerJoin('leave.employee', 'employee')
+      .select('employee.section', 'section')
+      .addSelect(
+        'COUNT(DISTINCT employee.id)',
+        'ongoingEmployees',
+      )
+      .where('leave.status = :status', {
+        status: LeaveStatus.APPROVED,
+      })
+      .andWhere(':today BETWEEN leave.start_date AND leave.end_date', {
+        today,
+      })
+      .groupBy('employee.section')
+      .getRawMany();
+
+    const ongoingMap = new Map(
+      ongoingLeaves.map(item => [
+        item.section,
+        Number(item.ongoingEmployees),
+      ]),
+    );
+
+    const totalOngoingEmployees =
+      ongoingLeaves.reduce(
+        (sum, item) =>
+          sum + Number(item.ongoingEmployees),
+        0,
+      );
+
+    return sections.map(section => {
+
+      const ongoingEmployees =
+        ongoingMap.get(section.section) || 0;
+
+      const rate =
+        totalOngoingEmployees > 0
+          ? Number(
+            (
+              (ongoingEmployees /
+                totalOngoingEmployees) *
+              100
+            ).toFixed(1)
+          )
+          : 0;
+
+      return {
+        section: section.section,
+        totalEmployees: Number(
+          section.totalEmployees,
+        ),
+        ongoingEmployees,
+        rate,
+      };
+    });
+  }
+
+  async getPendingLeavesBySection() {
+
+    const sections = await this.employeeRepository
+      .createQueryBuilder('employee')
+      .select('employee.section', 'section')
+      .where('employee.is_active = true')
+      .andWhere('employee.is_deleted = false')
+      .groupBy('employee.section')
+      .orderBy('employee.section', 'ASC')
+      .getRawMany();
+
+    const pendingLeaves = await this.leaveRepository
+      .createQueryBuilder('leave')
+      .innerJoin('leave.employee', 'employee')
+      .select('employee.section', 'section')
+      .addSelect('COUNT(leave.id)', 'pendingCount')
+      .where('leave.status = :status', {
+        status: LeaveStatus.PENDING,
+      })
+      .groupBy('employee.section')
+      .getRawMany();
+
+    const pendingMap = new Map(
+      pendingLeaves.map(item => [
+        item.section,
+        Number(item.pendingCount),
+      ]),
+    );
+
+    const totalPending = pendingLeaves.reduce(
+      (sum, item) => sum + Number(item.pendingCount),
+      0,
+    );
+
+    return sections.map(section => {
+
+      const pendingCount =
+        pendingMap.get(section.section) || 0;
+
+      const rate =
+        totalPending > 0
+          ? Number(
+            (
+              (pendingCount / totalPending) *
+              100
+            ).toFixed(1)
+          )
+          : 0;
+
+      return {
+        section: section.section,
+        pendingCount,
+        rate,
+      };
+    })
+      .sort((a, b) => b.pendingCount - a.pendingCount);
+  }
+
+  async getMonthlyGlobalAbsenceRate() {
+
+    const today = new Date();
+
+    const currentRate =
+      await this.calculateAbsenceRateForMonth(
+        today.getFullYear(),
+        today.getMonth(),
+      );
+
+    const previousMonthDate =
+      new Date(
+        today.getFullYear(),
+        today.getMonth() - 1,
+        1,
+      );
+
+    const previousRate =
+      await this.calculateAbsenceRateForMonth(
+        previousMonthDate.getFullYear(),
+        previousMonthDate.getMonth(),
+      );
+
+    const variation = Number(
+      (currentRate - previousRate).toFixed(2),
+    );
+
+    return {
+      currentRate,
+      previousRate,
+      variation,
+    };
   }
 
 }

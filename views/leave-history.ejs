@@ -177,11 +177,11 @@
                                                                                 <th class="text-center px-1"
                                                                                     style="width: 10%;">Start Date</th>
                                                                                 <th class="text-center px-1"
-                                                                                    style="width: 10%;">End Date</th>
+                                                                                    style="width: 5%;">Duration</th>
                                                                                 <th class="text-center px-1"
                                                                                     style="width: 10%;">Type</th>
                                                                                 <th class="text-center px-1"
-                                                                                    style="width: 5%;">Duration</th>
+                                                                                    style="width: 10%;">Applied at</th>
                                                                                 <th class="text-center px-1"
                                                                                     style="width: 5%;">Status</th>
                                                                                 <th class="text-center px-1"
@@ -472,12 +472,12 @@
                                         </td>
                                         <td class="text-center text-muted py-3 px-1" style="width: 10%;">${formatDate(leave.start_date)}
                                         </td>
-                                        <td class="text-center text-muted py-3 px-1" style="width: 10%;">${formatDate(leave.end_date)}
+                                        <td class="text-center text-muted py-3 px-1" style="width: 5%;">${leave.duration} day(s)
                                         </td>
-                                        <td class="text-center text-muted py-3 px-1" style="width: 10%;">
+                                        <td class="text-center py-3 px-1" style="width: 10%;">
                                             <span class="badge ${leaveTypeClass}">${leave.leave_type}</span>
                                         </td>
-                                        <td class="text-center text-muted py-3 px-1" style="width: 5%;">${leave.duration} day(s)
+                                        <td class="text-center text-muted py-3 px-1" style="width: 10%;">${formatDate(leave.created_at)}
                                         </td>
                                         <td class="text-center py-3 px-1" style="width: 5%;">
                                             <span class="badge ${statusClass}">${status}</span>

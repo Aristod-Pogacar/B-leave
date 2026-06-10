@@ -28,6 +28,17 @@ export class SmiaOstieService {
     private readonly historyService: HistoryService,
   ) { }
 
+  async getManagerConsultations(managerId: string) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return this.SmiaOstieRepo.find({
+      where: { employee: { manager: { id: managerId } }, date: today },
+      relations: ['employee'],
+
+    });
+  }
+
   private getWeekRange() {
     const now = new Date();
 
@@ -530,6 +541,96 @@ export class SmiaOstieService {
         )
       }))
       .sort((a, b) => b.pct - a.pct);
+  }
+
+  async getMedicalConsultationByManager(): Promise<any[]> {
+
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    const tomorrow = new Date(today)
+    tomorrow.setDate(today.getDate() + 1)
+
+    const employees = await this.employeeRepo.find({
+      relations: {
+        manager: true,
+      }
+    });
+
+    const consultations = await this.SmiaOstieRepo.find({
+      relations: {
+        employee: true,
+      },
+      where: {
+        date: Between(today, tomorrow),
+      }
+    });
+
+    const managerMap = new Map();
+
+    // Initialisation des managers
+    employees.forEach(employee => {
+
+      if (!employee.manager) return;
+
+      const managerId = employee.manager.id;
+
+      if (!managerMap.has(managerId)) {
+
+        managerMap.set(managerId, {
+          id: managerId,
+          manager: employee.manager.name + ' ' + employee.manager.firstName,
+          consultation: 0,
+          employees: 0,
+          employeeIds: [],
+        });
+      }
+
+      const entry = managerMap.get(managerId);
+
+      entry.employeeIds.push(employee.id);
+      entry.employees += 1;
+    });
+
+    // Comptage des consultations
+    consultations.forEach(consultation => {
+
+      managerMap.forEach(entry => {
+
+        if (
+          entry.employeeIds.includes(
+            consultation.employee?.id
+          )
+        ) {
+          entry.consultation += 1;
+        }
+
+      });
+
+    });
+
+    // Résultat final
+    const result = Array.from(managerMap.values()).map(entry => ({
+
+      id: entry.id,
+      manager: entry.manager,
+      employees: entry.employees,
+
+      consultation: entry.consultation,
+
+      pct:
+        entry.employees > 0
+          ? Math.round(
+            (entry.consultation / entry.employees) * 100
+          )
+          : 0
+
+    }));
+
+    // Trier du plus élevé au plus faible
+    result.sort((a, b) => b.consultation - a.consultation);
+
+    return result;
   }
 
 }

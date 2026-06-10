@@ -52,6 +52,7 @@
     const soldeCumuleMensuel1 = document.getElementById('soldeCumuleMensuel1');
     const soldeDebut1 = document.getElementById('soldeDebut1');
     const soldePris1 = document.getElementById('soldePris1');
+    const soldePermissions1 = document.getElementById('soldePermissions1');
     const soldeRestant1 = document.getElementById('soldeRestant1');
     const soldeRestantMensuel1 = document.getElementById('soldeRestantMensuel1');
 
@@ -59,6 +60,7 @@
     const soldeCumuleMensuel2 = document.getElementById('soldeCumuleMensuel2');
     const soldeDebut2 = document.getElementById('soldeDebut2');
     const soldePris2 = document.getElementById('soldePris2');
+    const soldePermissions2 = document.getElementById('soldePermissions2');
     const soldeRestant2 = document.getElementById('soldeRestant2');
     const soldeRestantMensuel2 = document.getElementById('soldeRestantMensuel2');
 
@@ -112,6 +114,7 @@
                         soldeDebut1.textContent = emp.solde_debut;
                         soldeDebut2.textContent = emp.solde_debut;
                         soldePris1.textContent = emp.solde_pris;
+                        soldePermissions1.textContent = emp.solde_pris_permission;
                         soldeRestant1.textContent = emp.solde_restant;
                         soldeRestantMensuel1.textContent = emp.solde_restant_mensuel;
                         solde = emp.solde_restant;
@@ -168,6 +171,7 @@
                 numberOfDays = 0;
             }
             soldePris2.textContent = solde_pris_simulate + numberOfDays;
+            soldePermissions2.textContent = soldePermissions1.textContent;
             soldeRestant2.textContent = (solde_simulate - numberOfDays).toFixed(2);
             console.log("SOLDE SIMULATE:", solde_simulate);
             console.log("SOLDE PRIS:", solde_pris_simulate);

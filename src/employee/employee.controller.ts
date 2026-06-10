@@ -459,8 +459,6 @@ export class EmployeeController {
       const cleanData2 = filtered2.filter(x => x.matricule);
 
       for (const data of cleanData2) {
-        console.log("DATA:", data);
-
         await this.employeeService.updatePassword(data);
       }
       await this.historyService.create({
@@ -473,7 +471,7 @@ export class EmployeeController {
         message: "Import master file by " + req.session.user.firstName + " " + req.session.user.name,
         created_by: req.session.user.matricule,
       });
-      res.redirect(`/leave/planning-view`);
+      res.redirect(`/`);
     } catch (error) {
       console.log("ERROR:", error.message)
       res.redirect(`/employee/import-master-file?error=${encodeURIComponent(error.message)}`);

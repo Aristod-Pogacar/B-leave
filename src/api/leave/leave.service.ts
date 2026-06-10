@@ -5,7 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Response } from 'express';
 import { Between, In, Repository } from 'typeorm';
 import { Employee } from 'src/employee/entities/employee.entity';
-import { Leave, LeaveStatus } from 'src/leave/entities/leave.entity';
+import { Leave, LeaveStatus, WithdrawStatus } from 'src/leave/entities/leave.entity';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
 import { EmployeeService } from 'src/employee/employee.service';
@@ -21,6 +21,29 @@ export class LeaveService {
     private readonly configService: ConfigService,
     private readonly employeeService: EmployeeService,
   ) { }
+
+  async findAllHistory(matricule: string) {
+    const employee = await this.employeeRepository.findOne({
+      where: { matricule },
+    });
+
+    if (!employee) {
+      return null;
+    }
+
+    const leaves = await this.leaveRepository.find({
+      where: {
+        employee,
+        status: In([LeaveStatus.APPROVED, LeaveStatus.PENDING]),
+        // withdraw_status: In([WithdrawStatus.WITHDRAW_PENDING, WithdrawStatus.WITHDRAW_CANCELLED, null])
+      },
+      order: { created_at: 'DESC' },
+      relations: ['employee']
+    });
+    console.log("LEAVES:", leaves);
+
+    return leaves;
+  }
 
   async create(createLeaveDto: CreateLeaveDto, res: any) {
     console.log("DTO:", createLeaveDto);

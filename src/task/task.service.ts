@@ -60,10 +60,8 @@ export class TaskService {
   }
 
   async runPuppeteerTask(data: CreateLeaveDto, leave: Leave) {
-    const employee = await this.employeeService.findOne(data.employee);
-    if (!employee) {
-      return;
-    }
+    const employee = await this.employeeService.findOneByMatricule(data.employee);
+    if (!employee || leave.onehr_status == true) return;
     const sessionId = await this.manager.createSession();
     console.log("SessionID:", sessionId);
     await delay(200);
@@ -82,24 +80,26 @@ export class TaskService {
                 await this.bot.goToNewLeave(sessionId).then(async (newLeaveResponse) => {
                   if (newLeaveResponse.success == true) {
                     await delay(5000);
-                    await this.bot.completeFormulaire(sessionId, data).then(async (completeFormResponse) => {
-                      if (completeFormResponse.success == true) {
-                        console.log("✅ FORM COMPLETE");
-                        await delay(5000);
-                        await this.leaveService.doneLeave(leave);
-                        await this.historyService.create({
-                          reason: HistoryReason.LEAVE,
-                          message: "New leave " + leave.start_date + " to " + leave.end_date + " of " + leave.employee.name + " " + leave.employee.firstname + " send to OneHR by AUTOMATION PUPPETEER",
-                          created_by: "AUTOMATION PUPPETEER",
-                        });
-                        // await this.leaveService.save(data);
-                        await this.manager.closeSession(sessionId);
-                        // res.status(200).json({ success: true, message: "FORM COMPLETE" });
-                      } else {
-                        await this.manager.closeSession(sessionId);
-                        // res.status(500).json({ success: false, message: "❌ FORM NOT COMPLETE" });
-                      }
-                    });
+                    // await this.bot.completeFormulaire(sessionId, data).then(async (completeFormResponse) => {
+                    //   if (completeFormResponse.success == true) {
+                    //     console.log("✅ FORM COMPLETE");
+                    //     await delay(5000);
+                    //     await this.leaveService.doneLeave(leave);
+                    //     await this.historyService.create({
+                    //       reason: HistoryReason.LEAVE,
+                    //       message: "New leave " + leave.start_date + " to " + leave.end_date + " of " + leave.employee.name + " " + leave.employee.firstname + " send to OneHR by AUTOMATION PUPPETEER",
+                    //       created_by: "AUTOMATION PUPPETEER",
+                    //     });
+                    // await this.leaveService.approveLeave(leave.id, leave.employee.manager.id);
+                    await this.manager.closeSession(sessionId);
+                    //     // await this.leaveService.save(data);
+                    //     await this.manager.closeSession(sessionId);
+                    //     // res.status(200).json({ success: true, message: "FORM COMPLETE" });
+                    //   } else {
+                    //     await this.manager.closeSession(sessionId);
+                    //     // res.status(500).json({ success: false, message: "❌ FORM NOT COMPLETE" });
+                    //   }
+                    // });
                   } else {
                     await this.manager.closeSession(sessionId);
                     // res.status(500).json({ success: false, message: "❌ NEW LEAVE NOT FOUND" });

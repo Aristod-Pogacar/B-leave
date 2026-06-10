@@ -61,6 +61,7 @@ export class AppController {
 
     const dateRef = this.obtenirDateReference();
     const activeEmployeesRef = await this.employeeService.getActiveEmployeesNotOnLeave(dateRef);
+    const employeesBySection = await this.employeeService.getEmployeeCountBySection();
     const diff = activeEmployees - activeEmployeesRef;
 
     const { currentRate, lastRate, variation } = await this.leaveService.getMonthlyAbsenceRate();
@@ -81,9 +82,21 @@ export class AppController {
 
     const leaveStatus = await this.leaveService.getLeaveStatusStats();
 
+    const managerStats = await this.leaveService.getAbsenceByManager();
+
     const sectionStats = await this.leaveService.getAbsenceBySection();
 
     const medicalStats = await this.smiaOstieService.getMedicalRateBySectionToday();
+
+    const medicalByManagerStats = await this.smiaOstieService.getMedicalConsultationByManager();
+
+    const absenceRateBySection = await this.leaveService.getMonthlyLeaveDistributionBySection();
+
+    const monthlyGlobalAbsenceRate = await this.leaveService.getMonthlyGlobalAbsenceRate();
+
+    const ongoingLeavesBySection = await this.leaveService.getOngoingLeavesBySection();
+
+    const pendingLeavesBySection = await this.leaveService.getPendingLeavesBySection();
 
     const userStats = await this.userService.getUsersDashboardStats();
     const allowedSites = this.getAllowedSites(req.session.user.site);
@@ -98,7 +111,7 @@ export class AppController {
       return key;
     });
 
-    return { t: (key: string) => i18n.t(key), title: 'Dashboard', activeEmployees, onLeaveEmployees, totalEmployees, diff, status, currentRate, lastRate, variation, ongoingLeaves, approvedLeaves, totalLeaves, approvalRate, pendingLeaves, totalLeaves2, pendingRate, monthlyStats, leaveTypes, leaveStatus, sectionStats, medicalStats, userStats, departementList, divisionList, sectionList, lineList, KEYS, allowedSites };
+    return { t: (key: string) => i18n.t(key), title: 'Dashboard', activeEmployees, onLeaveEmployees, totalEmployees, diff, status, currentRate, lastRate, variation, ongoingLeaves, approvedLeaves, totalLeaves, approvalRate, pendingLeaves, totalLeaves2, pendingRate, monthlyStats, leaveTypes, leaveStatus, managerStats, sectionStats, medicalStats, medicalByManagerStats, userStats, departementList, divisionList, sectionList, lineList, KEYS, allowedSites, employeesBySection, absenceRateBySection, monthlyGlobalAbsenceRate, ongoingLeavesBySection, pendingLeavesBySection };
   }
 
   @Get('login')

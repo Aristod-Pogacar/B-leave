@@ -28,6 +28,18 @@ export class EmployeeService {
     private readonly historyService: HistoryService
   ) { }
 
+  async getEmployeeCountBySection() {
+    return this.employeeRepository
+      .createQueryBuilder('employee')
+      .select('employee.section', 'section')
+      .addSelect('COUNT(employee.id)', 'count')
+      .where('employee.is_deleted = :isDeleted', { isDeleted: false })
+      .andWhere('employee.is_active = :isActive', { isActive: true })
+      .groupBy('employee.section')
+      .orderBy('employee.section', 'ASC')
+      .getRawMany();
+  }
+
   async paginateEmployee(search: string, page: number, limit: number, user: any) {
     const query = this.employeeRepository.createQueryBuilder('e');
     query.leftJoinAndSelect('e.manager', 'manager');

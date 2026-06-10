@@ -11,6 +11,11 @@ import { Roles } from 'src/user/role.decorator';
 export class SmiaOstieController {
   constructor(private readonly smiaOstieService: SmiaOstieService) { }
 
+  @Get('manager/:id/medical-services')
+  async getManagerMedicalServices(@Param('id') managerId: string) {
+    return this.smiaOstieService.getManagerConsultations(managerId);
+  }
+
   @Get('export')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HR_LEAD)

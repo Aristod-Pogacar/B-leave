@@ -65,7 +65,7 @@ export class LeaveController {
 
   @Get('permissions')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER)
+  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.HR_LEAD, UserRole.ADMIN)
   @Render('permission-list')
   async getPermissions(
     @Req() req: any,
@@ -76,6 +76,11 @@ export class LeaveController {
   ) {
     const leaves = await this.leaveService.getPermissions(req.session.user, new Date(startDate), new Date(endDate), status);
     return { title: "Permissions list", error: req.query.error, leaves: leaves, message: req.query.message, search: search, startDate, endDate, status };
+  }
+
+  @Get('manager/:id/absences')
+  async getManagerAbsences(@Param('id') managerId: string) {
+    return this.leaveService.getManagerAbsences(managerId);
   }
 
   @Post('reject-permission/:leaveId')
@@ -105,7 +110,7 @@ export class LeaveController {
   @UseGuards(RolesGuard)
   @Roles(UserRole.SUPERADMIN, UserRole.MANAGER)
   async approvePermission(@Param('leaveId') leaveId: string, @Res() res: express.Response, @Req() req: any) {
-    await this.leaveService.approveLeave(leaveId, req.session.user.id);
+    // await this.leaveService.approveLeave(leaveId, req.session.user.id);
     const message = "Permission approved successfully. You are pleased to validate also on OneHR platfrom."
     const leave = await this.leaveService.findOne(leaveId);
     // console.log("LEAVE:", leave);
@@ -119,13 +124,14 @@ export class LeaveController {
         leave_type: leave.leave_type
       }
 
-      await this.taskService.runPuppeteerTask(data, leave);
+      this.taskService.runPuppeteerTask(data, leave);
+      await this.leaveService.approveLeave(leaveId, req.session.user.id);
+      await this.historyService.create({
+        reason: HistoryReason.LEAVE,
+        message: "Permission approved by " + req.session.user.firstName + " " + req.session.user.name,
+        created_by: req.session.user.matricule,
+      });
     }
-    await this.historyService.create({
-      reason: HistoryReason.LEAVE,
-      message: "Permission approved by " + req.session.user.firstName + " " + req.session.user.name,
-      created_by: req.session.user.matricule,
-    });
     res.redirect('/leave/approuve-permissions?message=' + message);
   }
 
@@ -156,13 +162,14 @@ export class LeaveController {
         leave_type: leave.leave_type
       }
 
-      await this.taskService.runPuppeteerTask(data, leave);
+      this.taskService.runPuppeteerTask(data, leave);
+      await this.leaveService.approveLeave(leaveId, req.session.user.id);
+      await this.historyService.create({
+        reason: HistoryReason.LEAVE,
+        message: "Leave approved by " + req.session.user.firstName + " " + req.session.user.name,
+        created_by: req.session.user.matricule,
+      });
     }
-    await this.historyService.create({
-      reason: HistoryReason.LEAVE,
-      message: "Leave approved by " + req.session.user.firstName + " " + req.session.user.name,
-      created_by: req.session.user.matricule,
-    });
     res.redirect('/leave/approuve-leaves?message=' + message);
   }
 

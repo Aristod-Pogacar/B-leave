@@ -100,6 +100,25 @@ export class UserService {
 
     return { message: "User approved" };
   }
+
+  async updatePassword(id: any, body: any) {
+    const user = await this.userRepo.findOne({ where: { id } });
+    const hashedPassword = await bcrypt.hash(body.newPassword, 10);
+
+    if (!user) {
+      throw new BadRequestException("User not found");
+    }
+    const match = await bcrypt.compare(body.actualPassword, user.password);
+    if (body.newPassword != body.confirmPassword) {
+      throw new BadRequestException("New password and confirm password do not match");
+    }
+    if (!match) {
+      throw new BadRequestException("Actual password do not match");
+    }
+    await this.userRepo.update(id, { password: hashedPassword });
+    return user;
+  }
+
   async login(email: string, password: string) {
 
     const user = await this.userRepo.findOne({ where: { email } });

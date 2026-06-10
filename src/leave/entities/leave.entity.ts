@@ -5,7 +5,14 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 't
 export enum LeaveStatus {
     PENDING = 'pending',
     APPROVED = 'approved',
-    REJECTED = 'rejected'
+    REJECTED = 'rejected',
+    CANCELLED = 'cancelled',
+}
+
+export enum WithdrawStatus {
+    WITHDRAW_PENDING = 'withdraw_pending',
+    WITHDRAW_APPROVED = 'withdraw_approved',
+    WITHDRAW_CANCELLED = 'withdraw_cancelled',
 }
 
 @Entity('leaves')
@@ -31,6 +38,9 @@ export class Leave {
 
     @Column({ default: LeaveStatus.PENDING })
     status: LeaveStatus;
+
+    @Column({ nullable: true, default: null })
+    withdraw_status: WithdrawStatus;
 
     @Column({ default: false })
     onehr_status: boolean;

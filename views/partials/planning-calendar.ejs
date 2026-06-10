@@ -64,9 +64,20 @@
 
     const titre = document.title;
     console.log(titre);
-
     startDateFilter.value = startD.toISOString().split("T")[0];
     endDateFilter.value = endD.toISOString().split("T")[0];
+    if (titre.trim() == 'B-Leave || Dashboard') {
+        const today = new Date();
+        startD = new Date(today.getFullYear(), today.getMonth(), 1);
+        endD = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        startD.setDate(startD.getDate() + 1);
+        endD.setDate(endD.getDate() + 1);
+        startDateFilter.value = startD.toISOString().split("T")[0];
+        endDateFilter.value = endD.toISOString().split("T")[0];
+    }
+
+    console.log("Start date Filter value: ", startDateFilter.value)
+    console.log("End date Filter value: ", endDateFilter.value)
 
     startDateFilter.addEventListener("change", loadPlanning);
     endDateFilter.addEventListener("change", loadPlanning);
@@ -234,17 +245,7 @@
                 cell.classList.add("day-cell");
 
                 if (+d === +today) cell.classList.add("today");
-                if (d.getDay() === 6) cell.classList.add("day-off-saturday");
-                if (d.getDay() === 0) cell.classList.add("day-off-sunday");
 
-                // trouver uniquement le leave qui commence aujourd'hui
-                // const leave = leaves.find(l => {
-                //     if (l.employee.id !== emp.id) return false;
-                //     if (l.leave_type === "Medical_Leave_AMD") return false;
-
-                //     const start = clean(new Date(l.start_date));
-                //     return +start === +d;
-                // });
                 const leave = leaves.find(l => {
                     if (l.employee.id !== emp.id) return false;
                     if (l.leave_type === "Medical_Leave_AMD") return false;
@@ -330,6 +331,9 @@
                     });
 
                     cell.appendChild(wrapper);
+                } else {
+                    if (d.getDay() === 6) cell.classList.add("day-off-saturday");
+                    if (d.getDay() === 0) cell.classList.add("day-off-sunday");
                 }
 
                 datesGrid.appendChild(cell);
