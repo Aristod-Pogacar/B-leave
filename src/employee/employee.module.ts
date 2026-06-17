@@ -16,9 +16,10 @@ import { Permission2h } from 'src/permission2h/entities/permission2h.entity';
 import { Permission2hService } from 'src/permission2h/permission2h.service';
 import { SmiaOstieService } from 'src/smia_ostie/smia_ostie.service';
 import { SmiaOstie } from 'src/smia_ostie/entities/smia_ostie.entity';
+import { EmployeeHistory } from 'src/employee-history/entities/employee-history.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Leave, Employee, ManagerAssignation, User, History, Permission2h, SmiaOstie])],
+  imports: [TypeOrmModule.forFeature([Leave, Employee, ManagerAssignation, User, History, Permission2h, SmiaOstie, EmployeeHistory])],
   controllers: [EmployeeController],
   providers: [EmployeeService, LeaveService, CryptoService, UserService, JwtService, HistoryService, Permission2hService, SmiaOstieService],
   exports: [EmployeeService, TypeOrmModule, CryptoService, UserService, JwtService, HistoryService, Permission2hService, SmiaOstieService],

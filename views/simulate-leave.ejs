@@ -42,203 +42,385 @@
                         <!-- [ Main Content ] start -->
                         <div class="main-content">
                             <div class="tab-content">
+
                                 <div class="tab-pane fade active show" id="overviewTab">
-                                    <div class="row">
 
-                                        <div class="col-xl-12">
-                                            <div class="card stretch stretch-full d-flex">
-                                                <div class="card-header">
-                                                    <h4 class="header">Simulate leave</h4>
-                                                </div>
-                                                <div class="card-body">
-                                                    <div class="row">
-                                                        <div class="d-none" role="alert" id="message1">
+                                    <div class="card shadow-sm border-0">
+
+                                        <div class="card-header">
+                                            <h4 class="mb-0">
+                                                Simulate Leave
+                                            </h4>
+                                        </div>
+
+                                        <div class="card-body">
+
+                                            <div class="d-none" role="alert" id="message1"></div>
+
+                                            <div class="row g-4">
+
+                                                <!-- Simulation Form -->
+                                                <div class="col-lg-4">
+
+                                                    <div class="card border-0 bg-light h-100">
+
+                                                        <div class="card-header">
+                                                            <h5 class="mb-0">
+                                                                Simulation Parameters
+                                                            </h5>
                                                         </div>
-                                                        <!-- ===== LEFT: FORM ===== -->
-                                                        <div class="col-md-6 border-end">
 
-                                                            <!-- Recherche Employé -->
+                                                        <div class="card-body">
+
+                                                            <!-- Employee -->
                                                             <div class="mb-3">
-                                                                <label class="form-label">Employee</label>
+                                                                <label class="form-label">
+                                                                    Employee
+                                                                </label>
+
                                                                 <input type="text" class="form-control"
                                                                     id="employeeSearch1" autocomplete="off"
                                                                     placeholder="Search an employee..." required>
+
                                                                 <input type="text" class="input" name="employee"
                                                                     id="employee1" hidden required>
+
                                                                 <input type="text" class="input" name="matricule"
                                                                     id="matricule1" hidden required>
+
                                                                 <ul id="employeeResults1"
-                                                                    class="autocomplete-list ms-1 ps-0"></ul>
+                                                                    class="autocomplete-list ps-0 mt-2">
+                                                                </ul>
                                                             </div>
 
-                                                            <!-- Type -->
+                                                            <!-- Hidden Leave Type -->
                                                             <div class="mb-3 d-none">
-                                                                <label class="form-label">Leave type</label>
+                                                                <label class="form-label">
+                                                                    Leave Type
+                                                                </label>
+
                                                                 <select class="form-select" name="leave_type"
                                                                     id="leave_type">
-                                                                    <option value="Local_Leave_AMD" selected>Local
-                                                                        leave
+
+                                                                    <option value="Local_Leave_AMD" selected>
+
+                                                                        Local Leave
+
                                                                     </option>
+
                                                                 </select>
                                                             </div>
 
-                                                            <div class="row mb-3">
-                                                                <div class="col-md-6">
-                                                                    <label class="form-label ms-2">Date</label>
+                                                            <div class="row g-3">
+
+                                                                <div class="col-md-12">
+                                                                    <label class="form-label">
+                                                                        Simulation Date
+                                                                    </label>
+
                                                                     <input type="date" class="form-control"
                                                                         name="simulate_date" id="simulate_date"
                                                                         required>
                                                                 </div>
-                                                                <div class="col-md-3">
-                                                                    <label class="form-label ms-2">Days taken</label>
+
+                                                                <div class="col-md-6">
+                                                                    <label class="form-label">
+                                                                        Days Taken
+                                                                    </label>
+
                                                                     <input type="number" name="days_taken" value="1"
                                                                         min="0" max="30" id="days_taken"
                                                                         class="form-control" required>
                                                                 </div>
-                                                                <div class="col-md-3">
-                                                                    <label class="form-label ms-2">Balance type</label>
+
+                                                                <div class="col-md-6">
+                                                                    <label class="form-label">
+                                                                        Balance Type
+                                                                    </label>
+
                                                                     <select name="balance_type" id="balance_type"
                                                                         class="form-select" required>
-                                                                        <option value="Daily" selected>Daily</option>
-                                                                        <option value="Monthly">Monthly</option>
+
+                                                                        <option value="Daily" selected>
+                                                                            Daily
+                                                                        </option>
+
+                                                                        <option value="Monthly">
+                                                                            Monthly
+                                                                        </option>
+
                                                                     </select>
                                                                 </div>
+
+                                                                <!-- Hidden but required by JS -->
                                                                 <div class="col-md-12 p-4 row d-none">
                                                                     <button type="button" class="btn btn-primary mt-2"
                                                                         id="simulateButton">
+
                                                                         Simulate
+
                                                                     </button>
                                                                 </div>
+
                                                             </div>
 
-                                                            <!-- Date début -->
+                                                            <!-- Hidden dates required by JS -->
                                                             <div class="row d-none">
+
                                                                 <div class="col-md-6">
-                                                                    <label class="form-label">Starting date</label>
+
+                                                                    <label class="form-label">
+                                                                        Starting Date
+                                                                    </label>
+
                                                                     <input type="date" class="form-control"
                                                                         name="start_date" id="startDate1">
+
                                                                 </div>
 
-                                                                <!-- Date fin -->
                                                                 <div class="col-md-6">
-                                                                    <label class="form-label">Ending date</label>
+
+                                                                    <label class="form-label">
+                                                                        Ending Date
+                                                                    </label>
+
                                                                     <input type="date" class="form-control"
                                                                         name="end_date" id="endDate1">
+
                                                                 </div>
+
                                                             </div>
 
-                                                            <!-- Raison -->
+                                                            <!-- Hidden remarks -->
                                                             <div class="mb-3 d-none">
-                                                                <label class="form-label">Remarks</label>
+
+                                                                <label class="form-label">
+                                                                    Remarks
+                                                                </label>
+
                                                                 <textarea class="form-control" name="reason1"
                                                                     rows="3"></textarea>
+
                                                             </div>
-                                                            <!-- <input type="submit" hidden> -->
 
                                                         </div>
 
-                                                        <!-- ===== RIGHT: INFOS ===== -->
-                                                        <div class="col-md-6 row">
+                                                    </div>
 
-                                                            <div class="card mb-3 shadow-sm col-md-6">
-                                                                <div class="card-header text-center fw-bold">
-                                                                    Actual leave balance
+                                                </div>
+
+                                                <!-- Results -->
+                                                <div class="col-lg-8">
+
+                                                    <div class="row g-4">
+
+                                                        <!-- Current Balance -->
+                                                        <div class="col-md-6">
+
+                                                            <div class="card shadow-sm border-0 h-100">
+
+                                                                <div class="card-header bg-light">
+                                                                    <h5 class="mb-0">
+                                                                        Current Leave Balance
+                                                                    </h5>
                                                                 </div>
+
                                                                 <div class="card-body">
-                                                                    <p class="mb-2">
-                                                                        <strong>Carried forward balance :</strong>
-                                                                        <span id="soldeDebut1">-</span>
-                                                                    </p>
-                                                                    <p class="mb-2" name="entitlement-day">
-                                                                        <strong>Entitlement till date :</strong>
-                                                                        <span id="soldeCumule1">-</span>
-                                                                    </p>
-                                                                    <p class="mb-2 d-none" name="entitlement-month">
-                                                                        <strong>Entitlement till date :</strong>
-                                                                        <span id="soldeCumuleMensuel1">-</span>
-                                                                    </p>
-                                                                    <p class="mb-2">
-                                                                        <strong>Taken permissions :</strong>
-                                                                        <span id="soldePermissions1">-</span>
-                                                                    </p>
-                                                                    <p class="mb-2">
-                                                                        <strong>Taken leaves :</strong>
-                                                                        <span id="soldePris1">-</span>
-                                                                    </p>
-                                                                    <p class="mb-2" name="entitlement-day">
-                                                                        <strong>Current balance :</strong>
+
+                                                                    <div
+                                                                        class="d-flex justify-content-between py-2 border-bottom">
+                                                                        <span>Carried Forward</span>
+                                                                        <strong id="soldeDebut1">-</strong>
+                                                                    </div>
+
+                                                                    <div class="d-flex justify-content-between py-2 border-bottom"
+                                                                        name="entitlement-day">
+
+                                                                        <span>Entitlement To Date</span>
+                                                                        <strong id="soldeCumule1">-</strong>
+
+                                                                    </div>
+
+                                                                    <div class="d-flex justify-content-between py-2 border-bottom d-none"
+                                                                        name="entitlement-month">
+
+                                                                        <span>Entitlement To Date</span>
+                                                                        <strong id="soldeCumuleMensuel1">-</strong>
+
+                                                                    </div>
+
+                                                                    <div
+                                                                        class="d-flex justify-content-between py-2 border-bottom">
+                                                                        <span>Taken Permissions</span>
+                                                                        <strong id="soldePermissions1">-</strong>
+                                                                    </div>
+
+                                                                    <div
+                                                                        class="d-flex justify-content-between py-2 border-bottom">
+                                                                        <span>Taken Leaves</span>
+                                                                        <strong id="soldePris1">-</strong>
+                                                                    </div>
+
+                                                                    <div class="d-flex justify-content-between pt-3"
+                                                                        name="entitlement-day">
+
+                                                                        <span class="fw-semibold">
+                                                                            Current Balance
+                                                                        </span>
+
                                                                         <span id="soldeRestant1"
-                                                                            class="fw-bold text-primary">-</span>
-                                                                    </p>
-                                                                    <p class="mb-2 d-none" name="entitlement-month">
-                                                                        <strong>Current balance :</strong>
+                                                                            class="badge bg-primary">
+
+                                                                            -
+
+                                                                        </span>
+
+                                                                    </div>
+
+                                                                    <div class="d-flex justify-content-between pt-3 d-none"
+                                                                        name="entitlement-month">
+
+                                                                        <span class="fw-semibold">
+                                                                            Current Balance
+                                                                        </span>
+
                                                                         <span id="soldeRestantMensuel1"
-                                                                            class="fw-bold text-primary">-</span>
-                                                                    </p>
+                                                                            class="badge bg-primary">
+
+                                                                            -
+
+                                                                        </span>
+
+                                                                    </div>
+
                                                                 </div>
+
                                                             </div>
 
-                                                            <div class="card mb-3 shadow-sm col-md-6">
-                                                                <div class="card-header text-center fw-bold">
-                                                                    Simulated leave balance
+                                                        </div>
+
+                                                        <!-- Simulated Balance -->
+                                                        <div class="col-md-6">
+
+                                                            <div class="card shadow-sm border-0 h-100">
+
+                                                                <div class="card-header bg-success text-white">
+                                                                    <h5 class="mb-0">
+                                                                        Simulated Leave Balance
+                                                                    </h5>
                                                                 </div>
+
                                                                 <div class="card-body">
-                                                                    <p class="mb-2">
-                                                                        <strong>Carried forward balance :</strong>
-                                                                        <span id="soldeDebut2">-</span>
-                                                                    </p>
-                                                                    <p class="mb-2" name="entitlement-day">
-                                                                        <strong>Entitlement till date :</strong>
-                                                                        <span id="soldeCumule2">-</span>
-                                                                    </p>
-                                                                    <p class="mb-2 d-none" name="entitlement-month">
-                                                                        <strong>Entitlement till date :</strong>
-                                                                        <span id="soldeCumuleMensuel2">-</span>
-                                                                    </p>
-                                                                    <p class="mb-2">
-                                                                        <strong>Taken permissions :</strong>
-                                                                        <span id="soldePermissions2">-</span>
-                                                                    </p>
-                                                                    <p class="mb-2">
-                                                                        <strong>Taken leaves :</strong>
-                                                                        <span id="soldePris2">-</span>
-                                                                    </p>
-                                                                    <p class="mb-2" name="entitlement-day">
-                                                                        <strong>Current balance :</strong>
+
+                                                                    <div
+                                                                        class="d-flex justify-content-between py-2 border-bottom">
+                                                                        <span>Carried Forward</span>
+                                                                        <strong id="soldeDebut2">-</strong>
+                                                                    </div>
+
+                                                                    <div class="d-flex justify-content-between py-2 border-bottom"
+                                                                        name="entitlement-day">
+
+                                                                        <span>Entitlement To Date</span>
+                                                                        <strong id="soldeCumule2">-</strong>
+
+                                                                    </div>
+
+                                                                    <div class="d-flex justify-content-between py-2 border-bottom d-none"
+                                                                        name="entitlement-month">
+
+                                                                        <span>Entitlement To Date</span>
+                                                                        <strong id="soldeCumuleMensuel2">-</strong>
+
+                                                                    </div>
+
+                                                                    <div
+                                                                        class="d-flex justify-content-between py-2 border-bottom">
+                                                                        <span>Taken Permissions</span>
+                                                                        <strong id="soldePermissions2">-</strong>
+                                                                    </div>
+
+                                                                    <div
+                                                                        class="d-flex justify-content-between py-2 border-bottom">
+                                                                        <span>Taken Leaves</span>
+                                                                        <strong id="soldePris2">-</strong>
+                                                                    </div>
+
+                                                                    <div class="d-flex justify-content-between pt-3"
+                                                                        name="entitlement-day">
+
+                                                                        <span class="fw-semibold">
+                                                                            Simulated Balance
+                                                                        </span>
+
                                                                         <span id="soldeRestant2"
-                                                                            class="fw-bold text-primary">-</span>
-                                                                    </p>
-                                                                    <p class="mb-2 d-none" name="entitlement-month">
-                                                                        <strong>Current balance :</strong>
+                                                                            class="badge bg-success">
+
+                                                                            -
+
+                                                                        </span>
+
+                                                                    </div>
+
+                                                                    <div class="d-flex justify-content-between pt-3 d-none"
+                                                                        name="entitlement-month">
+
+                                                                        <span class="fw-semibold">
+                                                                            Simulated Balance
+                                                                        </span>
+
                                                                         <span id="soldeRestantMensuel2"
-                                                                            class="fw-bold text-primary">-</span>
-                                                                    </p>
+                                                                            class="badge bg-success">
+
+                                                                            -
+
+                                                                        </span>
+
+                                                                    </div>
+
                                                                     <% if (user.role==='TEST' ) { %>
+
                                                                         <hr>
-                                                                        <div class="d-grid gap-2">
+
+                                                                        <div class="d-grid">
+
                                                                             <button type="submit" form="formSimulation"
                                                                                 class="btn btn-success" disabled
                                                                                 id="submit1">
+
                                                                                 Planify
+
                                                                             </button>
+
                                                                         </div>
+
                                                                         <% } %>
+
                                                                 </div>
+
                                                             </div>
+
                                                         </div>
 
                                                     </div>
-                                                    <div class="row mt-2">
-                                                        <div class="col-md-12 text-center">
-                                                            <p id="message1" class="fw-bold"></p>
+
+                                                    <div class="mt-4">
+
+                                                        <div id="message1" class="text-center fw-semibold">
                                                         </div>
+
                                                     </div>
+
                                                 </div>
 
                                             </div>
+
                                         </div>
+
                                     </div>
+
                                 </div>
+
                             </div>
                         </div>
                     </div>

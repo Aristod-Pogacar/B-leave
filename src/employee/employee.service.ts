@@ -13,6 +13,7 @@ import { CryptoService } from 'src/crypto/crypto.service';
 import { CompareAdminDto } from './dto/compare-admin.dto';
 import { HistoryService } from 'src/history/history.service';
 import { HistoryReason } from 'src/history/entities/history.entity';
+import { EmployeeHistory } from 'src/employee-history/entities/employee-history.entity';
 
 @Injectable()
 export class EmployeeService {
@@ -20,6 +21,8 @@ export class EmployeeService {
   constructor(
     @InjectRepository(Employee)
     private readonly employeeRepository: Repository<Employee>,
+    @InjectRepository(EmployeeHistory)
+    private readonly employeeHistoryRepository: Repository<EmployeeHistory>,
     @InjectRepository(Leave)
     private readonly leaveRepository: Repository<Leave>,
     @InjectRepository(User)
@@ -27,6 +30,37 @@ export class EmployeeService {
     private readonly cryptoService: CryptoService,
     private readonly historyService: HistoryService
   ) { }
+
+  async archiveEmployee(id: string, dor: any) {
+    const employee = await this.employeeRepository.findOne({ where: { id } });
+    if (!employee) {
+      throw new BadRequestException("Employee not found");
+    }
+    const date = new Date(dor);
+    date.setHours(12, 0, 0, 0);
+    await this.employeeHistoryRepository.save({
+      employee: employee,
+      matricule: employee.matricule,
+      name: employee.name,
+      firstname: employee.firstname,
+      section: employee.section,
+      site: employee.site,
+      job_level: employee.job_level,
+      line: employee.line,
+      departement: employee.departement,
+      designation: employee.designation,
+      DOR: date,
+      DOE: employee.DOE,
+      division: employee.division,
+      type: employee.type,
+      job_post: employee.job_post,
+    });
+    employee.is_deleted = true;
+    employee.is_active = false;
+    employee.DOR = date;
+    await this.employeeRepository.save(employee);
+    return employee;
+  }
 
   async getEmployeeCountBySection() {
     return this.employeeRepository
@@ -49,10 +83,12 @@ export class EmployeeService {
 
     if (search && search.trim() !== '') {
       query.andWhere(
-        '(e.matricule LIKE :s OR e.name LIKE :s OR e.firstname LIKE :s) AND e.site IN (:...role)',
-        { s: `%${search}%`, role }
+        'e.matricule LIKE :s OR e.name LIKE :s OR e.firstname LIKE :s',
+        { s: `%${search}%` }
       );
     }
+    query.andWhere({ site: In(role) });
+    query.andWhere({ is_deleted: false, is_active: true });
 
     const total = await query.getCount();
     const data = await query
@@ -67,11 +103,11 @@ export class EmployeeService {
     const query = this.employeeRepository.createQueryBuilder('e');
     query.leftJoinAndSelect('e.manager', 'manager');
     query.orderBy('e.matricule', 'ASC');
-    query.where({ manager: { id: user.id } });
+    query.where({ manager: { id: user.id }, is_active: true, is_deleted: false });
 
     if (search && search.trim() !== '') {
       query.andWhere(
-        '(e.matricule LIKE :s OR e.name LIKE :s OR e.firstname LIKE :s OR e.section LIKE :s OR e.designation LIKE :s)',
+        '(e.matricule LIKE :s OR e.name LIKE :s OR e.firstname LIKE :s OR e.section LIKE :s OR e.designation LIKE :s) AND e.is_deleted = false AND e.is_active = true',
         { s: `%${search}%` }
       );
     }
@@ -82,7 +118,7 @@ export class EmployeeService {
   }
 
   async updateManager(data: { matricule: any; manager: any; }) {
-    const employee = await this.employeeRepository.findOne({ where: { matricule: data.matricule } });
+    const employee = await this.employeeRepository.findOne({ where: { matricule: data.matricule, is_active: true, is_deleted: false } });
     if (employee) {
       const manager = await this.userRepository.findOne({ where: { matricule: data.manager, role: UserRole.MANAGER } });
       if (manager) {
@@ -94,13 +130,13 @@ export class EmployeeService {
 
   async getAssignedEmployees(managerId: string) {
     return this.employeeRepository.find({
-      where: { manager: { id: managerId } },
+      where: { manager: { id: managerId }, is_active: true, is_deleted: false },
       select: ['name', 'firstname', 'matricule', 'id', 'section', 'line']
     });
   }
 
   async compare(compareAdminDto: CompareAdminDto) {
-    const employee = await this.employeeRepository.findOne({ where: { matricule: compareAdminDto.matricule } })
+    const employee = await this.employeeRepository.findOne({ where: { matricule: compareAdminDto.matricule, is_active: true, is_deleted: false } })
     if (!employee) {
       throw new BadRequestException("Employee not found");
     }
@@ -123,7 +159,7 @@ export class EmployeeService {
   }
 
   findAllByLineAndDepartement(line: string | undefined, departement: string | undefined, skip: number, take: number, year: number) {
-    return this.employeeRepository.find({ where: { line, departement }, skip, take, order: { matricule: 'ASC' } });
+    return this.employeeRepository.find({ where: { line, departement, is_active: true, is_deleted: false }, skip, take, order: { matricule: 'ASC' } });
   }
 
   async updatePassword(data: { matricule: any; app_password: any; onehr_password: any; }) {
@@ -148,7 +184,7 @@ export class EmployeeService {
     // ⚡ Bulk update
     await this.employeeRepository.update(
       { id: In(employeeIds) },
-      { manager: manager },
+      { manager: manager, is_active: true, is_deleted: false },
     );
 
     return {
@@ -163,9 +199,9 @@ export class EmployeeService {
     const allowedSites = this.getAllowedSites(site);
     const employees = await this.employeeRepository.find({
       where: [
-        { site: In(allowedSites), matricule: Like(`%${search}%`) },
-        { site: In(allowedSites), firstname: Like(`%${search}%`) },
-        { site: In(allowedSites), name: Like(`%${search}%`) }
+        { site: In(allowedSites), matricule: Like(`%${search}%`), is_active: true, is_deleted: false },
+        { site: In(allowedSites), firstname: Like(`%${search}%`), is_active: true, is_deleted: false },
+        { site: In(allowedSites), name: Like(`%${search}%`), is_active: true, is_deleted: false }
       ],
       select: [
         'name',
@@ -224,11 +260,11 @@ export class EmployeeService {
       if (search && search.trim() !== "") {
         [employees, total] = await this.employeeRepository.findAndCount({
           where: [
-            { manager: { id: user.id }, matricule: Like(`%${search}%`) },
-            { manager: { id: user.id }, name: Like(`%${search}%`) },
-            { manager: { id: user.id }, firstname: Like(`%${search}%`) },
-            { manager: { id: user.id }, division: Like(`%${search}%`) },
-            { manager: { id: user.id }, section: Like(`%${search}%`) },
+            { manager: { id: user.id }, matricule: Like(`%${search}%`), is_active: true, is_deleted: false },
+            { manager: { id: user.id }, name: Like(`%${search}%`), is_active: true, is_deleted: false },
+            { manager: { id: user.id }, firstname: Like(`%${search}%`), is_active: true, is_deleted: false },
+            { manager: { id: user.id }, division: Like(`%${search}%`), is_active: true, is_deleted: false },
+            { manager: { id: user.id }, section: Like(`%${search}%`), is_active: true, is_deleted: false },
           ],
           order: { matricule: 'ASC' },
           skip,
@@ -236,7 +272,7 @@ export class EmployeeService {
         });
       } else {
         [employees, total] = await this.employeeRepository.findAndCount({
-          where: { manager: { id: user.id } },
+          where: { manager: { id: user.id }, is_active: true, is_deleted: false },
           order: { matricule: 'ASC' },
           skip,
           take,
@@ -247,11 +283,11 @@ export class EmployeeService {
       if (search && search.trim() !== "") {
         [employees, total] = await this.employeeRepository.findAndCount({
           where: [
-            { matricule: Like(`%${search}%`) },
-            { name: Like(`%${search}%`) },
-            { firstname: Like(`%${search}%`) },
-            { division: Like(`%${search}%`) },
-            { section: Like(`%${search}%`) },
+            { matricule: Like(`%${search}%`), is_active: true, is_deleted: false },
+            { name: Like(`%${search}%`), is_active: true, is_deleted: false },
+            { firstname: Like(`%${search}%`), is_active: true, is_deleted: false },
+            { division: Like(`%${search}%`), is_active: true, is_deleted: false },
+            { section: Like(`%${search}%`), is_active: true, is_deleted: false },
           ],
           order: { matricule: 'ASC' },
           skip,
@@ -260,7 +296,7 @@ export class EmployeeService {
       } else {
         // 1️⃣ Récupérer les employés
         [employees, total] = await this.employeeRepository.findAndCount({
-          where: { line, section, division, site },
+          where: { line, section, division, site, is_active: true, is_deleted: false },
           order: { matricule: 'ASC' },
           skip,
           take,
@@ -397,7 +433,7 @@ export class EmployeeService {
     departement: string,
   ) {
     const [employees, total] = await this.employeeRepository.findAndCount({
-      where: { line, departement },
+      where: { line, departement, is_active: true, is_deleted: false },
       order: { matricule: 'ASC' },
     });
 
@@ -412,6 +448,7 @@ export class EmployeeService {
     const results = await this.employeeRepository
       .createQueryBuilder('empoyee')
       .select('DISTINCT empoyee.departement', 'departement')
+      .where('empoyee.is_active = true AND empoyee.is_deleted = false')
       .getRawMany();
 
     // this.employeeRepository.find({
@@ -426,7 +463,7 @@ export class EmployeeService {
     const results = await this.employeeRepository
       .createQueryBuilder('employee')
       .select('DISTINCT employee.division', 'division')
-      // .where('employee.division IS NOT NULL')
+      .where('employee.is_active = true AND employee.is_deleted = false')
       .orderBy('employee.division', 'ASC')
       .getRawMany();
 
@@ -437,7 +474,7 @@ export class EmployeeService {
     const results = await this.employeeRepository
       .createQueryBuilder('employee')
       .select('DISTINCT employee.section', 'section')
-      // .where('employee.section IS NOT NULL')
+      .where('employee.is_active = true AND employee.is_deleted = false')
       .orderBy('employee.section', 'ASC')
       .getRawMany();
 
@@ -449,6 +486,7 @@ export class EmployeeService {
       .createQueryBuilder('employee')
       .select('DISTINCT employee.departement', 'departement')
       .where('employee.departement IS NOT NULL')
+      .andWhere('employee.is_active = true AND employee.is_deleted = false')
       .orderBy('employee.departement', 'ASC')
       .getRawMany();
 
@@ -460,6 +498,7 @@ export class EmployeeService {
       .createQueryBuilder('employee')
       .select('DISTINCT employee.line', 'line')
       .where('employee.line IS NOT NULL')
+      .andWhere('employee.is_active = true AND employee.is_deleted = false')
       .orderBy('employee.line', 'ASC')
       .getRawMany();
 
@@ -663,6 +702,7 @@ export class EmployeeService {
         'daysTaken'
       )
       .where('employee.id = :employeeId', { employeeId: employee.id })
+      .andWhere('employee.is_active = true AND employee.is_deleted = false')
       .andWhere('leave.status = :status', { status: LeaveStatus.APPROVED })
       .andWhere('leave.leave_type = :type', { type: 'Local_Leave_AMD' })
       .andWhere('YEAR(leave.start_date) = :year', { year })
@@ -735,6 +775,7 @@ export class EmployeeService {
         '(e.matricule LIKE :q OR e.name LIKE :q OR e.firstname LIKE :q)',
         { q: `%${q}%` },
       )
+      .andWhere('e.is_active = true AND e.is_deleted = false')
       .select(['e.id', 'e.matricule', 'e.name', 'e.firstname', 'e.line', 'e.departement', 'e.section', 'e.site', 'e.section', 'e.DOE'])
       .take(10);
 

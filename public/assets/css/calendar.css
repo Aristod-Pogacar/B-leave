@@ -240,3 +240,33 @@
         thead {
             width: calc(100% - 0.3em);
         }
+
+        .nxl-navbar .nxl-link {
+            border-radius: 12px;
+            margin: 2px 8px;
+            transition: all .2s ease;
+        }
+
+        .nxl-navbar .nxl-link:hover {
+            background: rgba(13, 110, 253, .08);
+        }
+
+        .nxl-navbar .nxl-link.active {
+            background: rgba(13, 110, 253, .12);
+            font-weight: 600;
+        }
+
+        .nxl-caption label {
+            font-size: .7rem;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: #9ca3af;
+        }
+
+        .nxl-submenu .nxl-link {
+            font-size: .92rem;
+        }
+
+        .nxl-arrow {
+            opacity: .5;
+        }

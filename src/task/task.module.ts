@@ -21,11 +21,13 @@ import { Permission2hService } from 'src/permission2h/permission2h.service';
 import { Permission2h } from 'src/permission2h/entities/permission2h.entity';
 import { SmiaOstie } from 'src/smia_ostie/entities/smia_ostie.entity';
 import { SmiaOstieService } from 'src/smia_ostie/smia_ostie.service';
+import { EmployeeHistoryService } from 'src/employee-history/employee-history.service';
+import { EmployeeHistory } from 'src/employee-history/entities/employee-history.entity';
 
 @Module({
   imports: [
     ScheduleModule.forRoot(),
-    TypeOrmModule.forFeature([Task, Employee, Leave, User, History, Permission2h, SmiaOstie])
+    TypeOrmModule.forFeature([Task, Employee, Leave, User, History, Permission2h, SmiaOstie, EmployeeHistory])
   ],
   controllers: [TaskController],
   providers: [
@@ -40,7 +42,8 @@ import { SmiaOstieService } from 'src/smia_ostie/smia_ostie.service';
     JwtService,
     HistoryService,
     Permission2hService,
-    SmiaOstieService
+    SmiaOstieService,
+    EmployeeHistoryService
   ],
   exports: [
     TaskService,
@@ -54,7 +57,8 @@ import { SmiaOstieService } from 'src/smia_ostie/smia_ostie.service';
     HistoryService,
     JwtService,
     Permission2hService,
-    SmiaOstieService
+    SmiaOstieService,
+    EmployeeHistoryService
   ],
 })
 export class TaskModule { }

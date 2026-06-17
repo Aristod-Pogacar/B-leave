@@ -1,3 +1,4 @@
+import { EmployeeHistory } from 'src/employee-history/entities/employee-history.entity';
 import { Leave } from 'src/leave/entities/leave.entity';
 import { ManagerAssignation } from 'src/manager_assignation/entities/manager_assignation.entity';
 import { Permission2h } from 'src/permission2h/entities/permission2h.entity';
@@ -27,6 +28,9 @@ export class Employee {
 
     @Column({ type: 'date' })
     DOE!: Date;
+
+    @Column({ type: 'date', nullable: true })
+    DOR?: Date | null;
 
     @Column()
     division!: string;
@@ -70,13 +74,16 @@ export class Employee {
     @Index()
     @ManyToOne(() => User, user => user.employees, { nullable: true, onDelete: 'SET NULL' })
     @JoinColumn({ name: 'manager_id' })
-    manager: User;
+    manager?: User | null;
 
     @Column()
     app_password!: string;
 
     @Column()
     onehr_password!: string;
+
+    @OneToMany(() => EmployeeHistory, employeeHistory => employeeHistory.employee, { onDelete: 'NO ACTION' })
+    histories: EmployeeHistory[];
 
     @Column({ type: 'int', nullable: true, unique: true })
     fingerprintId?: number | null;

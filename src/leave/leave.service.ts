@@ -53,7 +53,9 @@ export class LeaveService {
         employee: {
           manager: {
             id: id
-          }
+          },
+          is_active: true,
+          is_deleted: false
         },
         status: LeaveStatus.PENDING,
         leave_type: In(typeLeaves)
@@ -74,7 +76,9 @@ export class LeaveService {
           employee: {
             manager: {
               id: user.id
-            }
+            },
+            is_active: true,
+            is_deleted: false
           },
           status: In([
             LeaveStatus.APPROVED,
@@ -96,7 +100,9 @@ export class LeaveService {
           new Date(endDate)
         ),
         employee: {
-          site: In(allowedSites)
+          site: In(allowedSites),
+          is_active: true,
+          is_deleted: false
         },
         status: In([
           LeaveStatus.APPROVED,
@@ -151,11 +157,11 @@ export class LeaveService {
               new Date(year, endMonth + 1, 0)
             ),
             employee: [
-              { manager: { id: user.id }, matricule: Like(`%${search}%`) },
-              { manager: { id: user.id }, name: Like(`%${search}%`) },
-              { manager: { id: user.id }, firstname: Like(`%${search}%`) },
-              { manager: { id: user.id }, division: Like(`%${search}%`) },
-              { manager: { id: user.id }, section: Like(`%${search}%`) },
+              { manager: { id: user.id }, matricule: Like(`%${search}%`), is_active: true, is_deleted: false },
+              { manager: { id: user.id }, name: Like(`%${search}%`), is_active: true, is_deleted: false },
+              { manager: { id: user.id }, firstname: Like(`%${search}%`), is_active: true, is_deleted: false },
+              { manager: { id: user.id }, division: Like(`%${search}%`), is_active: true, is_deleted: false },
+              { manager: { id: user.id }, section: Like(`%${search}%`), is_active: true, is_deleted: false },
             ],
             status: In([
               LeaveStatus.APPROVED,
@@ -177,7 +183,9 @@ export class LeaveService {
           employee: {
             manager: {
               id: user.id
-            }
+            },
+            is_active: true,
+            is_deleted: false
           },
           status: In([
             LeaveStatus.APPROVED,
@@ -198,11 +206,11 @@ export class LeaveService {
             new Date(year, endMonth + 1, 0)
           ),
           employee: [
-            { matricule: Like(`%${search}%`) },
-            { name: Like(`%${search}%`) },
-            { firstname: Like(`%${search}%`) },
-            { division: Like(`%${search}%`) },
-            { section: Like(`%${search}%`) },
+            { matricule: Like(`%${search}%`), is_active: true, is_deleted: false },
+            { name: Like(`%${search}%`), is_active: true, is_deleted: false },
+            { firstname: Like(`%${search}%`), is_active: true, is_deleted: false },
+            { division: Like(`%${search}%`), is_active: true, is_deleted: false },
+            { section: Like(`%${search}%`), is_active: true, is_deleted: false },
           ],
           status: In([
             LeaveStatus.APPROVED,
@@ -225,7 +233,9 @@ export class LeaveService {
           line,
           section,
           division,
-          site
+          site,
+          is_active: true,
+          is_deleted: false
         },
         status: In([
           LeaveStatus.APPROVED,
@@ -243,7 +253,7 @@ export class LeaveService {
     return this.leaveRepository.find({
       where: {
         start_date: Between(new Date(year, month, 1), new Date(year, month, 31)),
-        employee: { line, departement, site },
+        employee: { line, departement, site, is_active: true, is_deleted: false },
         status: In([LeaveStatus.APPROVED, LeaveStatus.PENDING])
       },
       relations: ['employee', 'approver']
@@ -252,7 +262,7 @@ export class LeaveService {
 
   async create(createLeaveDto: CreateLeaveDto, res: express.Response, req: any) {
     const employee = await this.employeeRepository.findOne({
-      where: { id: createLeaveDto.employee },
+      where: { id: createLeaveDto.employee, is_active: true, is_deleted: false },
       relations: ['manager']
     });
 
@@ -435,7 +445,7 @@ export class LeaveService {
       .createQueryBuilder('e')
       // .leftJoin('users', 'u', 'u.employee = e.matricule')
       .where(
-        'e.id = :id',
+        'e.id = :id AND e.is_active = true AND e.is_deleted = false',
         { id: employeeId },
       )
       // .andWhere('u.id IS NULL')
@@ -457,7 +467,7 @@ export class LeaveService {
       .andWhere('leave.status IN (:...status)', { status: [LeaveStatus.APPROVED, LeaveStatus.PENDING] })
       .andWhere('leave.leave_type = :type', { type: 'Local_Leave_AMD' })
       .andWhere('YEAR(leave.start_date) = :year', { year: date.getFullYear() })
-      // .andWhere('leave.start_date <= :date', { date: date.toISOString() })
+      .andWhere('employee.is_active = true AND employee.is_deleted = false')
       .groupBy('employee.id')
       .getRawMany();
     // // return data;
@@ -510,7 +520,7 @@ export class LeaveService {
 
   async getEmployeeSolde(matricule: string, at: Date) {
     const year = at.getFullYear();
-    const employee = await this.employeeRepository.findOne({ where: { matricule } });
+    const employee = await this.employeeRepository.findOne({ where: { matricule, is_active: true, is_deleted: false } });
     if (!employee) return { solde_cumul: 0, solde_pris: 0, solde_restant: 0, solde_cumul_mensuel: 0 };
 
     const takenLeaves = await this.leaveRepository
@@ -647,9 +657,9 @@ export class LeaveService {
 
   async getPaginateEmployeeLeaves(employeeId: string, skip: number = 0, take: number = 1000, startDate: Date, endDate: Date, status: string) {
     const [data, count] = await this.leaveRepository.findAndCount({
-      where: { employee: { id: employeeId }, start_date: Between(startDate, endDate), status: In(this.getLeavesByStatus(status)) },
+      where: { employee: { id: employeeId, is_active: true, is_deleted: false }, start_date: Between(startDate, endDate), status: In(this.getLeavesByStatus(status)) },
       order: { start_date: 'DESC' },
-      relations: ['approver'],
+      relations: ['approver', 'employee'],
       // skip,
       // take,
     });
@@ -659,31 +669,31 @@ export class LeaveService {
   }
 
   async getEmployeeLeaves(employeeId: string) {
-    return this.leaveRepository.find({ where: { employee: { id: employeeId } }, });
+    return this.leaveRepository.find({ where: { employee: { id: employeeId, is_active: true, is_deleted: false } }, });
   }
 
   async getEmployeeLeavesByDate(employeeId: string, date: Date) {
-    return this.leaveRepository.find({ where: { employee: { id: employeeId }, start_date: date } });
+    return this.leaveRepository.find({ where: { employee: { id: employeeId, is_active: true, is_deleted: false }, start_date: date } });
   }
 
   async getEmployeeLeavesByMonth(employeeId: string, month: number, year: number) {
-    return this.leaveRepository.find({ where: { employee: { id: employeeId }, start_date: Between(new Date(year, month, 1), new Date(year, month + 1, 1)) } });
+    return this.leaveRepository.find({ where: { employee: { id: employeeId, is_active: true, is_deleted: false }, start_date: Between(new Date(year, month, 1), new Date(year, month + 1, 1)) } });
   }
 
   async getEmployeeLeavesByYear(employeeId: string, year: number) {
-    return this.leaveRepository.find({ where: { employee: { id: employeeId }, start_date: Between(new Date(year, 0, 1), new Date(year + 1, 0, 1)) } });
+    return this.leaveRepository.find({ where: { employee: { id: employeeId, is_active: true, is_deleted: false }, start_date: Between(new Date(year, 0, 1), new Date(year + 1, 0, 1)) } });
   }
 
   async getEmployeeLeavesByRange(employeeId: string, startDate: Date, endDate: Date) {
-    return this.leaveRepository.find({ where: { employee: { id: employeeId }, start_date: Between(startDate, endDate) } });
+    return this.leaveRepository.find({ where: { employee: { id: employeeId, is_active: true, is_deleted: false }, start_date: Between(startDate, endDate) } });
   }
 
   async getLeavesByLine(line: string) {
-    return this.leaveRepository.find({ where: { employee: { line } } });
+    return this.leaveRepository.find({ where: { employee: { line, is_active: true, is_deleted: false } } });
   }
 
   async getLeavesBySection(section: string) {
-    return this.leaveRepository.find({ where: { employee: { section } } });
+    return this.leaveRepository.find({ where: { employee: { section, is_active: true, is_deleted: false } } });
   }
 
   async getLeavesByMonth(month: number, year: number) {
@@ -695,7 +705,7 @@ export class LeaveService {
   }
 
   async getLeavesByLineAndSection(line: string, section: string) {
-    return this.leaveRepository.find({ where: { employee: { line, section } } });
+    return this.leaveRepository.find({ where: { employee: { line, section, is_active: true, is_deleted: false } } });
   }
 
   async getPlanning(
@@ -732,11 +742,11 @@ export class LeaveService {
       .andWhere('leave.status != :status', { status: LeaveStatus.REJECTED });
 
     if (line) {
-      query.andWhere('employee.line = :line', { line });
+      query.andWhere('employee.line = :line  AND employee.is_active = true AND employee.is_deleted = false', { line });
     }
 
     if (section) {
-      query.andWhere('employee.section = :section', { section });
+      query.andWhere('employee.section = :section AND employee.is_active = true AND employee.is_deleted = false', { section });
     }
 
     query
@@ -748,8 +758,6 @@ export class LeaveService {
   }
 
   getDatesBetween(startDate: Date, endDate: Date) {
-    // console.log("startDate:", startDate);
-    // console.log("endDate:", endDate);
 
     const dates: Date[] = [];
 
@@ -763,22 +771,10 @@ export class LeaveService {
     let current = new Date(sy, sm, sd);
     const end = new Date(ey, em, ed);
 
-    // console.log("start year:", sy);
-    // console.log("start month:", sm);
-    // console.log("start date:", sd);
-    // console.log("end year:", ey);
-    // console.log("end month:", em);
-    // console.log("end date:", ed);
-
-    // console.log("current:", current);
-    // console.log("end:", end);
-
     while (current <= end) {
       dates.push(new Date(current));
       current.setDate(current.getDate() + 1);
     }
-
-    // console.log(dates);
 
     return dates;
   }
@@ -820,6 +816,8 @@ export class LeaveService {
           division,
           site,
           manager: { id: user.id },
+          is_active: true,
+          is_deleted: false
         },
         order: { matricule: "ASC" },
       });
@@ -845,7 +843,9 @@ export class LeaveService {
           line,
           section,
           division,
-          site
+          site,
+          is_active: true,
+          is_deleted: false
         },
         order: { matricule: "ASC" },
       });
@@ -857,7 +857,9 @@ export class LeaveService {
               line,
               section,
               division,
-              site
+              site,
+              is_active: true,
+              is_deleted: false
             },
             status: In(leaveEx),
           },
@@ -887,23 +889,6 @@ export class LeaveService {
     ];
 
     sheet.addRow(header);
-
-    // const headerRow = sheet.getRow(1);
-
-    // headerRow.eachCell((cell) => {
-    //   cell.font = { bold: true, color: { argb: "FFFFFFFF" } };
-    //   cell.alignment = {
-    //     vertical: "middle",
-    //     horizontal: "center",
-    //     wrapText: true,
-    //   };
-
-    //   cell.fill = {
-    //     type: "pattern",
-    //     pattern: "solid",
-    //     fgColor: { argb: "FF1F4E78" },
-    //   };
-    // });
 
     /*
         Construire une map :
@@ -943,43 +928,10 @@ export class LeaveService {
 
       const row = sheet.addRow(rowData);
 
-      // style colonnes fixes
-      // for (let i = 1; i <= 3; i++) {
-      //   row.getCell(i).fill = {
-      //     type: "pattern",
-      //     pattern: "solid",
-      //     fgColor: { argb: "FFF2F2F2" },
-      //   };
-      // }
-
       // coloration des congés
       dates.forEach((_, index) => {
         const cell = row.getCell(index + 4);
         const value = cell.value as string;
-
-        // if (value === "Local_Leave_AMD") {
-        //   cell.fill = {
-        //     type: "pattern",
-        //     pattern: "solid",
-        //     fgColor: { argb: "FF4F81BD" },
-        //   };
-        // }
-
-        // if (value === "Permission_AMD") {
-        //   cell.fill = {
-        //     type: "pattern",
-        //     pattern: "solid",
-        //     fgColor: { argb: "FFC0504D" },
-        //   };
-        // }
-
-        // if (value === "Indisponibilite_AMD") {
-        //   cell.fill = {
-        //     type: "pattern",
-        //     pattern: "solid",
-        //     fgColor: { argb: "FF9BBB59" },
-        //   };
-        // }
       });
     });
 
@@ -1004,277 +956,17 @@ export class LeaveService {
 
     return `${year}-${month}-${day}`;
   }
-  // async exportLeavePlanning(user: any, startDate: Date, endDate: Date, line?: string, section?: string, division?: string, site?: string, status: string = 'all') {
-  //   console.log("USER:", user)
-  //   let leaves: Leave[];
-  //   let employees: Employee[];
-
-  //   let leaveEx: string[] = this.getLeavesByStatus(status);
-
-  //   const dates = this.getDatesBetween(startDate, endDate);
-
-  //   if (user && user.role === UserRole.MANAGER) {
-  //     employees = await this.employeeRepository.find({ where: { line, section, division, site, manager: { id: user.id } }, order: { matricule: 'ASC' } });
-  //     leaves = await this.leaveRepository.find({
-  //       where: [{
-  //         start_date: In(dates),
-  //         employee: { line, section, division, site, manager: { id: user.id } },
-  //         status: In(leaveEx)
-  //       }, {
-  //         end_date: In(dates),
-  //         employee: { line, section, division, site, manager: { id: user.id } },
-  //         status: In(leaveEx)
-  //       }],
-  //       relations: ['employee', 'approver']
-  //     });
-  //   } else {
-  //     employees = await this.employeeRepository.find({ where: { line, section, division, site }, order: { matricule: 'ASC' } });
-  //     leaves = await this.leaveRepository.find({
-  //       where: [{
-  //         start_date: In(dates),
-  //         employee: { line, section, division, site },
-  //         status: In(leaveEx)
-  //       }, {
-  //         end_date: In(dates),
-  //         employee: { line, section, division, site },
-  //         status: In(leaveEx)
-  //       }],
-  //       relations: ['employee', 'approver']
-  //     });
-  //   }
-
-
-  //   console.log("LEAVES:", leaves);
-
-  //   const workbook = new ExcelJS.Workbook();
-  //   const sheet = workbook.addWorksheet("Leave Planning");
-  //   const requiredColumns = [
-  //     'mle',
-  //     'nom et prenom',
-  //     'fonction',
-  //     'codeabs',
-  //     'debutcongé',
-  //     'fincongé',
-  //     'DuréeAbsEffectif',
-  //     'status',
-  //     'Approuvé/Refusé par',
-  //     'Mle Approbateur',
-  //     'Date Approbation'
-  //   ];
-
-  //   const header = [
-  //     "Matricule",
-  //     "Fullname",
-  //     "Departement",
-  //     "Section",
-  //     "Line",
-  //     "Occupation",
-  //     "DOE",
-  //     "Statut",
-  //     // "Solde debut",
-  //     // "Solde pris",
-  //     // "Solde cumul",
-  //     // "Solde restant",
-  //     // ...dates.map(d => d.toLocaleDateString("en-US", { day: "numeric", month: "short" }))
-  //   ];
-
-  //   // sheet.addRow(header);
-  //   sheet.addRow(requiredColumns);
-
-  //   const headerRow = sheet.getRow(1);
-
-  //   headerRow.eachCell(cell => {
-  //     cell.font = { bold: true };
-  //     cell.alignment = { vertical: "middle", horizontal: "center" };
-
-  //     cell.fill = {
-  //       type: "pattern",
-  //       pattern: "solid",
-  //       fgColor: { argb: "FFf7ff18" }
-  //     };
-  //   });
-
-  //   // const sundayColumns = new Set<number>();
-
-  //   // dates.forEach((date, index) => {
-
-  //   //   if (date.getDay() === 0) { // dimanche
-
-  //   //     const columnIndex = index + 9; // 8 colonnes fixes + 1
-
-  //   //     sundayColumns.add(columnIndex);
-
-  //   //     sheet.getColumn(columnIndex).eachCell(cell => {
-
-  //   //       cell.fill = {
-  //   //         type: "pattern",
-  //   //         pattern: "solid",
-  //   //         fgColor: { argb: "FF808080" } // gris foncé
-  //   //       };
-
-  //   //     });
-  //   //   }
-
-  //   // });
-
-  //   // const leaveMap = new Map();
-
-  //   leaves.forEach(l => {
-  //     var codeabs = '';
-  //     if (l.leave_type === 'Local_Leave_AMD') {
-  //       codeabs = 'Congé annuel';
-  //     }
-  //     if (l.leave_type === 'Permission_AMD') {
-  //       codeabs = 'Permission';
-  //     }
-  //     if (l.leave_type === 'Indisponibilite_AMD') {
-  //       codeabs = 'Disponibilité';
-  //     }
-  //     // const row = ['mle', 'nom et prenom', 'fonction', 'codeabs', 'debutcongé', 'fincongé'];
-  //     const row = [
-  //       l.employee.matricule,
-  //       l.employee.name + " " + l.employee.firstname,
-  //       l.employee.designation,
-  //       codeabs,
-  //       l.start_date,
-  //       l.end_date,
-  //       l.duration,
-  //       l.status,
-  //       l.approver ? l.approver.firstName + ' ' + l.approver.name : '',
-  //       l.approver ? l.approver.matricule : '',
-  //       l.approved_date ? l.approved_date : ''
-  //     ];
-  //     sheet.addRow(row);
-  //     // let current = new Date(l.start_date);
-  //     // const end = new Date(l.end_date);
-  //     // console.log("Leaves:", "" + current + "-" + end);
-  //     // current.setDate(current.getDate() - 1);
-  //     // end.setDate(end.getDate() - 1);
-
-  //     // while (current <= end) {
-
-  //     //   const key = `${l.employee.id}_${current.toISOString().slice(0, 10)}`;
-
-  //     // leaveMap.set(key, l.leave_type);
-
-  //     // current.setDate(current.getDate() + 1);
-  //     // }
-
-  //   });
-
-  //   employees.forEach(emp => {
-
-  //     const rowData = [
-  //       emp.matricule,
-  //       emp.name + " " + emp.firstname,
-  //       emp.departement,
-  //       emp.section,
-  //       emp.line,
-  //       emp.designation,
-  //       emp.DOE,
-  //       emp.type,
-  //       // emp.solde_debut,
-  //       // emp.solde_pris,
-  //       // emp.solde_cumul,
-  //       // emp.solde_restant
-
-  //     ];
-
-  //     // dates.forEach(date => {
-
-  //     //   const key = `${emp.id}_${date.toISOString().slice(0, 10)}`;
-
-  //     //   rowData.push(leaveMap.get(key) || "");
-
-  //     // });
-
-  //     // const row = sheet.addRow(rowData);
-
-  //     // 🔹 style colonnes infos employé (gris clair)
-  //     // for (let i = 1; i <= 8; i++) {
-
-  //     //   const cell = row.getCell(i);
-
-  //     //   cell.fill = {
-  //     //     type: "pattern",
-  //     //     pattern: "solid",
-  //     //     fgColor: { argb: "FFEFEFEF" }
-  //     //   };
-
-  //     // }
-
-  //     // 🔹 style cellules planning
-  //     // dates.forEach((date, index) => {
-
-  //     //   const columnIndex = index + 9;
-  //     //   const cell = row.getCell(columnIndex);
-  //     //   const value = cell.value as string;
-
-  //     // dimanche → gris foncé (prioritaire)
-  //     // if (sundayColumns.has(columnIndex)) {
-
-  //     //   cell.fill = {
-  //     //     type: "pattern",
-  //     //     pattern: "solid",
-  //     //     fgColor: { argb: "FF808080" }
-  //     //   };
-
-  //     //   return;
-  //     // }
-
-  //     // couleurs selon type de leave
-  //     // if (value === "Local_Leave_AMD") {
-
-  //     //   cell.fill = {
-  //     //     type: "pattern",
-  //     //     pattern: "solid",
-  //     //     fgColor: { argb: "FF4F81BD" }
-  //     //   };
-
-  //     // }
-
-  //     // if (value === "Permission_AMD") {
-
-  //     //   cell.fill = {
-  //     //     type: "pattern",
-  //     //     pattern: "solid",
-  //     //     fgColor: { argb: "FFC0504D" }
-  //     //   };
-
-  //     // }
-
-  //     // if (value === "Indisponibilite_AMD") {
-
-  //     //   cell.fill = {
-  //     //     type: "pattern",
-  //     //     pattern: "solid",
-  //     //     fgColor: { argb: "FF9BBB59" }
-  //     //   };
-
-  //     // }
-
-  //     // });
-
-  //   });
-
-  //   sheet.columns.forEach(col => {
-  //     col.width = 12;
-  //   });
-
-  //   return workbook;
-  // }
 
   async exportEmployeeLeaves(employee: Employee, startDate: Date, endDate: Date, status: string) {
     const leaves = await this.leaveRepository.find({
       where: {
-        employee: { id: employee.id },
+        employee: { id: employee.id, is_active: true, is_deleted: false },
         start_date: Between(startDate, endDate),
         status: In(this.getLeavesByStatus(status))
       },
       order: { start_date: 'DESC' },
       relations: ['employee', 'approver']
     })
-    // console.log("Leaves:", leaves);
 
     const workbook = new ExcelJS.Workbook();
     const sheet = workbook.addWorksheet("" + employee.name + " " + employee.firstname);
@@ -1370,7 +1062,7 @@ export class LeaveService {
     const totalEmployees = await this.employeeRepository.count({
       where: {
         is_active: true,
-        is_deleted: false,
+        // is_deleted: false,
       },
     });
 
@@ -1412,11 +1104,18 @@ export class LeaveService {
   ): Promise<number> {
     const leaves = await this.leaveRepository
       .createQueryBuilder('leave')
+      .innerJoinAndSelect('leave.employee', 'employee')
       .where('leave.status IN (:...status)', {
         status: status,
       })
       .andWhere('leave.leave_type = :type', {
         type: 'Local_Leave_AMD',
+      })
+      .andWhere('employee.is_active = :is_active', {
+        is_active: true,
+      })
+      .andWhere('employee.is_deleted = :is_deleted', {
+        is_deleted: false,
       })
       .andWhere('leave.start_date <= :end', { end })
       .andWhere('leave.end_date >= :start', { start })
@@ -1459,11 +1158,18 @@ export class LeaveService {
   ): Promise<number> {
     const leaves = await this.leaveRepository
       .createQueryBuilder('leave')
+      .innerJoinAndSelect('leave.employee', 'employee')
       .where('leave.status = :status', {
         status,
       })
       .andWhere('leave.leave_type = :type', {
         type,
+      })
+      .andWhere('employee.is_active = :is_active', {
+        is_active: true,
+      })
+      .andWhere('employee.is_deleted = :is_deleted', {
+        is_deleted: false,
       })
       .andWhere('leave.start_date <= :end', { end })
       .andWhere('leave.end_date >= :start', { start })
@@ -1505,8 +1211,15 @@ export class LeaveService {
     const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
     const qb = this.leaveRepository.createQueryBuilder('leave')
+      .innerJoinAndSelect('leave.employee', 'employee')
       .where('leave.start_date <= :monthEnd', { monthEnd })
-      .andWhere('leave.end_date >= :monthStart', { monthStart });
+      .andWhere('leave.end_date >= :monthStart', { monthStart })
+      .andWhere('employee.is_active = :is_active', {
+        is_active: true,
+      })
+      .andWhere('employee.is_deleted = :is_deleted', {
+        is_deleted: false,
+      });
 
     // total demandes ce mois
     const totalLeaves = await qb.getCount();
@@ -1514,9 +1227,16 @@ export class LeaveService {
     // leaves approuvés
     const approvedLeaves = await this.leaveRepository
       .createQueryBuilder('leave')
+      .innerJoinAndSelect('leave.employee', 'employee')
       .where('leave.status = :status', { status: 'APPROVED' })
       .andWhere('leave.start_date <= :monthEnd', { monthEnd })
       .andWhere('leave.end_date >= :monthStart', { monthStart })
+      .andWhere('employee.is_active = :is_active', {
+        is_active: true,
+      })
+      .andWhere('employee.is_deleted = :is_deleted', {
+        is_deleted: false,
+      })
       .getCount();
 
     // leaves en cours aujourd'hui
@@ -1536,6 +1256,12 @@ export class LeaveService {
           today,
         },
       )
+      .andWhere('employee.is_active = :is_active', {
+        is_active: true,
+      })
+      .andWhere('employee.is_deleted = :is_deleted', {
+        is_deleted: false,
+      })
       .distinct(true)
       .getCount();
 
@@ -1561,8 +1287,11 @@ export class LeaveService {
           new Date(now.getFullYear(), now.getMonth(), 1),
           new Date(now.getFullYear(), now.getMonth() + 1, 0)
         ),
-        status: LeaveStatus.PENDING
-
+        status: LeaveStatus.PENDING,
+        employee: {
+          is_active: true,
+          is_deleted: false,
+        },
       },
       relations: [
         'employee',
@@ -1573,7 +1302,14 @@ export class LeaveService {
     // demandes en attente
     const pendingLeaves = await this.leaveRepository
       .createQueryBuilder('leave')
+      .innerJoinAndSelect('leave.employee', 'employee')
       .where('leave.status = :status', { status: 'PENDING' }) // ou LeaveStatus.PENDING
+      .andWhere('employee.is_active = :is_active', {
+        is_active: true,
+      })
+      .andWhere('employee.is_deleted = :is_deleted', {
+        is_deleted: false,
+      })
       .getCount();
 
     const pendingRate =
@@ -1633,10 +1369,17 @@ export class LeaveService {
   ): Promise<number> {
     const permissions = await this.leaveRepository
       .createQueryBuilder('leave')
+      .innerJoinAndSelect('leave.employee', 'employee')
       .where('leave.start_date <= :end', { end })
       .andWhere('leave.end_date >= :start', { start })
       .andWhere('leave.leave_type = :type', {
         type: 'Permission_AMD',
+      })
+      .andWhere('employee.is_active = :is_active', {
+        is_active: true,
+      })
+      .andWhere('employee.is_deleted = :is_deleted', {
+        is_deleted: false,
       })
       .andWhere('leave.status IN (:...status)', { status })
       .getMany();
@@ -1687,10 +1430,17 @@ export class LeaveService {
 
     const indisponibilities = await this.leaveRepository
       .createQueryBuilder('leave')
+      .innerJoinAndSelect('leave.employee', 'employee')
       .where('leave.start_date <= :end', { end })
       .andWhere('leave.end_date >= :start', { start })
       .andWhere('leave.leave_type = :type', {
         type: 'Indisponibilite_AMD',
+      })
+      .andWhere('employee.is_active = :is_active', {
+        is_active: true,
+      })
+      .andWhere('employee.is_deleted = :is_deleted', {
+        is_deleted: false,
       })
       .andWhere('leave.status IN (:...status)', { status })
       .getMany();
@@ -1798,7 +1548,7 @@ export class LeaveService {
       .createQueryBuilder("employee")
       .select("employee.section", "section")
       .addSelect("COUNT(employee.id)", "total")
-      .where("employee.is_active = true")
+      .where("employee.is_active = true AND employee.is_deleted = false")
       .groupBy("employee.section")
       .getRawMany();
 
@@ -1808,7 +1558,7 @@ export class LeaveService {
       const absent = await this.leaveRepository
         .createQueryBuilder("leave")
         .innerJoin("leave.employee", "employee")
-        .where("employee.section = :section", {
+        .where("employee.section = :section AND employee.is_active = true AND employee.is_deleted = false", {
           section: s.section,
         })
         .andWhere("leave.status = :status", {
@@ -1839,13 +1589,20 @@ export class LeaveService {
     const today = new Date();
 
     const employees = await this.employeeRepository.find({
+      where: {
+        is_active: true,
+        is_deleted: false
+      },
       relations: {
         manager: true,
       }
     });
 
     const leaves = await this.leaveRepository.find({
-      where: { status: LeaveStatus.APPROVED },
+      where: {
+        status: LeaveStatus.APPROVED,
+        employee: { is_active: true, is_deleted: false }
+      },
       relations: {
         employee: true,
       }
@@ -2032,7 +1789,9 @@ export class LeaveService {
       where: {
         manager: {
           id: managerId
-        }
+        },
+        is_active: true,
+        is_deleted: false
       },
       relations: {
         manager: true

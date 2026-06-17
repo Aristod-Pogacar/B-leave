@@ -48,151 +48,155 @@
                                         <div class="col-xl-12">
                                             <div class="card stretch stretch-full d-flex">
                                                 <div class="card-header">
-                                                    <h4 class="header">Leave history</h4>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="avatar-text avatar-lg bg-soft-primary me-3">
+                                                            <i class="feather-clock"></i>
+                                                        </div>
+
+                                                        <div>
+                                                            <h4 class="mb-1">Leave History</h4>
+                                                            <p class="text-muted mb-0">
+                                                                Search and review employee leave records.
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="card-body border-bottom bg-light">
+
+                                                    <!-- ===== LEFT: FORM ===== -->
+                                                    <div class="col-md-12">
+
+                                                        <!-- Recherche Employé -->
+                                                        <div class="mb-0">
+                                                            <div class="row">
+                                                                <div class="col-md-12 mb-3">
+                                                                    <label class=" form-label">Employee</label>
+                                                                    <input type="text" class="form-control"
+                                                                        id="employeeSearch" autocomplete="off"
+                                                                        placeholder="Search an employee...">
+                                                                    <input type="text" class="input" name="employee"
+                                                                        id="employee" hidden required>
+                                                                    <ul id="employeeResults"
+                                                                        class="autocomplete-list ps-0 w-100 z-200">
+                                                                    </ul>
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    <label for="status" class="form-label">Start</label>
+                                                                    <input type="date" class="form-control"
+                                                                        id="startDate" name="startDate">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    <label for="status" class="form-label">End</label>
+                                                                    <input type="date" class="form-control" id="endDate"
+                                                                        name="endDate">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    <label for="status"
+                                                                        class="form-label">Status</label>
+                                                                    <select name="status" id="status"
+                                                                        class="form-select">
+                                                                        <option value="all">All</option>
+                                                                        <option value="pending">Pending
+                                                                        </option>
+                                                                        <option value="approved">Approved
+                                                                        </option>
+                                                                        <option value="rejected">Rejected
+                                                                        </option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                    <!-- ===== RIGHT: INFOS ===== -->
+                                                    <div class="col-md-6 d-none">
+
+                                                        <div class="card mb-3 shadow-sm">
+                                                            <div class="card-header text-center fw-bold">
+                                                                Employee information
+                                                            </div>
+                                                            <div class="card-body">
+                                                                <p class="mb-2">
+                                                                    <strong>Fullname :</strong>
+                                                                    <span id="fullname">-</span>
+                                                                </p>
+                                                                <p class="mb-2">
+                                                                    <strong>Matricule :</strong>
+                                                                    <span id="matricule">-</span>
+                                                                </p>
+                                                                <p class="mb-2">
+                                                                    <strong>Site :</strong>
+                                                                    <span id="site">-</span>
+                                                                </p>
+                                                                <p class="mb-2">
+                                                                    <strong>Line :</strong>
+                                                                    <span id="line">-</span>
+                                                                </p>
+                                                                <p class="mb-2">
+                                                                    <strong>Departement :</strong>
+                                                                    <span id="departement">-</span>
+                                                                </p>
+                                                                <p class="mb-2">
+                                                                    <strong>Section :</strong>
+                                                                    <span id="section">-</span>
+                                                                </p>
+                                                                <p class="mb-2">
+                                                                    <strong>Cumulated leave solde :</strong>
+                                                                    <span id="soldeCumule">-</span>
+                                                                </p>
+                                                                <p class="mb-2">
+                                                                    <strong>Taken leave :</strong>
+                                                                    <span id="soldePris">-</span>
+                                                                </p>
+                                                                <p class="mb-2">
+                                                                    <strong>Leaves remaining :</strong>
+                                                                    <span id="soldeRestant"
+                                                                        class="fw-bold text-primary">-</span>
+                                                                </p>
+                                                                <p class="mb-0">
+                                                                    <strong>Taken permission :</strong>
+                                                                    <span id="soldePermission"
+                                                                        class="fw-bold text-success">-</span>
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="row mt-2 d-none">
+                                                        <div class="col-md-12 text-center">
+                                                            <p id="message" class="fw-bold"></p>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                                 <div class="card-body">
 
                                                     <div class="modal-body">
-                                                        <div class="row">
-
-                                                            <!-- ===== LEFT: FORM ===== -->
-                                                            <div class="col-md-12">
-
-                                                                <!-- Recherche Employé -->
-                                                                <div class="mb-0">
-                                                                    <div class="row">
-                                                                        <div class="col-md-12 mb-3">
-                                                                            <label class=" form-label">Employee</label>
-                                                                            <input type="text" class="form-control"
-                                                                                id="employeeSearch" autocomplete="off"
-                                                                                placeholder="Search an employee...">
-                                                                            <input type="text" class="input"
-                                                                                name="employee" id="employee" hidden
-                                                                                required>
-                                                                            <ul id="employeeResults"
-                                                                                class="autocomplete-list ps-0 w-100 z-200">
-                                                                            </ul>
-                                                                        </div>
-                                                                        <div class="col-md-4">
-                                                                            <label for="status"
-                                                                                class="form-label">Start</label>
-                                                                            <input type="date" class="form-control"
-                                                                                id="startDate" name="startDate">
-                                                                        </div>
-                                                                        <div class="col-md-4">
-                                                                            <label for="status"
-                                                                                class="form-label">End</label>
-                                                                            <input type="date" class="form-control"
-                                                                                id="endDate" name="endDate">
-                                                                        </div>
-                                                                        <div class="col-md-4">
-                                                                            <label for="status"
-                                                                                class="form-label">Status</label>
-                                                                            <select name="status" id="status"
-                                                                                class="form-select">
-                                                                                <option value="all">All</option>
-                                                                                <option value="pending">Pending
-                                                                                </option>
-                                                                                <option value="approved">Approved
-                                                                                </option>
-                                                                                <option value="rejected">Rejected
-                                                                                </option>
-                                                                            </select>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-
-                                                            </div>
-                                                            <!-- ===== RIGHT: INFOS ===== -->
-                                                            <div class="col-md-6 d-none">
-
-                                                                <div class="card mb-3 shadow-sm">
-                                                                    <div class="card-header text-center fw-bold">
-                                                                        Employee information
-                                                                    </div>
-                                                                    <div class="card-body">
-                                                                        <p class="mb-2">
-                                                                            <strong>Fullname :</strong>
-                                                                            <span id="fullname">-</span>
-                                                                        </p>
-                                                                        <p class="mb-2">
-                                                                            <strong>Matricule :</strong>
-                                                                            <span id="matricule">-</span>
-                                                                        </p>
-                                                                        <p class="mb-2">
-                                                                            <strong>Site :</strong>
-                                                                            <span id="site">-</span>
-                                                                        </p>
-                                                                        <p class="mb-2">
-                                                                            <strong>Line :</strong>
-                                                                            <span id="line">-</span>
-                                                                        </p>
-                                                                        <p class="mb-2">
-                                                                            <strong>Departement :</strong>
-                                                                            <span id="departement">-</span>
-                                                                        </p>
-                                                                        <p class="mb-2">
-                                                                            <strong>Section :</strong>
-                                                                            <span id="section">-</span>
-                                                                        </p>
-                                                                        <p class="mb-2">
-                                                                            <strong>Cumulated leave solde :</strong>
-                                                                            <span id="soldeCumule">-</span>
-                                                                        </p>
-                                                                        <p class="mb-2">
-                                                                            <strong>Taken leave :</strong>
-                                                                            <span id="soldePris">-</span>
-                                                                        </p>
-                                                                        <p class="mb-2">
-                                                                            <strong>Leaves remaining :</strong>
-                                                                            <span id="soldeRestant"
-                                                                                class="fw-bold text-primary">-</span>
-                                                                        </p>
-                                                                        <p class="mb-0">
-                                                                            <strong>Taken permission :</strong>
-                                                                            <span id="soldePermission"
-                                                                                class="fw-bold text-success">-</span>
-                                                                        </p>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                        </div>
-                                                        <div class="row mt-2 d-none">
-                                                            <div class="col-md-12 text-center">
-                                                                <p id="message" class="fw-bold"></p>
-                                                            </div>
-                                                        </div>
                                                         <div class="row mt-4">
                                                             <div class="col-12 pt-3">
-                                                                <div class="table-responsive overflow-y-auto"
-                                                                    style="height: 300px;" id="leaveHistoryWrapper">
-                                                                    <table
-                                                                        class="table table-sm table-hover table-bordered align-middle"
-                                                                        id="leaveHistoryTable">
-                                                                        <thead class="table-light z-100 w-100">
+                                                                <div class="table-responsive">
+                                                                    <table class="table table-hover align-middle mb-0">
+                                                                        <thead>
                                                                             <tr>
-                                                                                <th class="text-center px-1"
-                                                                                    style="width: 5%;">Range</th>
-                                                                                <th class="text-center px-1"
-                                                                                    style="width: 10%;">Start Date</th>
-                                                                                <th class="text-center px-1"
-                                                                                    style="width: 5%;">Duration</th>
-                                                                                <th class="text-center px-1"
-                                                                                    style="width: 10%;">Type</th>
-                                                                                <th class="text-center px-1"
-                                                                                    style="width: 10%;">Applied at</th>
-                                                                                <th class="text-center px-1"
-                                                                                    style="width: 5%;">Status</th>
-                                                                                <th class="text-center px-1"
-                                                                                    style="width: 10%;">
-                                                                                    Approuved/Rejected at</th>
-                                                                                <th class="text-center px-1"
-                                                                                    style="width: 20%;">By</th>
+                                                                                <th style="width:25%;">Employee</th>
+                                                                                <th style="width:15%;"
+                                                                                    class="text-center">Leave Type</th>
+                                                                                <th style="width:10%;"
+                                                                                    class="text-center">Start Date</th>
+                                                                                <th style="width:10%;"
+                                                                                    class="text-center">Duration</th>
+                                                                                <th style="width:10%;"
+                                                                                    class="text-center">Applied At</th>
+                                                                                <th style="width:10%;"
+                                                                                    class="text-center">Status</th>
+                                                                                <th style="width:10%;"
+                                                                                    class="text-center">
+                                                                                    Sign-off at</th>
+                                                                                <th style="width:10%;">Sign-off by</th>
                                                                             </tr>
                                                                         </thead>
-                                                                        <tbody id="leaveHistoryBody"
-                                                                            class="leave-history-body-2">
+
+                                                                        <tbody id="leaveHistoryBody">
+                                                                            <!-- Injected by JavaScript -->
                                                                         </tbody>
                                                                     </table>
                                                                 </div>
@@ -468,25 +472,74 @@
                 }
 
                 row.innerHTML = `
-                                        <td class="text-center text-muted py-3 px-1" style="width: 5%;">${i}
-                                        </td>
-                                        <td class="text-center text-muted py-3 px-1" style="width: 10%;">${formatDate(leave.start_date)}
-                                        </td>
-                                        <td class="text-center text-muted py-3 px-1" style="width: 5%;">${leave.duration} day(s)
-                                        </td>
-                                        <td class="text-center py-3 px-1" style="width: 10%;">
-                                            <span class="badge ${leaveTypeClass}">${leave.leave_type}</span>
-                                        </td>
-                                        <td class="text-center text-muted py-3 px-1" style="width: 10%;">${formatDate(leave.created_at)}
-                                        </td>
-                                        <td class="text-center py-3 px-1" style="width: 5%;">
-                                            <span class="badge ${statusClass}">${status}</span>
-                                        </td>
-                                        <td class="text-center py-3 px-1" style="width: 10%;">
-                                            ${approvedDate}
-                                        </td>
-                                        <td class="text-center text-muted py-3 px-1" style="width: 20%;">${approver}</td>
-        `;
+    <td style="width:25%;">
+        <div class="d-flex align-items-center">
+            <div class="avatar-text avatar-md bg-soft-primary me-3">
+                ${leave.employee?.firstname?.charAt(0) || "E"}
+            </div>
+
+            <div>
+                <div class="fw-semibold text-dark">
+                    ${leave.employee?.name || ""}
+                    ${leave.employee?.firstname || ""}
+                </div>
+
+                <small class="text-muted">
+                    ${leave.employee?.matricule || "-"}
+                </small>
+            </div>
+        </div>
+    </td>
+
+    <td class="text-center" style="width:15%;">
+        <span class="badge ${leaveTypeClass}">
+            ${leave.leave_type}
+        </span>
+    </td>
+
+    <td class="text-center" style="width:10%;">
+        ${formatDate(leave.start_date)}
+    </td>
+
+    <td class="text-center" style="width:10%;">
+        <span class="badge bg-soft-info text-info">
+            ${leave.duration} day(s)
+        </span>
+    </td>
+
+    <td class="text-center text-muted" style="width:10%;">
+        ${formatDate(leave.created_at)}
+    </td>
+
+    <td class="text-center" style="width:10%;">
+        <span class="badge ${statusClass}">
+            ${status}
+        </span>
+    </td>
+
+    <td class="text-center" style="width:10%;">
+        ${approvedDate}
+    </td>
+
+    <td style="width:10%;">
+        ${leave.approver ?
+                        `
+            <div class="d-flex align-items-center">
+                <div class="avatar-text avatar-sm bg-soft-warning me-2">
+                    ${leave.approver.firstName.charAt(0)}
+                </div>
+
+                <div>
+                    ${leave.approver.firstName}
+                    ${leave.approver.name}
+                </div>
+            </div>
+            `
+                        :
+                        `<span class="text-muted">-</span>`
+                    }
+    </td>
+`;
 
                 tbody.appendChild(row);
                 i++;

@@ -1,5 +1,42 @@
 <%- include('partials/head.ejs') %>
 
+    <style>
+        .modal {
+            z-index: 1060 !important;
+        }
+
+        .modal-backdrop {
+            z-index: 1055 !important;
+        }
+
+        .nxl-overlay,
+        .offcanvas-backdrop {
+            z-index: 1040 !important;
+        }
+
+        .nxl-container,
+        .nxl-content {
+            transform: none !important;
+        }
+
+        .modal-backdrop {
+            pointer-events: none !important;
+        }
+
+        .modal.show .modal-dialog {
+            z-index: 100000 !important;
+            position: relative;
+        }
+
+        .modal {
+            position: fixed !important;
+        }
+
+        .modal-backdrop.show {
+            z-index: 1040 !important;
+        }
+    </style>
+
     <body>
         <%- include('partials/sidebar.ejs') %>
             <%- include('partials/header.ejs') %>
@@ -40,177 +77,271 @@
                             </div>
                         </div>
                         <!-- [ Main Content ] start -->
-                        <div class="main-content">
-                            <div class="tab-content">
-                                <div class="tab-pane fade active show" id="overviewTab">
-                                    <div class="row">
+                        <div class="container-fluid py-4">
 
-                                        <div class="col-12">
-                                            <div class="card stretch stretch-full d-flex">
-                                                <div class="card-header">
-                                                    <h4 class="header">
-                                                        Employee details - <%= employee.name %>
-                                                            <%= employee.firstname %>
-                                                    </h4>
-                                                    <% if(user.role==='SUPERADMIN' || user.role==='ADMIN' ) { %>
-                                                        <button type="submit" form="userForm" class="btn btn-primary"
-                                                            onclick="window.location.href='/employee/edit/<%= employee.id %>';"
-                                                            id="submit">
-                                                            Edit
-                                                        </button>
-                                                        <% } %>
-                                                </div>
-                                                <div class="card-body">
+                            <% if (locals.error) { %>
+                                <div class="alert alert-danger">
+                                    <%= error %>
+                                </div>
+                                <% } %>
 
-                                                    <div class="modal-body">
-                                                        <div class="row">
+                                    <!-- Header -->
+                                    <div class="card shadow-sm border-0 mb-4">
+                                        <div class="card-body">
+                                            <div
+                                                class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
 
-                                                            <!-- ===== LEFT: FORM ===== -->
-                                                            <div class="col-12">
-                                                                <% if (locals.error) { %>
-                                                                    <div class="alert alert-danger" role="alert"
-                                                                        id="message">
-                                                                        <%= error %>
-                                                                    </div>
+                                                <div>
+                                                    <div class="d-flex">
+                                                        <h2 class="mb-1 me-2">
+                                                            <%= employee.name %>
+                                                                <%= employee.firstname %>
+                                                        </h2>
+                                                        <div class="p-2">
+                                                            <% if(employee.is_active==true) { %>
+                                                                <span class="badge bg-success">
+                                                                    Active
+                                                                </span>
+                                                                <% } else { %>
+                                                                    <span class="badge bg-danger">
+                                                                        Archived
+                                                                    </span>
                                                                     <% } %>
-                                                                        <!-- Recherche Employé -->
-                                                                        <div class="">
-                                                                            <div class="row">
-                                                                                <div class="col-md-2 mb-3">
-                                                                                    <label
-                                                                                        class="form-label">Matricule</label>
-                                                                                    <div class="form-control">
-                                                                                        <%= employee.matricule %>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div class="col-md-8 mb-3">
-                                                                                    <label class="form-label">Full
-                                                                                        name</label>
-                                                                                    <div class="form-control">
-                                                                                        <%= employee.name %>
-                                                                                            <%= employee.firstname %>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div class="col-md-2 mb-3">
-                                                                                    <label
-                                                                                        class="form-label">Gender</label>
-                                                                                    <div class="form-control">
-                                                                                        <%= employee.gender %>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-
-                                                                        <div class="">
-                                                                            <div class="row">
-                                                                                <div class="col-md-4 mb-3">
-                                                                                    <label
-                                                                                        class="form-label">Site</label>
-                                                                                    <div class="form-control">
-                                                                                        <%= employee.site %>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div class="col-md-4 mb-3">
-                                                                                    <label
-                                                                                        class="form-label">Departement</label>
-                                                                                    <div class="form-control">
-                                                                                        <%= employee.departement %>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div class="col-md-4 mb-3">
-                                                                                    <label
-                                                                                        class="form-label">Section</label>
-                                                                                    <div class="form-control">
-                                                                                        <%= employee.section %>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-
-                                                                        <div class="">
-                                                                            <div class="row">
-                                                                                <div class="col-md-4 mb-3">
-                                                                                    <label
-                                                                                        class="form-label">Division</label>
-                                                                                    <div class="form-control">
-                                                                                        <%= employee.division %>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div class="col-md-4 mb-3">
-                                                                                    <label
-                                                                                        class="form-label">Designation</label>
-                                                                                    <div class="form-control">
-                                                                                        <%= employee.designation %>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div class="col-md-4 mb-3">
-                                                                                    <label
-                                                                                        class="form-label">Line</label>
-                                                                                    <div class="form-control">
-                                                                                        <%= employee.line %>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-
-                                                                        <div class="">
-                                                                            <div class="row">
-                                                                                <div class="col-md-4 mb-3">
-                                                                                    <label class="form-label">Job
-                                                                                        level</label>
-                                                                                    <div class="form-control">
-                                                                                        <%= employee.job_level %>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div class="col-md-4 mb-3">
-                                                                                    <label
-                                                                                        class="form-label">Type</label>
-                                                                                    <div class="form-control">
-                                                                                        <%= employee.type %>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div class="col-md-4 mb-3">
-                                                                                    <label
-                                                                                        class="form-label">DOE</label>
-                                                                                    <div class="form-control">
-                                                                                        <%= employee.DOE %>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-
-                                                                        <div class="">
-                                                                            <div class="row">
-                                                                                <div class="col-md-12 mb-3">
-                                                                                    <label
-                                                                                        class="form-label">Manager</label>
-                                                                                    <div class="form-control">
-                                                                                        <%= employee.manager?
-                                                                                            employee.manager?.matricule
-                                                                                            + " - " +
-                                                                                            employee.manager?.firstName
-                                                                                            + " " +
-                                                                                            employee.manager?.name : "-"
-                                                                                            %>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                            </div>
-
                                                         </div>
+                                                    </div>
 
+                                                    <div class="d-flex flex-wrap gap-2">
+                                                        <span class="badge bg-primary">
+                                                            <%= employee.matricule %>
+                                                        </span>
+
+                                                        <span class="badge bg-secondary">
+                                                            <%= employee.gender %>
+                                                        </span>
+
+                                                        <span class="badge bg-info text-dark">
+                                                            <% if (employee.job_level !='NULL' ) { %>
+                                                                Level <%= employee.job_level.substring(1) %>
+                                                                    <% } else { %>
+                                                                        <%= employee.job_level %>
+                                                                            <% } %>
+                                                        </span>
                                                     </div>
                                                 </div>
+
+                                                <% if(user.role==='SUPERADMIN' || user.role==='ADMIN' ) { %>
+                                                    <div class="d-flex gap-2">
+                                                        <a href="/employee/edit/<%= employee.id %>"
+                                                            class="btn btn-primary">
+                                                            <i class="bi bi-pencil-square me-2"></i>
+                                                            Edit
+                                                        </a>
+                                                        <% if(employee.is_active==true) { %>
+                                                            <a href="/employee/confirm-archive/<%= employee.id %>"
+                                                                class="btn btn-danger">
+                                                                <i class="bi bi-archive me-2"></i>
+                                                                Archive
+                                                            </a>
+                                                            <% } %>
+                                                    </div>
+                                                    <% } %>
+
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
+
+                                    <div class="row g-4">
+
+                                        <!-- Organisation -->
+                                        <div class="col-lg-6">
+                                            <div class="card shadow-sm h-100">
+                                                <div class="card-header bg-primary">
+                                                    <h5 class="mb-0 text-white">Organisation</h5>
+                                                </div>
+
+                                                <div class="card-body">
+
+                                                    <div class="row gy-3">
+
+                                                        <div class="col-md-6">
+                                                            <small class="text-muted">Site</small>
+                                                            <div class="fw-semibold">
+                                                                <%= employee.site %>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-6">
+                                                            <small class="text-muted">Department</small>
+                                                            <div class="fw-semibold">
+                                                                <%= employee.departement %>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-6">
+                                                            <small class="text-muted">Section</small>
+                                                            <div class="fw-semibold">
+                                                                <%= employee.section %>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-6">
+                                                            <small class="text-muted">Division</small>
+                                                            <div class="fw-semibold">
+                                                                <%= employee.division %>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-6">
+                                                            <small class="text-muted">Designation</small>
+                                                            <div class="fw-semibold">
+                                                                <%= employee.designation %>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-6">
+                                                            <small class="text-muted">Line</small>
+                                                            <div class="fw-semibold">
+                                                                <%= employee.line %>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- RH -->
+                                        <div class="col-lg-6">
+                                            <div class="card shadow-sm h-100">
+                                                <div class="card-header bg-primary">
+                                                    <h5 class="mb-0 text-white">HR informations</h5>
+                                                </div>
+
+                                                <div class="card-body">
+
+                                                    <div class="row gy-3">
+
+                                                        <div class="col-md-6">
+                                                            <small class="text-muted">Type</small>
+                                                            <div class="fw-semibold">
+                                                                <%= employee.type %>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-6">
+                                                            <small class="text-muted">Job Level</small>
+                                                            <div class="fw-semibold">
+                                                                <%= employee.job_level %>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-6">
+                                                            <small class="text-muted">Date of entry</small>
+                                                            <div class="fw-semibold">
+                                                                <%= new Date(employee.DOE).toLocaleDateString("en-US",{
+                                                                    year: "numeric" , month: "short" , day: "numeric" })
+                                                                    %>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-6">
+                                                            <small class="text-muted">Date of resignation</small>
+                                                            <div class="fw-semibold">
+                                                                <%= employee.DOR? new
+                                                                    Date(employee.DOR).toLocaleDateString("en-US",{
+                                                                    year: "numeric" , month: "short" , day: "numeric" })
+                                                                    : 'Not specified' %>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-12">
+                                                            <small class="text-muted">Manager</small>
+
+                                                            <div class="border rounded p-3 bg-light">
+                                                                <%= employee.manager ? employee.manager.matricule
+                                                                    + " - " + employee.manager.firstName + " " +
+                                                                    employee.manager.name : "-" %>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
                         </div>
                     </div>
                     <%- include('partials/new-leave-modal-test') %>
                         <%- include('partials/footer.ejs') %>
+
+                            <!-- Archive Modal -->
+                            <div class="modal fade" id="archiveModal" tabindex="-1" aria-labelledby="archiveModalLabel"
+                                aria-hidden="true" style="z-index: 900000;">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content border-0 shadow">
+
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="archiveModalLabel">
+                                                Archive Employee
+                                            </h5>
+
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close">
+                                            </button>
+                                        </div>
+
+                                        <div class="modal-body text-center py-4">
+
+                                            <div class="mb-3">
+                                                <i class="bi bi-exclamation-triangle-fill text-warning fs-1"></i>
+                                            </div>
+
+                                            <h5 class="mb-3">
+                                                Are you sure?
+                                            </h5>
+
+                                            <p class="text-muted mb-0">
+                                                You are about to archive
+                                                <strong>
+                                                    <%= employee.name %>
+                                                        <%= employee.firstname %>
+                                                </strong>.
+                                            </p>
+
+                                            <p class="text-muted">
+                                                The employee will no longer appear in active employee lists.
+                                            </p>
+
+                                        </div>
+
+                                        <div class="modal-footer">
+
+                                            <button type="button" class="btn btn-outline-secondary"
+                                                data-bs-dismiss="modal">
+                                                Cancel
+                                            </button>
+
+                                            <form action="/employee/archive/<%= employee.id %>" method="POST"
+                                                class="d-inline">
+
+                                                <button type="submit" class="btn btn-danger">
+
+                                                    <i class="bi bi-archive me-2"></i>
+                                                    Archive Employee
+
+                                                </button>
+
+                                            </form>
+
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
     </body>
 
     </html>

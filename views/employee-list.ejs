@@ -23,63 +23,162 @@
                                     <div class="row">
                                         <div class="col-12">
                                             <div class="card stretch stretch-full">
-                                                <div class="card-header">
-                                                    <h5 class="card-title">Employee list</h5>
+                                                <div class="card-body border-bottom">
+                                                    <div
+                                                        class="d-flex justify-content-between align-items-center flex-wrap gap-3">
 
-                                                    <!-- Filtres -->
-                                                    <form method="GET" action="/employee/list"
-                                                        class="d-flex align-items-end gap-3 mt-2 flex-wrap">
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="avatar-text avatar-lg bg-soft-primary me-3">
+                                                                <i class="feather-users"></i>
+                                                            </div>
+
+                                                            <div>
+                                                                <h4 class="mb-1">Employee Directory</h4>
+                                                                <p class="text-muted mb-0">
+                                                                    Browse and search employee information.
+                                                                </p>
+                                                            </div>
+                                                        </div>
+
                                                         <div>
-                                                            <label class="form-label mb-1">Recherche</label>
-                                                            <input type="text" name="search" class="form-control"
-                                                                placeholder="Matricule, nom..." value="<%= search %>" />
+                                                            <span class="badge bg-soft-primary text-primary">
+                                                                <%= total %> Employees
+                                                            </span>
                                                         </div>
-                                                        <div class="d-flex gap-2">
-                                                            <button type="submit" class="btn btn-primary">
-                                                                <i class="feather-search me-1"></i> Filtrer
-                                                            </button>
-                                                            <a href="/employee/list"
-                                                                class="btn btn-outline-secondary ms-2">
-                                                                <i class="feather-x me-1"></i> Reset
-                                                            </a>
+
+                                                    </div>
+                                                </div>
+                                                <div class="card-body border-bottom bg-light">
+                                                    <form method="GET" action="/employee/list">
+
+                                                        <div class="row g-3 align-items-end">
+
+                                                            <div class="col-md-6">
+                                                                <label class="form-label">
+                                                                    Search Employee
+                                                                </label>
+
+                                                                <div class="input-group">
+
+                                                                    <span class="input-group-text">
+                                                                        <i class="feather-search"></i>
+                                                                    </span>
+
+                                                                    <input type="text" name="search"
+                                                                        class="form-control"
+                                                                        placeholder="Matricule, name, firstname..."
+                                                                        value="<%= search %>">
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-md-6">
+                                                                <div class="d-flex gap-2">
+
+                                                                    <button type="submit" class="btn btn-primary">
+
+                                                                        <i class="feather-search me-2"></i>
+                                                                        Search
+                                                                    </button>
+
+                                                                    <a href="/employee/list" class="btn btn-light">
+
+                                                                        Reset
+                                                                    </a>
+
+                                                                </div>
+                                                            </div>
+
                                                         </div>
+
                                                     </form>
                                                 </div>
-
                                                 <div class="card-body custom-card-action p-0">
                                                     <div class="table-responsive mb-3">
-                                                        <table class="table table-hover mb-0">
+                                                        <table class="table table-hover align-middle mb-0">
                                                             <thead>
                                                                 <tr>
-                                                                    <th style="width: 10%;">Matricule</th>
-                                                                    <th style="width: 30%;">Fullname</th>
-                                                                    <th style="width: 10%;">Section</th>
-                                                                    <th style="width: 10%;">Designation</th>
+                                                                    <th style="width: 50%;">Fullname</th>
+                                                                    <th style="width: 10%;" class="text-center">Section
+                                                                    </th>
+                                                                    <th style="width: 10%;" class="text-center">
+                                                                        Designation</th>
                                                                     <th style="width: 30%;">Manager</th>
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
                                                                 <% data.forEach(employee=> { %>
                                                                     <tr>
-                                                                        <td style="width: 10%;">
-                                                                            <%= employee.matricule %>
-                                                                        </td>
-                                                                        <td style="width: 30%;">
-                                                                            <a
-                                                                                href="/employee/details/<%= employee.id %>">
-                                                                                <%= employee.name %>
-                                                                                    <%= employee.firstname %>
+                                                                        <td>
+                                                                            <a href="/employee/details/<%= employee.id %>"
+                                                                                class="text-decoration-none">
+
+                                                                                <div class="d-flex align-items-center">
+
+                                                                                    <div
+                                                                                        class="avatar-text avatar-md bg-soft-primary me-3">
+                                                                                        <%= employee.firstname?.charAt(0)
+                                                                                            || employee.name.charAt(0)
+                                                                                            %>
+                                                                                    </div>
+
+                                                                                    <div>
+
+                                                                                        <div
+                                                                                            class="fw-semibold text-dark">
+                                                                                            <%= employee.name %>
+                                                                                                <%= employee.firstname
+                                                                                                    %>
+                                                                                        </div>
+
+                                                                                        <small class="text-muted">
+                                                                                            <%= employee.matricule %>
+                                                                                        </small>
+
+                                                                                    </div>
+
+                                                                                </div>
+
                                                                             </a>
                                                                         </td>
-                                                                        <td style="width: 10%;">
-                                                                            <%= employee.section %>
+                                                                        <td style="width: 10%;" class="text-center">
+                                                                            <span
+                                                                                class="badge bg-soft-primary text-primary">
+                                                                                <%= employee.section || '-' %>
+                                                                            </span>
                                                                         </td>
-                                                                        <td style="width: 10%;">
-                                                                            <%= employee.designation %>
+                                                                        <td style="width: 10%;" class="text-center">
+                                                                            <span
+                                                                                class="badge bg-soft-success text-success">
+                                                                                <%= employee.designation || '-' %>
+                                                                            </span>
                                                                         </td>
                                                                         <td style="width: 30%;">
-                                                                            <%= employee.manager?.firstName %>
-                                                                                <%= employee.manager?.lastName %>
+                                                                            <% if(employee.manager) { %>
+
+                                                                                <div class="d-flex align-items-center">
+
+                                                                                    <div
+                                                                                        class="avatar-text avatar-sm bg-soft-warning me-2">
+                                                                                        <%= employee.manager.firstName.charAt(0)
+                                                                                            %>
+                                                                                    </div>
+
+                                                                                    <div>
+                                                                                        <%= employee.manager.firstName
+                                                                                            %>
+                                                                                            <%= employee.manager.lastName
+                                                                                                %>
+                                                                                    </div>
+
+                                                                                </div>
+
+                                                                                <% } else { %>
+
+                                                                                    <span class="text-muted">
+                                                                                        Not assigned
+                                                                                    </span>
+
+                                                                                    <% } %>
                                                                         </td>
                                                                     </tr>
                                                                     <% }) %>
@@ -95,12 +194,20 @@
                                                     </div>
 
                                                     <!-- Pagination -->
-                                                    <div
-                                                        class="d-flex align-items-center justify-content-between px-3 pb-3">
+                                                    <div class="d-flex align-items-center
+            justify-content-between
+            px-4 py-3
+            border-top">
                                                         <small class="text-muted">
-                                                            Total : <strong>
+                                                            Showing
+                                                            <strong>
+                                                                <%= data.length %>
+                                                            </strong>
+                                                            of
+                                                            <strong>
                                                                 <%= total %>
-                                                            </strong> enregistrement(s)
+                                                            </strong>
+                                                            employees
                                                         </small>
                                                         <% if (totalPages> 1) { %>
                                                             <ul class="pagination mb-0">

@@ -8,7 +8,7 @@
                         <div class="page-header">
                             <div class="page-header-left d-flex align-items-center">
                                 <div class="page-header-title">
-                                    <h5 class="m-b-10">Be-Leave</h5>
+                                    <h5 class="m-b-10">B-Leave</h5>
                                 </div>
                                 <ul class="breadcrumb">
                                     <li class="breadcrumb-item">Employee</li>
@@ -40,247 +40,274 @@
                             </div>
                         </div>
                         <!-- [ Main Content ] start -->
-                        <div class="main-content">
-                            <div class="tab-content">
-                                <div class="tab-pane fade active show" id="overviewTab">
-                                    <div class="row">
+                        <div class="main-content py-4">
+                            <div class="container-fluid">
 
-                                        <div class="col-12">
-                                            <div class="card stretch stretch-full d-flex">
-                                                <div class="card-header">
-                                                    <h4 class="header">New employee</h4>
+                                <% if (locals.error) { %>
+                                    <div class="alert alert-danger alert-dismissible fade show shadow-sm border-0 mb-4"
+                                        role="alert">
+                                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                        <%= error %>
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    </div>
+                                    <% } %>
+
+                                        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                                            <div class="card-body border-bottom border-1">
+                                                <div
+                                                    class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+
+                                                    <div>
+                                                        <h3 class="fw-bold mb-1">
+                                                            New Employee
+                                                        </h3>
+
+                                                        <p class="text-muted mb-0">
+                                                            Create a new employee profile and assign organizational
+                                                            information.
+                                                        </p>
+                                                    </div>
+
+                                                    <div class="d-flex gap-2">
+
+                                                        <div class="rounded-circle d-flex align-items-center justify-content-center"
+                                                            style="width:64px;height:64px;">
+                                                            <i class="bi bi-person-plus-fill fs-3"></i>
+                                                        </div>
+
+                                                    </div>
+
                                                 </div>
-                                                <div class="card-body">
+                                            </div>
 
-                                                    <div class="modal-body">
-                                                        <div class="row">
+                                            <div class="card-body p-4">
 
-                                                            <!-- ===== LEFT: FORM ===== -->
-                                                            <div class="col-12">
-                                                                <% if (locals.error) { %>
-                                                                    <div class="alert alert-danger" role="alert"
-                                                                        id="message">
-                                                                        <%= error %>
-                                                                    </div>
-                                                                    <% } %>
-                                                                        <form id="userForm" method="POST"
-                                                                            action="/employee/new-employee">
+                                                <form id="userForm" method="POST" action="/employee/new-employee">
 
-                                                                            <!-- Recherche Employé -->
-                                                                            <div class="">
-                                                                                <div class="row">
-                                                                                    <div class="col-md-2 mb-3">
-                                                                                        <label
-                                                                                            class="form-label">Matricule</label>
-                                                                                        <input type="text"
-                                                                                            class="form-control"
-                                                                                            id="matricule"
-                                                                                            name="matricule"
-                                                                                            placeholder="AMAA000000"
-                                                                                            required>
-                                                                                    </div>
-                                                                                    <div class="col-md-4 mb-3">
-                                                                                        <label
-                                                                                            class="form-label">Name</label>
-                                                                                        <input type="text"
-                                                                                            class="form-control"
-                                                                                            id="name" name="name"
-                                                                                            placeholder="Enter full name"
-                                                                                            required>
-                                                                                    </div>
-                                                                                    <div class="col-md-4 mb-3">
-                                                                                        <label
-                                                                                            class="form-label">Firstname</label>
-                                                                                        <input type="text"
-                                                                                            class="form-control"
-                                                                                            id="firstname"
-                                                                                            name="firstname"
-                                                                                            placeholder="Enter firstname"
-                                                                                            required>
-                                                                                    </div>
-                                                                                    <div class="col-md-2 mb-3">
-                                                                                        <label
-                                                                                            class="form-label">Gender</label>
-                                                                                        <select name="gender"
-                                                                                            id="gender"
-                                                                                            class="form-select"
-                                                                                            required>
-                                                                                            <option value="Male">
-                                                                                                Male
-                                                                                            </option>
-                                                                                            <option value="Female">
-                                                                                                Female
-                                                                                            </option>
-                                                                                        </select>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
+                                                    <!-- Personal Information -->
+                                                    <div class="mb-4">
+                                                        <h5 class="fw-semibold mb-3">
+                                                            <i class="bi bi-person me-2 text-primary"></i>
+                                                            Personal Information
+                                                        </h5>
 
-                                                                            <!-- Recherche Employé -->
-                                                                            <div class="">
-                                                                                <div class="row">
-                                                                                    <div class="col-md-4 mb-3">
-                                                                                        <label
-                                                                                            class="form-label">Site</label>
-                                                                                        <select name="site" id="site"
-                                                                                            class="form-select"
-                                                                                            required>
-                                                                                            <% allowedSites.forEach(function(site)
-                                                                                                { %>
-                                                                                                <% const maValeur=site ;
-                                                                                                    const
-                                                                                                    index=allowedSites.indexOf(maValeur);
-                                                                                                    const maCle=(index
-                                                                                                    !==-1) ? KEYS[index]
-                                                                                                    : "Inconnu" ; %>
-                                                                                                    <option
-                                                                                                        value="<%= site %>">
-                                                                                                        <%= maCle %>
-                                                                                                    </option>
-                                                                                                    <% }); %>
-                                                                                        </select>
-                                                                                    </div>
-                                                                                    <div class="col-md-4 mb-3">
-                                                                                        <label
-                                                                                            class="form-label">Departement</label>
-                                                                                        <input type="text"
-                                                                                            class="form-control"
-                                                                                            id="departement"
-                                                                                            name="departement"
-                                                                                            placeholder="Enter departement"
-                                                                                            required>
-                                                                                    </div>
-                                                                                    <div class="col-md-4 mb-3">
-                                                                                        <label
-                                                                                            class="form-label">Section</label>
-                                                                                        <input type="text"
-                                                                                            class="form-control"
-                                                                                            id="section" name="section"
-                                                                                            placeholder="Enter section"
-                                                                                            required>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
+                                                        <div class="row g-3">
 
-                                                                            <!-- Recherche Employé -->
-                                                                            <div class="">
-                                                                                <div class="row">
-                                                                                    <div class="col-md-4 mb-3">
-                                                                                        <label
-                                                                                            class="form-label">Division</label>
-                                                                                        <input type="text"
-                                                                                            class="form-control"
-                                                                                            id="division"
-                                                                                            name="division"
-                                                                                            placeholder="Enter division"
-                                                                                            required>
-                                                                                    </div>
-                                                                                    <div class="col-md-4 mb-3">
-                                                                                        <label
-                                                                                            class="form-label">Designation</label>
-                                                                                        <input type="text"
-                                                                                            class="form-control"
-                                                                                            id="designation"
-                                                                                            name="designation"
-                                                                                            placeholder="Enter designation"
-                                                                                            required>
-                                                                                    </div>
-                                                                                    <div class="col-md-4 mb-3">
-                                                                                        <label
-                                                                                            class="form-label">Line</label>
-                                                                                        <select name="line" id="line"
-                                                                                            class="form-select">
-                                                                                            <option value="L1">L1
-                                                                                            </option>
-                                                                                            <option value="L2">L2
-                                                                                            </option>
-                                                                                            <option value="L3">L3
-                                                                                            </option>
-                                                                                            <option value="L4">L4
-                                                                                            </option>
-                                                                                            <option value="L5">L5
-                                                                                            </option>
-                                                                                            <option value="L6">L6
-                                                                                            </option>
-                                                                                            <option value="NULL">NULL
-                                                                                            </option>
-                                                                                        </select>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-
-                                                                            <!-- Recherche Employé -->
-                                                                            <div class="">
-                                                                                <div class="row">
-                                                                                    <div class="col-md-4 mb-3">
-                                                                                        <label class="form-label">Job
-                                                                                            level</label>
-                                                                                        <input type="text"
-                                                                                            class="form-control"
-                                                                                            id="job_level"
-                                                                                            name="job_level"
-                                                                                            placeholder="Enter job level"
-                                                                                            required>
-                                                                                    </div>
-                                                                                    <div class="col-md-4 mb-3">
-                                                                                        <label
-                                                                                            class="form-label">Type</label>
-                                                                                        <input type="text"
-                                                                                            class="form-control"
-                                                                                            id="type" name="type"
-                                                                                            placeholder="Enter type"
-                                                                                            required>
-                                                                                    </div>
-                                                                                    <div class="col-md-4 mb-3">
-                                                                                        <label
-                                                                                            class="form-label">DOE</label>
-                                                                                        <input type="date"
-                                                                                            class="form-control"
-                                                                                            id="DOE" name="DOE"
-                                                                                            placeholder="Enter DOE"
-                                                                                            required>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-
-                                                                            <!-- Recherche Employé -->
-                                                                            <div class="">
-                                                                                <div class="row">
-                                                                                    <div class="col-md-12 mb-3">
-                                                                                        <label
-                                                                                            class="form-label">Manager</label>
-                                                                                        <input type="text"
-                                                                                            class="form-control"
-                                                                                            id="managerSearch"
-                                                                                            placeholder="Search for Manager...">
-                                                                                        <input type="text" class="input"
-                                                                                            name="managerId"
-                                                                                            id="manager" hidden>
-                                                                                        <ul id="managerResults"
-                                                                                            class="autocomplete-list ps-0 w-100 z-200">
-                                                                                        </ul>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                        </form>
-
+                                                            <div class="col-lg-2">
+                                                                <label class="form-label fw-medium">
+                                                                    Employee ID
+                                                                </label>
+                                                                <input type="text" class="form-control" id="matricule"
+                                                                    name="matricule" placeholder="AMAA000000" required>
                                                             </div>
+
+                                                            <div class="col-lg-4">
+                                                                <label class="form-label fw-medium">
+                                                                    Last Name
+                                                                </label>
+                                                                <input type="text" class="form-control" id="name"
+                                                                    name="name" placeholder="Enter last name" required>
+                                                            </div>
+
+                                                            <div class="col-lg-4">
+                                                                <label class="form-label fw-medium">
+                                                                    First Name
+                                                                </label>
+                                                                <input type="text" class="form-control" id="firstname"
+                                                                    name="firstname" placeholder="Enter first name"
+                                                                    required>
+                                                            </div>
+
+                                                            <div class="col-lg-2">
+                                                                <label class="form-label fw-medium">
+                                                                    Gender
+                                                                </label>
+                                                                <select name="gender" id="gender" class="form-select"
+                                                                    required>
+                                                                    <option value="Male">Male</option>
+                                                                    <option value="Female">Female</option>
+                                                                </select>
+                                                            </div>
+
+                                                        </div>
+                                                    </div>
+
+                                                    <hr>
+
+                                                    <!-- Organization -->
+                                                    <div class="mb-4">
+                                                        <h5 class="fw-semibold mb-3">
+                                                            <i class="bi bi-diagram-3 me-2 text-primary"></i>
+                                                            Organization
+                                                        </h5>
+
+                                                        <div class="row g-3">
+
+                                                            <div class="col-lg-4">
+                                                                <label class="form-label fw-medium">
+                                                                    Site
+                                                                </label>
+                                                                <select name="site" id="site" class="form-select"
+                                                                    required>
+
+                                                                    <% allowedSites.forEach(function(site) { %>
+                                                                        <% const maValeur=site; const
+                                                                            index=allowedSites.indexOf(maValeur); const
+                                                                            maCle=(index !==-1) ? KEYS[index]
+                                                                            : "Unknown" ; %>
+
+                                                                            <option value="<%= site %>">
+                                                                                <%= maCle %>
+                                                                            </option>
+                                                                            <% }); %>
+
+                                                                </select>
+                                                            </div>
+
+                                                            <div class="col-lg-4">
+                                                                <label class="form-label fw-medium">
+                                                                    Department
+                                                                </label>
+                                                                <input type="text" class="form-control" id="departement"
+                                                                    name="departement" placeholder="Enter department"
+                                                                    required>
+                                                            </div>
+
+                                                            <div class="col-lg-4">
+                                                                <label class="form-label fw-medium">
+                                                                    Section
+                                                                </label>
+                                                                <input type="text" class="form-control" id="section"
+                                                                    name="section" placeholder="Enter section" required>
+                                                            </div>
+
+                                                            <div class="col-lg-4">
+                                                                <label class="form-label fw-medium">
+                                                                    Division
+                                                                </label>
+                                                                <input type="text" class="form-control" id="division"
+                                                                    name="division" placeholder="Enter division"
+                                                                    required>
+                                                            </div>
+
+                                                            <div class="col-lg-4">
+                                                                <label class="form-label fw-medium">
+                                                                    Designation
+                                                                </label>
+                                                                <input type="text" class="form-control" id="designation"
+                                                                    name="designation" placeholder="Enter designation"
+                                                                    required>
+                                                            </div>
+
+                                                            <div class="col-lg-4">
+                                                                <label class="form-label fw-medium">
+                                                                    Line
+                                                                </label>
+                                                                <select name="line" id="line" class="form-select">
+                                                                    <option value="L1">L1</option>
+                                                                    <option value="L2">L2</option>
+                                                                    <option value="L3">L3</option>
+                                                                    <option value="L4">L4</option>
+                                                                    <option value="L5">L5</option>
+                                                                    <option value="L6">L6</option>
+                                                                    <option value="NULL">NULL</option>
+                                                                </select>
+                                                            </div>
+
+                                                        </div>
+                                                    </div>
+
+                                                    <hr>
+
+                                                    <!-- Employment Information -->
+                                                    <div class="mb-4">
+                                                        <h5 class="fw-semibold mb-3">
+                                                            <i class="bi bi-briefcase me-2 text-primary"></i>
+                                                            Employment Information
+                                                        </h5>
+
+                                                        <div class="row g-3">
+
+                                                            <div class="col-lg-4">
+                                                                <label class="form-label fw-medium">
+                                                                    Job Level
+                                                                </label>
+                                                                <input type="text" class="form-control" id="job_level"
+                                                                    name="job_level" placeholder="Enter job level"
+                                                                    required>
+                                                            </div>
+
+                                                            <div class="col-lg-4">
+                                                                <label class="form-label fw-medium">
+                                                                    Employee Type
+                                                                </label>
+                                                                <input type="text" class="form-control" id="type"
+                                                                    name="type" placeholder="Enter employee type"
+                                                                    required>
+                                                            </div>
+
+                                                            <div class="col-lg-4">
+                                                                <label class="form-label fw-medium">
+                                                                    Date of Entry
+                                                                </label>
+                                                                <input type="date" class="form-control" id="DOE"
+                                                                    name="DOE" required>
+                                                            </div>
+
+                                                        </div>
+                                                    </div>
+
+                                                    <hr>
+
+                                                    <!-- Manager -->
+                                                    <div>
+                                                        <h5 class="fw-semibold mb-3">
+                                                            <i class="bi bi-person-badge me-2 text-primary"></i>
+                                                            Reporting Manager
+                                                        </h5>
+
+                                                        <div class="position-relative">
+
+                                                            <label class="form-label fw-medium">
+                                                                Manager
+                                                            </label>
+
+                                                            <input type="text" class="form-control" id="managerSearch"
+                                                                placeholder="Search manager by name or employee ID...">
+
+                                                            <input type="hidden" name="managerId" id="manager">
+
+                                                            <ul id="managerResults"
+                                                                class="list-group position-absolute w-100 shadow-sm mt-1"
+                                                                style="z-index:1000;">
+                                                            </ul>
 
                                                         </div>
 
                                                     </div>
-                                                </div>
 
-                                                <div class="card-footer">
-                                                    <button type="submit" form="userForm" class="btn btn-primary"
+                                                </form>
+
+                                            </div>
+
+                                            <div class="card-footer bg-light border-0 p-4">
+                                                <div class="d-flex justify-content-end gap-2">
+
+                                                    <a href="/employee/list" class="btn btn-outline-secondary px-4">
+                                                        Cancel
+                                                    </a>
+
+                                                    <button type="submit" form="userForm" class="btn btn-primary px-4"
                                                         id="submit">
-                                                        Save
+                                                        <i class="bi bi-check-circle me-2"></i>
+                                                        Create Employee
                                                     </button>
+
                                                 </div>
                                             </div>
+
                                         </div>
-                                    </div>
-                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -300,6 +327,11 @@
         let timeout = null;
 
         input.addEventListener('input', () => {
+            if (input.value.trim() === '') {
+                results.innerHTML = '';
+                hiddenInput.value = '';
+                return;
+            }
             clearTimeout(timeout);
 
             const query = input.value.trim();

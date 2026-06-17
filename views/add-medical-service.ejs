@@ -46,85 +46,115 @@
                                     <div class="row">
 
                                         <div class="col-xl-12">
-                                            <div class="card stretch stretch-full d-flex">
-                                                <div class="card-header">
-                                                    <h4 class="header">Add new</h4>
-                                                </div>
-                                                <div class="card-body">
+                                            <div class="card stretch stretch-full">
+                                                <div class="card-body border-bottom border-1">
+                                                    <div
+                                                        class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
 
-                                                    <div class="modal-body">
-                                                        <div class="row">
-                                                            <form action="/smia-ostie/add" method="post"
-                                                                id="addMedicalService">
+                                                        <div>
+                                                            <h3 class="fw-bold mb-1">
+                                                                New Medical Consultation
+                                                            </h3>
 
-                                                                <!-- ===== LEFT: FORM ===== -->
-                                                                <div class="col-md-12">
-
-                                                                    <!-- Recherche Employé -->
-                                                                    <div class="mb-0">
-                                                                        <div class="row">
-                                                                            <div class="col-md-12 mb-3">
-                                                                                <label
-                                                                                    class=" form-label">Employee</label>
-                                                                                <input type="text" class="form-control"
-                                                                                    id="employeeSearch"
-                                                                                    autocomplete="off"
-                                                                                    placeholder="Search an employee...">
-                                                                                <input type="text" class="input"
-                                                                                    name="employee" id="employee" hidden
-                                                                                    required>
-                                                                                <ul id="employeeResults"
-                                                                                    class="autocomplete-list ps-0 w-100 z-200">
-                                                                                </ul>
-                                                                            </div>
-                                                                            <div class="col-md-4">
-                                                                                <label for="date"
-                                                                                    class="form-label">Date</label>
-                                                                                <input type="date" class="form-control"
-                                                                                    id="date" name="date" required>
-                                                                            </div>
-                                                                            <div class="col-md-4">
-                                                                                <label for="status"
-                                                                                    class="form-label">Status</label>
-                                                                                <select name="status" id="status"
-                                                                                    class="form-select">
-                                                                                    <option value="normal">Normal
-                                                                                    </option>
-                                                                                    <option value="emergency" selected>
-                                                                                        Emergency
-                                                                                    </option>
-                                                                                </select>
-                                                                            </div>
-                                                                            <div class="col-md-4">
-                                                                                <label for="reason"
-                                                                                    class="form-label">Reason</label>
-                                                                                <input type="text" class="form-control"
-                                                                                    id="reason" name="reason"
-                                                                                    placeholder="Enter reason...">
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-
-                                                                </div>
-                                                            </form>
-
+                                                            <p class="text-muted mb-0">
+                                                                Register a new employee consultation.
+                                                            </p>
                                                         </div>
-                                                        <div class="row mt-2 d-none">
-                                                            <div class="col-md-12 text-center">
-                                                                <p id="message" class="fw-bold"></p>
+
+                                                    </div>
+                                                </div>
+
+                                                <div class="card-body">
+                                                    <form action="/smia-ostie/add" method="post" id="addMedicalService">
+
+                                                        <!-- Employee Selection -->
+                                                        <div class="border rounded-3 p-4 mb-4">
+                                                            <h6 class="fw-bold mb-3">
+                                                                <i class="feather-user me-2 text-primary"></i>
+                                                                Employee Selection
+                                                            </h6>
+
+                                                            <div class="row">
+                                                                <div class="col-lg-12">
+                                                                    <label class="form-label">
+                                                                        Employee <span class="text-danger">*</span>
+                                                                    </label>
+
+                                                                    <input type="text" class="form-control"
+                                                                        id="employeeSearch" autocomplete="off"
+                                                                        placeholder="Search employee by matricule, name or firstname...">
+
+                                                                    <input type="text" class="input" name="employee"
+                                                                        id="employee" hidden required>
+
+                                                                    <ul id="employeeResults"
+                                                                        class="autocomplete-list ps-0 w-100 z-200">
+                                                                    </ul>
+                                                                </div>
                                                             </div>
                                                         </div>
 
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                                <div class="card-footer">
-                                                    <button class="btn btn-primary" type="submit"
-                                                        form="addMedicalService">
-                                                        Add Employee
-                                                    </button>
+                                                        <!-- Consultation Details -->
+                                                        <div class="border rounded-3 p-4">
+                                                            <h6 class="fw-bold mb-3">
+                                                                <i class="feather-clipboard me-2 text-primary"></i>
+                                                                Consultation Details
+                                                            </h6>
+
+                                                            <div class="row">
+
+                                                                <div class="col-md-4 mb-3">
+                                                                    <label for="date" class="form-label">
+                                                                        Consultation Date
+                                                                    </label>
+
+                                                                    <input type="date" class="form-control" id="date"
+                                                                        name="date" required>
+                                                                </div>
+
+                                                                <div class="col-md-4 mb-3">
+                                                                    <label for="status" class="form-label">
+                                                                        Consultation Type
+                                                                    </label>
+
+                                                                    <select name="status" id="status"
+                                                                        class="form-select">
+                                                                        <option value="normal">
+                                                                            Normal
+                                                                        </option>
+                                                                        <option value="emergency" selected>
+                                                                            Emergency
+                                                                        </option>
+                                                                    </select>
+                                                                </div>
+
+                                                                <div class="col-md-4 mb-3">
+                                                                    <label for="reason" class="form-label">
+                                                                        Reason
+                                                                    </label>
+
+                                                                    <input type="text" class="form-control" id="reason"
+                                                                        name="reason"
+                                                                        placeholder="Enter consultation reason...">
+                                                                </div>
+
+                                                            </div>
+                                                        </div>
+
+                                                    </form>
                                                 </div>
 
+                                                <div class="card-footer d-flex justify-content-end gap-2">
+                                                    <a href="/smia-ostie/list" class="btn btn-light">
+                                                        Cancel
+                                                    </a>
+
+                                                    <button class="btn btn-primary" type="submit"
+                                                        form="addMedicalService">
+                                                        <i class="feather-plus me-2"></i>
+                                                        Add Consultation
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

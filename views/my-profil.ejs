@@ -21,155 +21,158 @@
                         </div>
 
                         <!-- Main content -->
-                        <div class="main-content py-4">
-                            <div class="container-fluid">
-                                <div class="row justify-content-center">
-                                    <div class="col-12 col-lg-9 col-xl-7">
+                        <div class="container-fluid py-4">
 
-                                        <!-- Profile card -->
-                                        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                            <!-- Header -->
+                            <div class="card shadow-sm border-0 mb-4">
+                                <div class="card-body">
 
-                                            <!-- Banner + avatar -->
-                                            <div class="profile-banner position-relative"
-                                                style="height: 110px; background: linear-gradient(135deg, #1a56db 0%, #0091ff 100%);">
-                                                <div class="position-absolute" style="bottom: -40px; left: 32px;">
-                                                    <div class="avatar-circle d-flex align-items-center justify-content-center rounded-circle border border-4 border-white shadow-sm"
-                                                        style="width: 80px; height: 80px; background: #1a56db; color: #fff; font-size: 26px; font-weight: 600; letter-spacing: -1px;">
-                                                        <%= user.firstName.charAt(0).toUpperCase() %>
-                                                            <%= user.name.charAt(0).toUpperCase() %>
-                                                    </div>
-                                                </div>
+                                    <div
+                                        class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+
+                                        <div class="d-flex align-items-center gap-3">
+
+                                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold"
+                                                style="width:70px;height:70px;font-size:1.5rem;">
+
+                                                <%= user.firstName.charAt(0).toUpperCase() %>
+                                                    <%= user.name.charAt(0).toUpperCase() %>
+
                                             </div>
 
-                                            <!-- Header row -->
-                                            <div class="card-body pt-5 pb-3 px-4">
-                                                <div class="d-flex align-items-start justify-content-between mt-2">
-                                                    <div>
-                                                        <h4 class="mb-1 fw-semibold" style="font-size: 1.2rem;">
-                                                            <%= user.firstName %>
-                                                                <%= user.name %>
-                                                        </h4>
-                                                        <div class="d-flex flex-wrap gap-2 mt-2">
-                                                            <span class="badge rounded-pill px-3 py-1"
-                                                                style="background:#eff6ff; color:#1a56db; font-size:12px; font-weight:500;">
-                                                                <i class="feather-shield me-1"
-                                                                    style="font-size:11px;"></i>
-                                                                <%= user.role %>
-                                                            </span>
-                                                            <span class="badge rounded-pill px-3 py-1"
-                                                                style="background:#f0fdf4; color:#0e9f6e; font-size:12px; font-weight:500;">
-                                                                <i class="feather-map-pin me-1"
-                                                                    style="font-size:11px;"></i>
-                                                                <%= user.site %>
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                    <a href="/user/edit-profil"
-                                                        class="btn btn-outline-primary btn-sm rounded-3 px-3"
-                                                        style="font-size:13px;">
-                                                        <i class="feather-edit-2 me-1" style="font-size:13px;"></i>
-                                                        Edit
-                                                    </a>
-                                                </div>
-                                            </div>
+                                            <div>
+                                                <h2 class="mb-1">
+                                                    <%= user.firstName %>
+                                                        <%= user.name %>
+                                                </h2>
 
-                                            <hr class="mx-4 my-0" style="opacity:.08;">
+                                                <div class="d-flex flex-wrap gap-2">
 
-                                            <!-- Info fields -->
-                                            <div class="card-body px-4 py-3">
-                                                <p class="text-uppercase mb-3"
-                                                    style="font-size:11px; letter-spacing:.07em; color:#9ca3af; font-weight:500;">
-                                                    Personal information
-                                                </p>
+                                                    <span class="badge bg-primary">
+                                                        <%= user.role %>
+                                                    </span>
 
-                                                <div class="row g-3">
-
-                                                    <!-- Full name -->
-                                                    <div class="col-12 col-sm-6">
-                                                        <div class="p-3 rounded-3"
-                                                            style="background:#f9fafb; border:1px solid #f3f4f6;">
-                                                            <p class="mb-1"
-                                                                style="font-size:11px; color:#9ca3af; font-weight:500; text-transform:uppercase; letter-spacing:.05em;">
-                                                                <i class="feather-user me-1"></i>Full name
-                                                            </p>
-                                                            <p class="mb-0 fw-medium"
-                                                                style="font-size:14px; color:#111827;">
-                                                                <%= user.firstName %>
-                                                                    <%= user.name %>
-                                                            </p>
-                                                        </div>
-                                                    </div>
-
-                                                    <!-- Phone -->
-                                                    <div class="col-12 col-sm-6">
-                                                        <div class="p-3 rounded-3"
-                                                            style="background:#f9fafb; border:1px solid #f3f4f6;">
-                                                            <p class="mb-1"
-                                                                style="font-size:11px; color:#9ca3af; font-weight:500; text-transform:uppercase; letter-spacing:.05em;">
-                                                                <i class="feather-phone me-1"></i>Phone
-                                                            </p>
-                                                            <p class="mb-0 fw-medium"
-                                                                style="font-size:14px; color:#111827;">
-                                                                <%= user.phone %>
-                                                            </p>
-                                                        </div>
-                                                    </div>
-
-                                                    <!-- Email -->
-                                                    <div class="col-12 col-sm-6">
-                                                        <div class="p-3 rounded-3"
-                                                            style="background:#f9fafb; border:1px solid #f3f4f6;">
-                                                            <p class="mb-1"
-                                                                style="font-size:11px; color:#9ca3af; font-weight:500; text-transform:uppercase; letter-spacing:.05em;">
-                                                                <i class="feather-mail me-1"></i>Email
-                                                            </p>
-                                                            <p class="mb-0 fw-medium"
-                                                                style="font-size:14px; color:#111827;">
-                                                                <%= user.email %>
-                                                            </p>
-                                                        </div>
-                                                    </div>
-
-                                                    <!-- Role -->
-                                                    <div class="col-12 col-sm-6">
-                                                        <div class="p-3 rounded-3"
-                                                            style="background:#f9fafb; border:1px solid #f3f4f6;">
-                                                            <p class="mb-1"
-                                                                style="font-size:11px; color:#9ca3af; font-weight:500; text-transform:uppercase; letter-spacing:.05em;">
-                                                                <i class="feather-briefcase me-1"></i>Role
-                                                            </p>
-                                                            <p class="mb-0 fw-medium"
-                                                                style="font-size:14px; color:#111827;">
-                                                                <%= user.role %>
-                                                            </p>
-                                                        </div>
-                                                    </div>
-
-                                                    <!-- Site -->
-                                                    <div class="col-12">
-                                                        <div class="p-3 rounded-3"
-                                                            style="background:#f9fafb; border:1px solid #f3f4f6;">
-                                                            <p class="mb-1"
-                                                                style="font-size:11px; color:#9ca3af; font-weight:500; text-transform:uppercase; letter-spacing:.05em;">
-                                                                <i class="feather-map-pin me-1"></i>Site
-                                                            </p>
-                                                            <p class="mb-0 fw-medium"
-                                                                style="font-size:14px; color:#111827;">
-                                                                <%= user.site %>
-                                                            </p>
-                                                        </div>
-                                                    </div>
+                                                    <span class="badge bg-secondary">
+                                                        <%= user.site %>
+                                                    </span>
 
                                                 </div>
                                             </div>
-                                            <!-- end card-body -->
 
                                         </div>
-                                        <!-- end card -->
+
+                                        <a href="/user/edit-profil" class="btn btn-primary">
+                                            Edit Profile
+                                        </a>
 
                                     </div>
+
                                 </div>
                             </div>
+
+                            <div class="row g-4">
+
+                                <!-- Informations personnelles -->
+                                <div class="col-lg-6">
+
+                                    <div class="card shadow-sm border-0 h-100">
+
+                                        <div class="card-header bg-primary">
+                                            <h5 class="mb-0 text-white">
+                                                Personal informations
+                                            </h5>
+                                        </div>
+
+                                        <div class="card-body">
+
+                                            <div class="row g-3">
+
+                                                <div class="col-12">
+                                                    <label class="form-label text-muted">
+                                                        Full name
+                                                    </label>
+
+                                                    <div class="fw-semibold">
+                                                        <%= user.firstName %>
+                                                            <%= user.name %>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-12">
+                                                    <label class="form-label text-muted">
+                                                        Phone
+                                                    </label>
+
+                                                    <div class="fw-semibold">
+                                                        <%= user.phone || '-' %>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-12">
+                                                    <label class="form-label text-muted">
+                                                        Email
+                                                    </label>
+
+                                                    <div class="fw-semibold">
+                                                        <%= user.email %>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                                <!-- Compte -->
+                                <div class="col-lg-6">
+
+                                    <div class="card shadow-sm border-0 h-100">
+
+                                        <div class="card-header bg-primary">
+                                            <h5 class="mb-0 text-white">
+                                                Account informations
+                                            </h5>
+                                        </div>
+
+                                        <div class="card-body">
+
+                                            <div class="row g-3">
+
+                                                <div class="col-12">
+                                                    <label class="form-label text-muted">
+                                                        Role
+                                                    </label>
+
+                                                    <div>
+                                                        <span class="badge bg-primary">
+                                                            <%= user.role %>
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-12">
+                                                    <label class="form-label text-muted">
+                                                        Site
+                                                    </label>
+
+                                                    <div class="fw-semibold">
+                                                        <%= user.site %>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
                         </div>
 
                     </div>

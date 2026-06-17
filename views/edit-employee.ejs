@@ -40,320 +40,245 @@
                             </div>
                         </div>
                         <!-- [ Main Content ] start -->
-                        <div class="main-content">
-                            <div class="tab-content">
-                                <div class="tab-pane fade active show" id="overviewTab">
-                                    <div class="row">
+                        <div class="container-fluid py-4">
 
-                                        <div class="col-12">
-                                            <div class="card stretch stretch-full d-flex">
-                                                <div class="card-header">
-                                                    <h4 class="header">Edit employee - <%= employee.name %>
-                                                            <%= employee.firstname %>
-                                                    </h4>
+                            <% if (locals.error) { %>
+                                <div class="alert alert-danger">
+                                    <%= error %>
+                                </div>
+                                <% } %>
+
+                                    <form id="userForm" method="POST" action="/employee/edit/<%= employee.id %>">
+
+                                        <!-- Header -->
+                                        <div class="card shadow-sm border-0 mb-4">
+                                            <div class="card-body">
+                                                <div
+                                                    class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+
+                                                    <div>
+                                                        <h2 class="mb-1">
+                                                            Edit employee
+                                                        </h2>
+
+                                                        <div class="text-muted">
+                                                            <%= employee.name %>
+                                                                <%= employee.firstname %>
+                                                        </div>
+                                                    </div>
+
+                                                    <span class="badge text-dark fs-6">
+                                                        <%= employee.matricule %>
+                                                    </span>
+
                                                 </div>
-                                                <div class="card-body">
+                                            </div>
+                                        </div>
 
-                                                    <div class="modal-body">
-                                                        <div class="row">
+                                        <div class="row g-4">
 
-                                                            <!-- ===== LEFT: FORM ===== -->
-                                                            <div class="col-12">
-                                                                <% if (locals.error) { %>
-                                                                    <div class="alert alert-danger" role="alert"
-                                                                        id="message">
-                                                                        <%= error %>
-                                                                    </div>
-                                                                    <% } %>
-                                                                        <form id="userForm" method="POST"
-                                                                            action="/employee/edit/<%= employee.id %>">
+                                            <!-- Informations personnelles -->
+                                            <div class="col-12">
+                                                <div class="card shadow-sm border-0">
+                                                    <div class="card-header bg-primary">
+                                                        <h5 class="mb-0 text-light">Personnal informations</h5>
+                                                    </div>
 
-                                                                            <!-- Recherche Employé -->
-                                                                            <div class="">
-                                                                                <div class="row">
-                                                                                    <div class="col-md-2 mb-3">
-                                                                                        <label
-                                                                                            class="form-label">Matricule</label>
-                                                                                        <input type="text"
-                                                                                            class="form-control"
-                                                                                            id="matricule"
-                                                                                            name="matricule"
-                                                                                            placeholder="AMAA000000"
-                                                                                            required
-                                                                                            value="<%= employee.matricule %>">
-                                                                                    </div>
-                                                                                    <div class="col-md-4 mb-3">
-                                                                                        <label
-                                                                                            class="form-label">Name</label>
-                                                                                        <input type="text"
-                                                                                            class="form-control"
-                                                                                            id="name" name="name"
-                                                                                            placeholder="Enter full name"
-                                                                                            required
-                                                                                            value="<%= employee.name %>">
-                                                                                    </div>
-                                                                                    <div class="col-md-4 mb-3">
-                                                                                        <label
-                                                                                            class="form-label">Firstname</label>
-                                                                                        <input type="text"
-                                                                                            class="form-control"
-                                                                                            id="firstname"
-                                                                                            name="firstname"
-                                                                                            placeholder="Enter firstname"
-                                                                                            required
-                                                                                            value="<%= employee.firstname %>">
-                                                                                    </div>
-                                                                                    <div class="col-md-2 mb-3">
-                                                                                        <label
-                                                                                            class="form-label">Gender</label>
-                                                                                        <select name="gender"
-                                                                                            id="gender"
-                                                                                            class="form-select"
-                                                                                            required>
-                                                                                            <% if(employee.gender==='Male'
-                                                                                                ) { %>
-                                                                                                <option value="Male"
-                                                                                                    selected>
-                                                                                                    Male
-                                                                                                </option>
-                                                                                                <option value="Female">
-                                                                                                    Female
-                                                                                                </option>
-                                                                                                <% } else { %>
-                                                                                                    <option
-                                                                                                        value="Male">
-                                                                                                        Male
-                                                                                                    </option>
-                                                                                                    <option
-                                                                                                        value="Female"
-                                                                                                        selected>
-                                                                                                        Female
-                                                                                                    </option>
-                                                                                                    <% } %>
-                                                                                        </select>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
+                                                    <div class="card-body">
 
-                                                                            <!-- Recherche Employé -->
-                                                                            <div class="">
-                                                                                <div class="row">
-                                                                                    <div class="col-md-4 mb-3">
-                                                                                        <label
-                                                                                            class="form-label">Site</label>
-                                                                                        <select name="site" id="site"
-                                                                                            class="form-select"
-                                                                                            required>
-                                                                                            <% allowedSites.forEach(function(site)
-                                                                                                { %>
-                                                                                                <% const maValeur=site ;
-                                                                                                    const
-                                                                                                    index=allowedSites.indexOf(maValeur);
-                                                                                                    const maCle=(index
-                                                                                                    !==-1) ? KEYS[index]
-                                                                                                    : "Inconnu" ; %>
-                                                                                                    <% if(site===employee.site)
-                                                                                                        { %>
-                                                                                                        <option
-                                                                                                            value="<%= site %>"
-                                                                                                            selected>
-                                                                                                            <%= maCle %>
-                                                                                                        </option>
-                                                                                                        <% } else { %>
-                                                                                                            <option
-                                                                                                                value="<%= site %>">
-                                                                                                                <%= maCle
-                                                                                                                    %>
-                                                                                                            </option>
-                                                                                                            <% } %>
-                                                                                                                <% });
-                                                                                                                    %>
-                                                                                        </select>
-                                                                                    </div>
-                                                                                    <div class="col-md-4 mb-3">
-                                                                                        <label
-                                                                                            class="form-label">Departement</label>
-                                                                                        <input type="text"
-                                                                                            class="form-control"
-                                                                                            id="departement"
-                                                                                            name="departement"
-                                                                                            placeholder="Enter departement"
-                                                                                            value="<%= employee.departement %>"
-                                                                                            required>
-                                                                                    </div>
-                                                                                    <div class="col-md-4 mb-3">
-                                                                                        <label
-                                                                                            class="form-label">Section</label>
-                                                                                        <input type="text"
-                                                                                            class="form-control"
-                                                                                            id="section" name="section"
-                                                                                            placeholder="Enter section"
-                                                                                            value="<%= employee.section %>"
-                                                                                            required>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
+                                                        <div class="row g-3">
 
-                                                                            <!-- Recherche Employé -->
-                                                                            <div class="">
-                                                                                <div class="row">
-                                                                                    <div class="col-md-4 mb-3">
-                                                                                        <label
-                                                                                            class="form-label">Division</label>
-                                                                                        <input type="text"
-                                                                                            class="form-control"
-                                                                                            id="division"
-                                                                                            name="division"
-                                                                                            placeholder="Enter division"
-                                                                                            value="<%= employee.division %>"
-                                                                                            required>
-                                                                                    </div>
-                                                                                    <div class="col-md-4 mb-3">
-                                                                                        <label
-                                                                                            class="form-label">Designation</label>
-                                                                                        <input type="text"
-                                                                                            class="form-control"
-                                                                                            id="designation"
-                                                                                            name="designation"
-                                                                                            placeholder="Enter designation"
-                                                                                            value="<%= employee.designation %>"
-                                                                                            required>
-                                                                                    </div>
-                                                                                    <div class="col-md-4 mb-3">
-                                                                                        <label
-                                                                                            class="form-label">Line</label>
-                                                                                        <select name="line" id="line"
-                                                                                            class="form-select">
-                                                                                            <option value="L1" <%
-                                                                                                if(employee.line==='L1'
-                                                                                                ) { %>selected<% } %>>L1
-                                                                                            </option>
-                                                                                            <option value="L2" <%
-                                                                                                if(employee.line==='L2'
-                                                                                                ) { %>selected<% } %>>L2
-                                                                                            </option>
-                                                                                            <option value="L3" <%
-                                                                                                if(employee.line==='L3'
-                                                                                                ) { %>selected<% } %>>L3
-                                                                                            </option>
-                                                                                            <option value="L4" <%
-                                                                                                if(employee.line==='L4'
-                                                                                                ) { %>selected<% } %>>L4
-                                                                                            </option>
-                                                                                            <option value="L5" <%
-                                                                                                if(employee.line==='L5'
-                                                                                                ) { %>selected<% } %>>L5
-                                                                                            </option>
-                                                                                            <option value="L6" <%
-                                                                                                if(employee.line==='L6'
-                                                                                                ) { %>selected<% } %>>L6
-                                                                                            </option>
-                                                                                            <option value="NULL" <%
-                                                                                                if(employee.line==='NULL'
-                                                                                                ) { %>selected<% } %>
-                                                                                                    >NULL
-                                                                                            </option>
-                                                                                        </select>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
+                                                            <div class="col-md-2">
+                                                                <label class="form-label">Matricule</label>
+                                                                <input type="text" class="form-control" name="matricule"
+                                                                    value="<%= employee.matricule %>" required>
+                                                            </div>
 
-                                                                            <!-- Recherche Employé -->
-                                                                            <div class="">
-                                                                                <div class="row">
-                                                                                    <div class="col-md-4 mb-3">
-                                                                                        <label class="form-label">Job
-                                                                                            level</label>
-                                                                                        <input type="text"
-                                                                                            class="form-control"
-                                                                                            id="job_level"
-                                                                                            name="job_level"
-                                                                                            placeholder="Enter job level"
-                                                                                            value="<%= employee.job_level %>"
-                                                                                            required>
-                                                                                    </div>
-                                                                                    <div class="col-md-4 mb-3">
-                                                                                        <label
-                                                                                            class="form-label">Type</label>
-                                                                                        <input type="text"
-                                                                                            class="form-control"
-                                                                                            id="type" name="type"
-                                                                                            placeholder="Enter type"
-                                                                                            value="<%= employee.type %>"
-                                                                                            required>
-                                                                                    </div>
-                                                                                    <div class="col-md-4 mb-3">
-                                                                                        <label
-                                                                                            class="form-label">DOE</label>
-                                                                                        <input type="date"
-                                                                                            class="form-control"
-                                                                                            id="DOE" name="DOE"
-                                                                                            placeholder="Enter DOE"
-                                                                                            value="<%= employee.DOE %>"
-                                                                                            required>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <label class="form-label">Name</label>
+                                                                <input type="text" class="form-control" name="name"
+                                                                    value="<%= employee.name %>" required>
+                                                            </div>
 
-                                                                            <!-- Recherche Employé -->
-                                                                            <div class="">
-                                                                                <div class="row">
-                                                                                    <div class="col-md-12 mb-3">
-                                                                                        <label
-                                                                                            class="form-label">Manager</label>
-                                                                                        <input type="text"
-                                                                                            class="form-control"
-                                                                                            id="managerSearch"
-                                                                                            placeholder="Search for Manager..."
-                                                                                            <% if (employee.manager) {
-                                                                                            %>
-                                                                                        value="<%=
-                                                                                            employee.manager?.matricule
-                                                                                            + ' - ' +
-                                                                                            employee.manager?.firstName
-                                                                                            + ' ' +
-                                                                                            employee.manager?.name %>">
-                                                                                            <% } else { %>
-                                                                                                value="">
-                                                                                                <% } %>
-                                                                                                    <input type="text"
-                                                                                                        class="input"
-                                                                                                        name="managerId"
-                                                                                                        id="manager"
-                                                                                                        hidden <% if
-                                                                                                        (employee.manager)
-                                                                                                        { %>
-                                                                                                    value="<%=
-                                                                                                        employee.manager.id
-                                                                                                        %>">
-                                                                                                        <% } else { %>
-                                                                                                            value="">
-                                                                                                            <% } %>
-                                                                                                                <ul id="managerResults"
-                                                                                                                    class="autocomplete-list ps-0 w-100 z-200">
-                                                                                                                </ul>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                        </form>
+                                                            <div class="col-md-4">
+                                                                <label class="form-label">First name</label>
+                                                                <input type="text" class="form-control" name="firstname"
+                                                                    value="<%= employee.firstname %>" required>
+                                                            </div>
+
+                                                            <div class="col-md-2">
+                                                                <label class="form-label">Gender</label>
+
+                                                                <select name="gender" class="form-select" required>
+
+                                                                    <option value="Male" <%=employee.gender==='Male'
+                                                                        ? 'selected' : '' %>>
+                                                                        Male
+                                                                    </option>
+
+                                                                    <option value="Female" <%=employee.gender==='Female'
+                                                                        ? 'selected' : '' %>>
+                                                                        Female
+                                                                    </option>
+
+                                                                </select>
                                                             </div>
 
                                                         </div>
 
                                                     </div>
                                                 </div>
+                                            </div>
 
-                                                <div class="card-footer">
-                                                    <button type="submit" form="userForm" class="btn btn-primary"
-                                                        id="submit">
-                                                        Save
-                                                    </button>
+                                            <!-- Organisation -->
+                                            <div class="col-lg-6">
+                                                <div class="card shadow-sm border-0 h-100">
+                                                    <div class="card-header bg-primary">
+                                                        <h5 class="mb-0 text-light">Organisation</h5>
+                                                    </div>
+
+                                                    <div class="card-body">
+
+                                                        <div class="row g-3">
+
+                                                            <div class="col-md-12">
+                                                                <label class="form-label">Site</label>
+
+                                                                <select name="site" class="form-select" required>
+
+                                                                    <% allowedSites.forEach(function(site) { %>
+
+                                                                        <% const index=allowedSites.indexOf(site); %>
+                                                                            <% const label=index !==-1 ? KEYS[index] :
+                                                                                site; %>
+
+                                                                                <option value="<%= site %>"
+                                                                                    <%=employee.site===site ? 'selected'
+                                                                                    : '' %>>
+                                                                                    <%= label %>
+                                                                                </option>
+
+                                                                                <% }) %>
+
+                                                                </select>
+                                                            </div>
+
+                                                            <div class="col-md-6">
+                                                                <label class="form-label">Department</label>
+                                                                <input type="text" class="form-control"
+                                                                    name="departement"
+                                                                    value="<%= employee.departement %>">
+                                                            </div>
+
+                                                            <div class="col-md-6">
+                                                                <label class="form-label">Section</label>
+                                                                <input type="text" class="form-control" name="section"
+                                                                    value="<%= employee.section %>">
+                                                            </div>
+
+                                                            <div class="col-md-6">
+                                                                <label class="form-label">Division</label>
+                                                                <input type="text" class="form-control" name="division"
+                                                                    value="<%= employee.division %>">
+                                                            </div>
+
+                                                            <div class="col-md-6">
+                                                                <label class="form-label">Designation</label>
+                                                                <input type="text" class="form-control"
+                                                                    name="designation"
+                                                                    value="<%= employee.designation %>">
+                                                            </div>
+
+                                                            <div class="col-md-12">
+                                                                <label class="form-label">Line</label>
+
+                                                                <select name="line" class="form-select">
+
+                                                                    <%
+                                                                        ['L1','L2','L3','L4','L5','L6','NULL'].forEach(line=>
+                                                                        { %>
+                                                                        <option value="<%= line %>"
+                                                                            <%=employee.line===line ? 'selected' : '' %>
+                                                                            >
+                                                                            <%= line %>
+                                                                        </option>
+                                                                        <% }) %>
+
+                                                                </select>
+                                                            </div>
+
+                                                        </div>
+
+                                                    </div>
                                                 </div>
                                             </div>
+
+                                            <!-- RH -->
+                                            <div class="col-lg-6">
+                                                <div class="card shadow-sm border-0 h-100">
+                                                    <div class="card-header bg-primary">
+                                                        <h5 class="mb-0 text-light">HR informations</h5>
+                                                    </div>
+
+                                                    <div class="card-body">
+
+                                                        <div class="row g-3">
+
+                                                            <div class="col-md-6">
+                                                                <label class="form-label">Job Level</label>
+                                                                <input type="text" class="form-control" name="job_level"
+                                                                    value="<%= employee.job_level?.slice(1) || '' %>">
+                                                            </div>
+
+                                                            <div class="col-md-6">
+                                                                <label class="form-label">Type</label>
+                                                                <input type="text" class="form-control" name="type"
+                                                                    value="<%= employee.type %>">
+                                                            </div>
+
+                                                            <div class="col-md-12">
+                                                                <label class="form-label">Date of entry</label>
+                                                                <input type="date" class="form-control" name="DOE"
+                                                                    value="<%= employee.DOE %>">
+                                                            </div>
+
+                                                            <div class="col-md-12">
+                                                                <label class="form-label">Manager</label>
+
+                                                                <input type="text" class="form-control"
+                                                                    id="managerSearch"
+                                                                    placeholder="Rechercher un manager..."
+                                                                    value="<%= employee.manager ? employee.manager.matricule + ' - ' + employee.manager.firstName + ' ' + employee.manager.name : '' %>">
+
+                                                                <input type="hidden" name="managerId" id="manager"
+                                                                    value="<%= employee.manager ? employee.manager.id : '' %>">
+
+                                                                <ul id="managerResults" class="list-group mt-2">
+                                                                </ul>
+                                                            </div>
+
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+
                                         </div>
-                                    </div>
-                                </div>
-                            </div>
+
+                                        <!-- Footer -->
+                                        <div class="d-flex justify-content-end gap-2 mt-4">
+                                            <a href="/employee/details/<%= employee.id %>"
+                                                class="btn btn-outline-secondary">
+                                                Cancel
+                                            </a>
+
+                                            <button type="submit" class="btn btn-primary">
+                                                Save
+                                            </button>
+                                        </div>
+
+                                    </form>
+
                         </div>
                     </div>
                     <%- include('partials/new-leave-modal-test') %>
@@ -372,6 +297,11 @@
         let timeout = null;
 
         input.addEventListener('input', () => {
+            if (input.value.trim() === '') {
+                results.innerHTML = '';
+                hiddenInput.value = '';
+                return;
+            }
             clearTimeout(timeout);
 
             const query = input.value.trim();

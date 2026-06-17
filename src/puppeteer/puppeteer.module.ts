@@ -18,12 +18,14 @@ import { Permission2h } from 'src/permission2h/entities/permission2h.entity';
 import { SmiaOstie } from 'src/smia_ostie/entities/smia_ostie.entity';
 import { UserService } from 'src/user/user.service';
 import { JwtService } from '@nestjs/jwt';
+import { EmployeeHistoryService } from 'src/employee-history/employee-history.service';
+import { EmployeeHistory } from 'src/employee-history/entities/employee-history.entity';
 
 
 @Module({
     imports: [
         ConfigModule.forRoot({ isGlobal: true }),
-        TypeOrmModule.forFeature([Employee, Leave, User, History, Permission2h, SmiaOstie, User, Leave]),
+        TypeOrmModule.forFeature([Employee, Leave, User, History, Permission2h, SmiaOstie, User, Leave, EmployeeHistory]),
     ],
     controllers: [PuppeteerController],
     providers: [
@@ -37,7 +39,8 @@ import { JwtService } from '@nestjs/jwt';
         SmiaOstieService,
         UserService,
         JwtService,
-        UserService
+        UserService,
+        EmployeeHistoryService
     ],
     exports: [
         PuppeteerService,
@@ -50,7 +53,8 @@ import { JwtService } from '@nestjs/jwt';
         SmiaOstieService,
         UserService,
         JwtService,
-        UserService
+        UserService,
+        EmployeeHistoryService
     ],
 })
 export class PuppeteerModule { }

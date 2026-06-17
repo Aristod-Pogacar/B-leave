@@ -34,9 +34,31 @@ export class EmployeeController {
     return [userSite];
   }
 
+  @Get('confirm-archive/:id')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.HR_LEAD)
+  @Render('confirm-archive')
+  async getEmployeeConfirmArchive(@Param('id') id: string, @Req() req: any) {
+    const employee = await this.employeeService.findOne(id);
+    return { title: "Confirm archive", employee };
+  }
+
+  @Post('confirm-archive/:id')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.HR_LEAD)
+  async getEmployeeConfirmArchivePost(@Param('id') id: string, @Req() req: any, @Res() res: express.Response, @Body() body: any) {
+    const employee = await this.employeeService.archiveEmployee(id, body.DOR);
+    await this.historyService.create({
+      reason: HistoryReason.EMPLOYEE,
+      message: `Employee ${employee.matricule} archived by ${req.session.user.firstName} ${req.session.user.name}`,
+      created_by: req.session.user.matricule,
+    });
+    return res.redirect(`/employee/list`);
+  }
+
   @Get('details/:id')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HR_LEAD, UserRole.MANAGER, UserRole.PAYROLL, UserRole.HR_LEAD)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.PAYROLL, UserRole.HR_LEAD)
   @Render('employee')
   async getEmployee(@Param('id') id: string, @Req() req: any) {
     const employee = await this.employeeService.findOne(id);

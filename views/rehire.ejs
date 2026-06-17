@@ -1,0 +1,247 @@
+<%- include('partials/head.ejs') %>
+
+    <body>
+        <%- include('partials/sidebar.ejs') %>
+            <%- include('partials/header.ejs') %>
+
+                <main class="nxl-container">
+                    <div class="nxl-content">
+
+                        <div class="container-fluid py-4">
+
+                            <form id="rehireForm" method="POST" action="/employee-history/rehire/<%= data.id %>">
+
+                                <!-- Header -->
+                                <div class="card shadow-sm border-0 mb-4">
+
+                                    <div class="card-body">
+
+                                        <div
+                                            class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+
+                                            <div>
+
+                                                <h2 class="mb-1">
+                                                    Rehire Employee
+                                                </h2>
+
+                                                <p class="text-muted mb-0">
+                                                    Create a new employment record for an archived employee.
+                                                </p>
+
+                                            </div>
+
+                                            <span class="badge bg-success fs-6">
+                                                Rehire Process
+                                            </span>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                                <div class="row g-4">
+
+                                    <!-- Employee Information -->
+                                    <div class="col-lg-5">
+
+                                        <div class="card shadow-sm border-0 h-100">
+
+                                            <div class="card-header bg-primary">
+                                                <h5 class="mb-0 text-white">
+                                                    Employee Information
+                                                </h5>
+                                            </div>
+
+                                            <div class="card-body">
+
+                                                <div class="row g-3">
+
+                                                    <div class="col-12">
+
+                                                        <label class="form-label text-muted">
+                                                            Full Name
+                                                        </label>
+
+                                                        <div class="fw-semibold">
+                                                            <%= data.firstname %>
+                                                                <%= data.name %>
+                                                        </div>
+
+                                                    </div>
+
+                                                    <div class="col-12">
+
+                                                        <label class="form-label text-muted">
+                                                            Previous Matricule
+                                                        </label>
+
+                                                        <div class="fw-semibold">
+                                                            <%= data.matricule %>
+                                                        </div>
+
+                                                    </div>
+
+                                                    <div class="col-md-6">
+
+                                                        <label class="form-label text-muted">
+                                                            Site
+                                                        </label>
+
+                                                        <div class="fw-semibold">
+                                                            <%= data.site %>
+                                                        </div>
+
+                                                    </div>
+
+                                                    <div class="col-md-6">
+
+                                                        <label class="form-label text-muted">
+                                                            Department
+                                                        </label>
+
+                                                        <div class="fw-semibold">
+                                                            <%= data.departement || '-' %>
+                                                        </div>
+
+                                                    </div>
+
+                                                    <div class="col-12">
+
+                                                        <label class="form-label text-muted">
+                                                            Previous Employment Period
+                                                        </label>
+
+                                                        <div class="border rounded p-3 bg-light">
+
+                                                            <div>
+                                                                <strong>DOE:</strong>
+                                                                <%= new Date(data.DOE).toLocaleDateString("en-US",{
+                                                                    year: "numeric" , month: "short" , day: "numeric" })
+                                                                    %>
+                                                            </div>
+
+                                                            <div>
+                                                                <strong>DOR:</strong>
+                                                                <%= data.DOR ? new
+                                                                    Date(data.DOR).toLocaleDateString("en-US",{
+                                                                    year: "numeric" , month: "short" , day: "numeric" })
+                                                                    : '-' %>
+                                                            </div>
+
+                                                        </div>
+
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                    <!-- Rehire Information -->
+                                    <div class="col-lg-7">
+
+                                        <div class="card shadow-sm border-0">
+
+                                            <div class="card-header bg-primary">
+                                                <h5 class="mb-0 text-white">
+                                                    New Employment Information
+                                                </h5>
+                                            </div>
+
+                                            <div class="card-body">
+
+                                                <div class="row g-3">
+
+                                                    <div class="col-md-6">
+
+                                                        <label for="matricule" class="form-label">
+
+                                                            New Matricule
+                                                        </label>
+
+                                                        <input type="text" id="matricule" name="matricule"
+                                                            class="form-control" placeholder="<%= data.matricule %>"
+                                                            required>
+
+                                                    </div>
+
+                                                    <div class="col-md-6">
+
+                                                        <label for="DOE" class="form-label">
+
+                                                            New Date of Entry
+                                                        </label>
+
+                                                        <input type="date" id="DOE" name="DOE" class="form-control"
+                                                            required>
+
+                                                    </div>
+
+                                                    <div class="col-md-6">
+
+                                                        <label for="DOR" class="form-label">
+
+                                                            New Date of Resignation
+                                                        </label>
+
+                                                        <input type="date" id="DOR" name="DOR" class="form-control">
+
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                        <div class="alert alert-info mt-4 mb-0">
+
+                                            <strong>Note:</strong>
+                                            Rehiring will reactivate this employee using the new employment information
+                                            provided above.
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                                <!-- Footer -->
+                                <div class="d-flex justify-content-end gap-2 mt-4">
+
+                                    <a href="/employee-history/archives" class="btn btn-outline-secondary">
+
+                                        Cancel
+
+                                    </a>
+
+                                    <button type="submit" class="btn btn-success">
+
+                                        <i class="bi bi-person-plus me-2"></i>
+                                        Rehire Employee
+
+                                    </button>
+
+                                </div>
+
+                            </form>
+
+                        </div>
+
+                    </div>
+
+                    <%- include('partials/footer.ejs') %>
+                </main>
+                <script>
+                    const today = new Date().toISOString().split('T')[0];
+                    document.getElementById('DOE').value = today;
+                </script>
+
+    </body>
+
+    </html>

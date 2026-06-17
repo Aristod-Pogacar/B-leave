@@ -18,200 +18,265 @@
                         </div>
 
                         <div class="main-content">
-                            <div class="tab-content">
-                                <div class="tab-pane fade active show" id="overviewTab">
-                                    <div class="row">
-                                        <div class="col-12">
-                                            <div class="card stretch stretch-full">
-                                                <div class="card-header">
-                                                    <h5 class="card-title">Employee consultations list</h5>
 
-                                                    <!-- Filtres -->
-                                                    <form method="GET" action="/smia-ostie/list"
-                                                        class="d-flex align-items-end gap-3 mt-2 flex-wrap">
-                                                        <div>
-                                                            <label class="form-label mb-1">Recherche</label>
-                                                            <input type="text" name="search" class="form-control"
-                                                                placeholder="Matricule, nom..." value="<%= search %>" />
-                                                        </div>
-                                                        <div>
-                                                            <label class="form-label mb-1">Date début</label>
-                                                            <input type="date" name="startDate" class="form-control"
-                                                                value="<%= startDate %>" />
-                                                        </div>
-                                                        <div>
-                                                            <label class="form-label mb-1">Date fin</label>
-                                                            <input type="date" name="endDate" class="form-control"
-                                                                value="<%= endDate %>" />
-                                                        </div>
-                                                        <div class="d-flex gap-2">
-                                                            <button type="submit" class="btn btn-primary">
-                                                                <i class="feather-search me-1"></i> Filtrer
-                                                            </button>
-                                                            <a href="/smia-ostie/list"
-                                                                class="btn btn-outline-secondary ms-2">
-                                                                <i class="feather-x me-1"></i> Reset
-                                                            </a>
-                                                        </div>
-                                                    </form>
-                                                </div>
+                            <!-- Results -->
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body border-bottom">
+                                    <div
+                                        class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
 
-                                                <div class="card-body custom-card-action p-0">
-                                                    <div class="table-responsive mb-3">
-                                                        <table class="table table-hover mb-0">
-                                                            <thead>
-                                                                <tr>
-                                                                    <th style="width: 15%;">Matricule</th>
-                                                                    <th style="width: 40%;">Fullname</th>
-                                                                    <th style="width: 20%;">Date</th>
-                                                                    <th style="width: 15%;">Reason</th>
-                                                                    <th style="width: 10%;">Status</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                <% data.forEach(d=> {
-                                                                    var leaveTypeClass = "";
-                                                                    if (d.status === "normal") {
-                                                                    leaveTypeClass = "bg-soft-primary text-primary";
-                                                                    } else if (d.status === "emergency") {
-                                                                    leaveTypeClass = "bg-soft-danger text-danger";
-                                                                    }
-                                                                    %>
-                                                                    <tr>
-                                                                        <td style="width: 15%;">
-                                                                            <%= d.employee.matricule %>
-                                                                        </td>
-                                                                        <td style="width: 40%;">
-                                                                            <%= d.employee.name %>
-                                                                                <%= d.employee.firstname %>
-                                                                        </td>
-                                                                        <td style="width: 20%;">
-                                                                            <%= d.date.toLocaleDateString('en-GB', {
-                                                                                weekday: 'long' , year: 'numeric' ,
-                                                                                month: 'long' , day: 'numeric' }) %>
-                                                                        </td>
-                                                                        <td
-                                                                            style="width: 15%; overflow-wrap: break-word;">
-                                                                            <%= d.reason %>
-                                                                        </td>
-                                                                        <td style="width: 10%;">
-                                                                            <span class="badge <%= leaveTypeClass %>">
-                                                                                <%= d.status %>
-                                                                            </span>
-                                                                        </td>
-                                                                    </tr>
-                                                                    <% }) %>
-                                                                        <% if (data.length===0) { %>
-                                                                            <tr>
-                                                                                <td colspan="4"
-                                                                                    class="text-center text-muted py-4">
-                                                                                    Aucun résultat trouvé.</td>
-                                                                            </tr>
-                                                                            <% } %>
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
+                                        <div>
+                                            <h3 class="fw-bold mb-1">
+                                                Employee Consultations
+                                            </h3>
 
-                                                    <!-- Pagination -->
-                                                    <div
-                                                        class="d-flex align-items-center justify-content-between px-3 pb-3">
-                                                        <small class="text-muted">
-                                                            Total : <strong>
-                                                                <%= total %>
-                                                            </strong> enregistrement(s)
-                                                        </small>
-                                                        <% if (totalPages> 1) { %>
-                                                            <ul class="pagination mb-0">
-
-                                                                <!-- Précédent -->
-                                                                <li
-                                                                    class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
-                                                                    <a class="page-link"
-                                                                        href="?page=<%= currentPage - 1 %>&search=<%= search %>&startDate=<%= startDate %>&endDate=<%= endDate %>">
-                                                                        <i class="feather-chevron-left"></i>
-                                                                    </a>
-                                                                </li>
-
-                                                                <!-- Première page si hors plage -->
-                                                                <% if (startPage> 1) { %>
-                                                                    <li class="page-item">
-                                                                        <a class="page-link"
-                                                                            href="?page=1&search=<%= search %>&startDate=<%= startDate %>&endDate=<%= endDate %>">1</a>
-                                                                    </li>
-                                                                    <% if (startPage> 2) { %>
-                                                                        <li class="page-item disabled"><span
-                                                                                class="page-link">…</span></li>
-                                                                        <% } %>
-                                                                            <% } %>
-
-                                                                                <!-- Pages numérotées -->
-                                                                                <% for (let i=startPage; i <=endPage;
-                                                                                    i++) { %>
-                                                                                    <li
-                                                                                        class="page-item <%= i === currentPage ? 'active' : '' %>">
-                                                                                        <a class="page-link"
-                                                                                            href="?page=<%= i %>&search=<%= search %>&startDate=<%= startDate %>&endDate=<%= endDate %>">
-                                                                                            <%= i %>
-                                                                                        </a>
-                                                                                    </li>
-                                                                                    <% } %>
-
-                                                                                        <!-- Dernière page si hors plage -->
-                                                                                        <% if (endPage < totalPages) {
-                                                                                            %>
-                                                                                            <% if (endPage < totalPages
-                                                                                                - 1) { %>
-                                                                                                <li
-                                                                                                    class="page-item disabled">
-                                                                                                    <span
-                                                                                                        class="page-link">…</span>
-                                                                                                </li>
-                                                                                                <% } %>
-                                                                                                    <li
-                                                                                                        class="page-item">
-                                                                                                        <a class="page-link"
-                                                                                                            href="?page=<%= totalPages %>&search=<%= search %>&startDate=<%= startDate %>&endDate=<%= endDate %>">
-                                                                                                            <%= totalPages
-                                                                                                                %>
-                                                                                                        </a>
-                                                                                                    </li>
-                                                                                                    <% } %>
-
-                                                                                                        <!-- Suivant -->
-                                                                                                        <li
-                                                                                                            class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
-                                                                                                            <a class="page-link"
-                                                                                                                href="?page=<%= currentPage + 1 %>&search=<%= search %>&startDate=<%= startDate %>&endDate=<%= endDate %>">
-                                                                                                                <i
-                                                                                                                    class="feather-chevron-right"></i>
-                                                                                                            </a>
-                                                                                                        </li>
-
-                                                            </ul>
-                                                            <% } %>
-                                                    </div>
-
-                                                </div>
-                                                <div class="card-footer" <% if (user.role==='SUPERADMIN' ||
-                                                    user.role==='PAYROLL' || user.role=="HR_LEAD" ) { %>
-                                                    id="footer-export" <% } %>>
-                                                        <form action="/smia-ostie/export" method="get">
-                                                            <input type="text" name="search" value="<%= search %>"
-                                                                hidden>
-                                                            <input type="date" name="startDate" value="<%= startDate %>"
-                                                                hidden>
-                                                            <input type="date" name="endDate" value="<%= endDate %>"
-                                                                hidden>
-                                                            <button class="btn btn-primary" type="submit">
-                                                                Export as Excel file
-                                                            </button>
-                                                        </form>
-                                                </div>
-                                            </div>
+                                            <p class="text-muted mb-0">
+                                                Search, filter and export employee medical consultations.
+                                            </p>
                                         </div>
+
+                                        <div class="d-flex gap-2">
+
+                                            <div class="badge bg-soft-primary text-primary px-3 py-2">
+                                                <%= total %> Records
+                                            </div>
+
+                                        </div>
+
                                     </div>
                                 </div>
+                                <div class="card-body border-bottom bg-light">
+                                    <form method="GET" action="/smia-ostie/list">
+
+                                        <div class="row g-3">
+
+                                            <div class="col-lg-4">
+                                                <label class="form-label">
+                                                    Employee Search
+                                                </label>
+
+                                                <input type="text" name="search" class="form-control"
+                                                    placeholder="Matricule, employee name..." value="<%= search %>">
+                                            </div>
+
+                                            <div class="col-lg-3">
+                                                <label class="form-label">
+                                                    Start Date
+                                                </label>
+
+                                                <input type="date" name="startDate" class="form-control"
+                                                    value="<%= startDate %>">
+                                            </div>
+
+                                            <div class="col-lg-3">
+                                                <label class="form-label">
+                                                    End Date
+                                                </label>
+
+                                                <input type="date" name="endDate" class="form-control"
+                                                    value="<%= endDate %>">
+                                            </div>
+
+                                            <div class="col-lg-2 d-flex align-items-end">
+
+                                                <div class="d-grid gap-2 w-100">
+
+                                                    <button type="submit" class="btn btn-primary">
+
+                                                        <i class="feather-search me-2"></i>
+                                                        Search
+
+                                                    </button>
+
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                        <div class="mt-3">
+
+                                            <a href="/smia-ostie/list" class="btn btn-light">
+
+                                                <i class="feather-rotate-ccw me-2"></i>
+                                                Reset Filters
+
+                                            </a>
+
+                                        </div>
+
+                                    </form>
+                                </div>
+                                <!-- <div class="card-header bg-transparent border-bottom">
+
+                                    <div class="d-flex justify-content-between align-items-center">
+
+                                        <div>
+                                            <h5 class="mb-0">
+                                                Consultation Records
+                                            </h5>
+
+                                            <small class="text-muted">
+                                                <%= total %> consultation(s) found
+                                            </small>
+                                        </div>
+
+                                    </div> -->
+
+                                <!-- </div> -->
+
+                                <div class="card-body p-0">
+
+                                    <div class="table-responsive">
+
+                                        <table class="table table-hover align-middle mb-0">
+
+                                            <thead class="table-light">
+
+                                                <tr>
+                                                    <th>Matricule</th>
+                                                    <th>Employee</th>
+                                                    <th>Date</th>
+                                                    <th>Reason</th>
+                                                    <th>Status</th>
+                                                </tr>
+
+                                            </thead>
+
+                                            <tbody>
+
+                                                <% data.forEach(d=> { %>
+
+                                                    <tr>
+
+                                                        <td>
+                                                            <span class="fw-semibold">
+                                                                <%= d.employee.matricule %>
+                                                            </span>
+                                                        </td>
+
+                                                        <td>
+                                                            <div class="fw-semibold">
+                                                                <%= d.employee.name %>
+                                                                    <%= d.employee.firstname %>
+                                                            </div>
+                                                        </td>
+
+                                                        <td>
+                                                            <%= d.date.toLocaleDateString('en-GB',{ weekday:'short',
+                                                                year:'numeric', month:'short', day:'numeric' }) %>
+                                                        </td>
+
+                                                        <td>
+                                                            <%= d.reason %>
+                                                        </td>
+
+                                                        <td>
+
+                                                            <% if(d.status==="normal" ){ %>
+
+                                                                <span class="badge bg-soft-primary text-primary">
+                                                                    Normal
+                                                                </span>
+
+                                                                <% } else { %>
+
+                                                                    <span class="badge bg-soft-danger text-danger">
+                                                                        Emergency
+                                                                    </span>
+
+                                                                    <% } %>
+
+                                                        </td>
+
+                                                    </tr>
+
+                                                    <% }) %>
+
+                                                        <% if(data.length===0){ %>
+
+                                                            <tr>
+
+                                                                <td colspan="5" class="text-center py-5">
+
+                                                                    <i class="feather-inbox fs-1 text-muted"></i>
+
+                                                                    <div class="mt-2 text-muted">
+                                                                        No consultation records found
+                                                                    </div>
+
+                                                                </td>
+
+                                                            </tr>
+
+                                                            <% } %>
+
+                                            </tbody>
+
+                                        </table>
+
+                                    </div>
+
+                                </div>
+
+                                <div class="card-footer bg-white">
+
+                                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+
+                                        <small class="text-muted">
+                                            Total: <strong>
+                                                <%= total %>
+                                            </strong> record(s)
+                                        </small>
+
+                                        <!-- Pagination ici sans modification -->
+
+                                    </div>
+
+                                </div>
+
                             </div>
+
+                            <!-- Export -->
+                            <div class="card border-0 shadow-sm mt-4">
+
+                                <div class="card-body">
+
+                                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+
+                                        <div>
+
+                                            <h6 class="mb-1">
+                                                Export Data
+                                            </h6>
+
+                                            <small class="text-muted">
+                                                Download filtered consultation records.
+                                            </small>
+
+                                        </div>
+
+                                        <form action="/smia-ostie/export" method="get">
+
+                                            <input type="hidden" name="search" value="<%= search %>">
+                                            <input type="hidden" name="startDate" value="<%= startDate %>">
+                                            <input type="hidden" name="endDate" value="<%= endDate %>">
+
+                                            <button class="btn btn-success" type="submit">
+
+                                                <i class="feather-download me-2"></i>
+                                                Export Excel
+
+                                            </button>
+
+                                        </form>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
                         </div>
                     </div>
                     <%- include('partials/footer.ejs') %>

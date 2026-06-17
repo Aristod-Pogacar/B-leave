@@ -24,7 +24,7 @@ export class LeaveService {
 
   async findAllHistory(matricule: string) {
     const employee = await this.employeeRepository.findOne({
-      where: { matricule },
+      where: { matricule, is_active: true },
     });
 
     if (!employee) {
@@ -35,12 +35,10 @@ export class LeaveService {
       where: {
         employee,
         status: In([LeaveStatus.APPROVED, LeaveStatus.PENDING]),
-        // withdraw_status: In([WithdrawStatus.WITHDRAW_PENDING, WithdrawStatus.WITHDRAW_CANCELLED, null])
       },
       order: { created_at: 'DESC' },
       relations: ['employee']
     });
-    console.log("LEAVES:", leaves);
 
     return leaves;
   }
@@ -49,10 +47,8 @@ export class LeaveService {
     console.log("DTO:", createLeaveDto);
 
     const employee = await this.employeeRepository.findOne({
-      where: { matricule: createLeaveDto.employee },
+      where: { matricule: createLeaveDto.employee, is_active: true },
     });
-
-    // const
 
     if (!employee) {
       return res.status(400).json({ message: 'Employee not found' });

@@ -43,6 +43,9 @@ import { FingerprintService } from './fingerprint/fingerprint.service';
 import { FingerprintModule } from './fingerprint/fingerprint.module';
 import { Permission2hService } from './permission2h/permission2h.service';
 import { SmiaOstieService } from './smia_ostie/smia_ostie.service';
+import { EmployeeHistoryModule } from './employee-history/employee-history.module';
+import { EmployeeHistory } from './employee-history/entities/employee-history.entity';
+import { EmployeeHistoryService } from './employee-history/employee-history.service';
 
 @Module({
   imports: [
@@ -78,7 +81,8 @@ import { SmiaOstieService } from './smia_ostie/smia_ostie.service';
         Permission2h,
         MedicalService,
         SmiaOstie,
-        History
+        History,
+        EmployeeHistory
       ],
       synchronize: true,
     }),
@@ -101,9 +105,10 @@ import { SmiaOstieService } from './smia_ostie/smia_ostie.service';
     TaskModule,
     HistoryModule,
     FingerprintModule,
+    EmployeeHistoryModule,
   ],
   controllers: [AppController, PuppeteerController],
-  providers: [AppService, MailService, AuthService, JwtService, EmployeeService, PuppeteerService, CryptoService, PuppeteerManagerService, TaskService, HistoryService, FingerprintGateway, FortestGateway, FingerprintService, Permission2hService, SmiaOstieService],
+  providers: [AppService, MailService, AuthService, JwtService, EmployeeService, PuppeteerService, CryptoService, PuppeteerManagerService, TaskService, HistoryService, FingerprintGateway, FortestGateway, FingerprintService, Permission2hService, SmiaOstieService, EmployeeHistoryService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

@@ -3,166 +3,253 @@
     <body>
         <%- include('partials/sidebar.ejs') %>
             <%- include('partials/header.ejs') %>
+
                 <main class="nxl-container">
                     <div class="nxl-content">
+
                         <div class="page-header">
                             <div class="page-header-left d-flex align-items-center">
                                 <div class="page-header-title">
-                                    <h5 class="m-b-10">Be-Leave</h5>
+                                    <h5 class="m-b-10">B-Leave</h5>
                                 </div>
                                 <ul class="breadcrumb">
                                     <li class="breadcrumb-item">Users</li>
-                                    <li class="breadcrumb-item">Edit user</li>
+                                    <li class="breadcrumb-item">Edit User</li>
                                 </ul>
                             </div>
-                            <div class="page-header-right ms-auto">
-                                <div class="page-header-right-items">
-                                    <div class="d-flex d-md-none">
-                                        <a href="javascript:void(0)" class="page-header-right-close-toggle">
-                                            <i class="feather-arrow-left me-2"></i>
-                                            <span>Back</span>
-                                        </a>
-                                    </div>
-                                </div>
-                                <div class="d-md-none d-flex align-items-center">
-                                    <a href="javascript:void(0)" class="page-header-right-open-toggle">
-                                        <i class="feather-align-right fs-20"></i>
-                                    </a>
-                                </div>
-                            </div>
                         </div>
-                        <!-- [ page-header ] end -->
-                        <div class="bg-white py-3 border-bottom rounded-0 p-md-0 mb-0">
-                            <div class="d-md-none d-flex align-items-center justify-content-between">
-                                <a href="javascript:void(0)" class="page-content-left-open-toggle">
-                                    <i class="feather-align-left fs-20"></i>
-                                </a>
-                            </div>
-                        </div>
-                        <!-- [ Main Content ] start -->
+
                         <div class="main-content">
                             <div class="tab-content">
-                                <div class="tab-pane fade active show" id="overviewTab">
+                                <div class="tab-pane fade active show">
+
                                     <div class="row">
-
                                         <div class="col-12">
+
                                             <div class="card stretch stretch-full d-flex">
-                                                <div class="card-header">
-                                                    <h4 class="header">Edit user</h4>
-                                                </div>
-                                                <div class="card-body">
 
-                                                    <div class="modal-body">
-                                                        <div class="row">
+                                                <!-- Header -->
+                                                <div class="card-header border-bottom">
+                                                    <div class="d-flex align-items-center">
 
-                                                            <!-- ===== LEFT: FORM ===== -->
-                                                            <div class="col-12">
-                                                                <form id="userForm" method="POST"
-                                                                    action="/user/edit-user/<%= users.id %>">
-
-                                                                    <!-- Recherche Employé -->
-                                                                    <div class="">
-                                                                        <div class="row">
-                                                                            <div class="col-md-4 mb-3">
-                                                                                <label class="form-label">Name</label>
-                                                                                <input type="text" class="form-control"
-                                                                                    id="name" name="name"
-                                                                                    placeholder="Enter your name"
-                                                                                    value="<%= users.name %>" required>
-                                                                            </div>
-                                                                            <div class="col-md-4 mb-3">
-                                                                                <label class="form-label">First
-                                                                                    name</label>
-                                                                                <input type="text" class="form-control"
-                                                                                    id="firstName" name="firstName"
-                                                                                    placeholder="Enter your first name"
-                                                                                    value="<%= users.firstName %>"
-                                                                                    required>
-                                                                            </div>
-                                                                            <div class="col-md-4 mb-3">
-                                                                                <label class="form-label">Phone
-                                                                                    number</label>
-                                                                                <input type="text" class="form-control"
-                                                                                    id="phone" name="phone"
-                                                                                    placeholder="Enter your phone number"
-                                                                                    value="<%= users.phone %>" required>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <!-- Recherche Employé -->
-                                                                    <div class="">
-                                                                        <div class="row">
-                                                                            <div class="col-md-4 mb-3">
-                                                                                <label class="form-label">Email</label>
-                                                                                <input type="text" class="form-control"
-                                                                                    id="email" name="email"
-                                                                                    placeholder="exemple@mail.com"
-                                                                                    value="<%= users.email %>" required>
-                                                                            </div>
-                                                                            <div class="col-md-4 mb-3">
-                                                                                <label class="form-label">Role</label>
-                                                                                <select class="form-select" id="role"
-                                                                                    name="role" required>
-                                                                                    <%
-                                                                                        Object.keys(userRole).forEach(key=>
-                                                                                        { %>
-                                                                                        <% if(userRole[key]
-                                                                                            !==userRole.SUPERADMIN) { %>
-                                                                                            <option
-                                                                                                value="<%= userRole[key] %>"
-                                                                                                <%
-                                                                                                if(userRole[key]===users.role)
-                                                                                                { %>
-                                                                                                selected <% } %>>
-                                                                                                    <%= userRole[key] %>
-                                                                                            </option>
-                                                                                            <% } %>
-                                                                                                <% }) %>
-                                                                                </select>
-                                                                            </div>
-                                                                            <div class="col-md-4 mb-3">
-                                                                                <label class="form-label">Site</label>
-                                                                                <select class="form-select" id="site"
-                                                                                    name="site" required>
-                                                                                    <% Object.keys(site).forEach(key=>
-                                                                                        { %>
-                                                                                        <option value="<%= site[key] %>"
-                                                                                            <% if
-                                                                                            (site[key]===users.site) {
-                                                                                            %>
-                                                                                            selected <% } %>>
-                                                                                                <%= site[key] %>
-                                                                                        </option>
-                                                                                        <% }) %>
-                                                                                </select>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-
-                                                                </form>
-                                                            </div>
-
+                                                        <div>
+                                                            <h3 class="mb-1">Edit User</h3>
+                                                            <p class="text-muted mb-0">
+                                                                Update user information and permissions.
+                                                            </p>
                                                         </div>
 
                                                     </div>
                                                 </div>
 
-                                                <div class="card-footer">
-                                                    <button type="submit" form="userForm" class="btn btn-primary"
-                                                        id="submit">
-                                                        Save
-                                                    </button>
+                                                <!-- Body -->
+                                                <div class="card-body">
+
+                                                    <% if (locals.error) { %>
+                                                        <div class="alert alert-danger mb-4">
+                                                            <%= error %>
+                                                        </div>
+                                                        <% } %>
+
+                                                            <form id="userForm" method="POST"
+                                                                action="/user/edit-user/<%= users.id %>">
+
+                                                                <!-- Personal Information -->
+                                                                <div class="mb-4">
+
+                                                                    <h5 class="fw-semibold mb-3">
+                                                                        <i class="bi bi-person me-2 text-primary"></i>
+                                                                        Personal Information
+                                                                    </h5>
+
+                                                                    <div class="row">
+
+                                                                        <div class="col-md-4 mb-3">
+                                                                            <label class="form-label">
+                                                                                Name *
+                                                                            </label>
+                                                                            <input type="text" class="form-control"
+                                                                                id="name" name="name"
+                                                                                value="<%= users.name %>" required>
+                                                                        </div>
+
+                                                                        <div class="col-md-4 mb-3">
+                                                                            <label class="form-label">
+                                                                                First Name *
+                                                                            </label>
+                                                                            <input type="text" class="form-control"
+                                                                                id="firstName" name="firstName"
+                                                                                value="<%= users.firstName %>" required>
+                                                                        </div>
+
+                                                                        <div class="col-md-4 mb-3">
+                                                                            <label class="form-label">
+                                                                                Phone Number *
+                                                                            </label>
+                                                                            <input type="text" class="form-control"
+                                                                                id="phone" name="phone"
+                                                                                value="<%= users.phone %>" required>
+                                                                        </div>
+
+                                                                    </div>
+
+                                                                </div>
+
+                                                                <!-- Account Information -->
+                                                                <div>
+
+                                                                    <h5 class="fw-semibold mb-3">
+                                                                        <i
+                                                                            class="bi bi-person-badge me-2 text-primary"></i>
+                                                                        Access & Permissions
+                                                                    </h5>
+
+                                                                    <div class="row">
+
+                                                                        <div class="col-md-4 mb-3">
+                                                                            <label class="form-label">
+                                                                                Email
+                                                                            </label>
+                                                                            <input type="email" class="form-control"
+                                                                                id="email" name="email"
+                                                                                value="<%= users.email %>">
+                                                                        </div>
+
+                                                                        <div class="col-md-4 mb-3">
+                                                                            <label class="form-label">
+                                                                                Role *
+                                                                            </label>
+
+                                                                            <select class="form-select" id="role"
+                                                                                name="role" required>
+
+                                                                                <% Object.keys(userRole).forEach(key=> {
+                                                                                    %>
+
+                                                                                    <% if(userRole[key]
+                                                                                        !==userRole.SUPERADMIN) { %>
+
+                                                                                        <option
+                                                                                            value="<%= userRole[key] %>"
+                                                                                            <%=userRole[key]===users.role
+                                                                                            ? 'selected' : '' %>>
+                                                                                            <%= userRole[key] %>
+                                                                                        </option>
+
+                                                                                        <% } %>
+
+                                                                                            <% }) %>
+
+                                                                            </select>
+                                                                        </div>
+
+                                                                        <div class="col-md-4 mb-3">
+                                                                            <label class="form-label">
+                                                                                Site *
+                                                                            </label>
+
+                                                                            <select class="form-select" id="site"
+                                                                                name="site" required>
+
+                                                                                <% Object.keys(site).forEach(key=> { %>
+
+                                                                                    <option value="<%= site[key] %>"
+                                                                                        <%=site[key]===users.site
+                                                                                        ? 'selected' : '' %>>
+                                                                                        <%= site[key] %>
+                                                                                    </option>
+
+                                                                                    <% }) %>
+
+                                                                            </select>
+                                                                        </div>
+
+                                                                    </div>
+
+                                                                </div>
+
+                                                            </form>
+
                                                 </div>
+
+                                                <!-- Footer -->
+                                                <div class="card-footer d-flex justify-content-end gap-2 bg-light">
+
+                                                    <a href="/user/list" class="btn btn-light">
+                                                        Cancel
+                                                    </a>
+
+                                                    <button type="submit" form="userForm" class="btn btn-primary">
+
+                                                        <i class="feather-save me-2"></i>
+                                                        Update User
+
+                                                    </button>
+
+                                                </div>
+
                                             </div>
+
                                         </div>
                                     </div>
+
                                 </div>
                             </div>
                         </div>
+
                     </div>
-                    <%- include('partials/new-leave-modal-test') %>
-                        <%- include('partials/footer.ejs') %>
+
+                    <%- include('partials/footer.ejs') %>
+
+                </main>
+
     </body>
+
+    <script>
+        const roleSelect = document.getElementById("role");
+        const siteSelect = document.getElementById("site");
+
+        const allSiteOptions = Array.from(siteSelect.options);
+
+        function filterSites() {
+
+            const role = roleSelect.value;
+
+            const restrictedRoles = [
+                "HR_LEAD",
+                "MANAGER",
+                "ADMIN",
+                "PAYROLL"
+            ];
+
+            const allowedSites = [
+                "TANA",
+                "ABE 1",
+                "ABE 2"
+            ];
+
+            siteSelect.innerHTML = "";
+
+            let filteredOptions;
+
+            if (restrictedRoles.includes(role)) {
+                filteredOptions = allSiteOptions.filter(option =>
+                    allowedSites.includes(option.value)
+                );
+            } else {
+                filteredOptions = allSiteOptions;
+            }
+
+            filteredOptions.forEach(option => {
+                siteSelect.appendChild(option.cloneNode(true));
+            });
+
+            siteSelect.value = "<%= users.site %>";
+        }
+
+        roleSelect.addEventListener("change", filterSites);
+
+        filterSites();
+    </script>
 
     </html>

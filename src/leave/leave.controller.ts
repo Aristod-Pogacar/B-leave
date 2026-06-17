@@ -193,10 +193,6 @@ export class LeaveController {
   async getEmployeeLeaves(@Param('employeeId') employeeId: string, @Query('skip') skip: number, @Query('take') take: number, @Query('startDate') startDate: string, @Query('endDate') endDate: string, @Query('status') status: string) {
     const st = new Date(startDate);
     const et = new Date(endDate);
-    // console.log("STATUS:", status);
-    // console.log("EMPLOYEE ID:", employeeId);
-    // console.log("START DATE:", startDate);
-    // console.log("END DATE:", endDate);
     return this.leaveService.getPaginateEmployeeLeaves(employeeId, skip, take, st, et, status);
   }
 

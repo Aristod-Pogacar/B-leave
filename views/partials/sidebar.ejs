@@ -10,12 +10,19 @@
         <div class="navbar-content">
             <ul class="nxl-navbar">
                 <li class="nxl-item nxl-caption">
-                    <label>Navigation</label>
+                    <label>Workspace</label>
                 </li>
-                <li class="nxl-item"><a class="nxl-link" href="/">
-                        <span class="nxl-micon"><i class="feather-layers"></i></span>
+                <li class="nxl-item">
+                    <a class="nxl-link" href="/">
+                        <span class="nxl-micon">
+                            <i class="feather-home"></i>
+                        </span>
                         <span class="nxl-mtext">Dashboard</span>
-                    </a></li>
+                    </a>
+                </li>
+                <li class="nxl-item nxl-caption">
+                    <label>Time & attendance</label>
+                </li>
                 <li class="nxl-item nxl-hasmenu">
                     <a href="javascript:void(0);" class="nxl-link">
                         <span class="nxl-micon"><i class="feather-calendar"></i></span>
@@ -30,8 +37,16 @@
                                 <li class="nxl-item"><a class="nxl-link" href="/leave/simulate-leave">Simulation</a>
                                 </li>
                                 <% if(user.role=="SUPERADMIN" || user.role=="MANAGER" ) { %>
-                                    <li class="nxl-item"><a class="nxl-link" href="/leave/approuve-leaves">Leave
-                                            approval</a>
+                                    <li class="nxl-item">
+                                        <a class="nxl-link d-flex align-items-center justify-content-between"
+                                            href="/leave/approuve-leaves">
+
+                                            <span>Leave Approval</span>
+
+                                            <!-- <span class="badge bg-danger rounded-pill">
+                                                New
+                                            </span> -->
+                                        </a>
                                     </li>
                                     <% } %>
                                         <li class="nxl-item"><a class="nxl-link" href="/leave/leave-history">Leave
@@ -86,9 +101,14 @@
                         </li>
                     </ul>
                 </li>
+                <li class="nxl-item nxl-caption">
+                    <label>Human resources</label>
+                </li>
                 <li class="nxl-item nxl-hasmenu">
                     <a href="javascript:void(0);" class="nxl-link">
-                        <span class="nxl-micon"><i class="feather-users"></i></span>
+                        <span class="nxl-micon">
+                            <i class="feather-user-check"></i>
+                        </span>
                         <span class="nxl-mtext">Employees</span><span class="nxl-arrow"><i
                                 class="feather-chevron-right"></i></span>
                     </a>
@@ -97,25 +117,32 @@
                             <li class="nxl-item"><a class="nxl-link" href="/employee/list">Employee list</a>
                             </li>
                             <% } %>
-                                <% if(user.role=="SUPERADMIN" || user.role=="ADMIN" || user.role=="HR_ADMIN" ) { %>
-                                    <li class="nxl-item"><a class="nxl-link" href="/employee/import-master-file">Import
-                                            list</a>
+                                <% if(user.role=="SUPERADMIN" || user.role=="ADMIN" ) { %>
+                                    <li class="nxl-item"><a class="nxl-link" href="/employee/new-employee">New
+                                            employee</a>
                                     </li>
                                     <% } %>
-                                        <% if(user.role=="" ) { %>
+                                        <% if(user.role=="SUPERADMIN" || user.role=="ADMIN" || user.role=="HR_ADMIN" ) {
+                                            %>
                                             <li class="nxl-item"><a class="nxl-link"
-                                                    href="/employee/import-password">Import
-                                                    passwords</a>
+                                                    href="/employee/import-master-file">Import
+                                                    list</a>
                                             </li>
-                                            <li class="nxl-item"><a class="nxl-link"
-                                                    href="/employee/import-manager">Import
-                                                    managers</a>
+                                            <li class="nxl-item">
+                                                <a class="nxl-link text-warning" href="/employee-history/archives">
+                                                    <i class="feather-archive me-2"></i>
+                                                    Archives
+                                                </a>
                                             </li>
                                             <% } %>
-                                                <% if(user.role=="SUPERADMIN" || user.role=="ADMIN" ) { %>
+                                                <% if(user.role=="" ) { %>
                                                     <li class="nxl-item"><a class="nxl-link"
-                                                            href="/employee/new-employee">New
-                                                            employee</a>
+                                                            href="/employee/import-password">Import
+                                                            passwords</a>
+                                                    </li>
+                                                    <li class="nxl-item"><a class="nxl-link"
+                                                            href="/employee/import-manager">Import
+                                                            managers</a>
                                                     </li>
                                                     <% } %>
                                                         <% if(user.role=="" ) { %>
@@ -133,7 +160,9 @@
                 </li>
                 <li class="nxl-item nxl-hasmenu">
                     <a href="javascript:void(0);" class="nxl-link">
-                        <span class="nxl-micon"><i class="feather-plus-square"></i></span>
+                        <span class="nxl-micon">
+                            <i class="feather-heart"></i>
+                        </span>
                         <span class="nxl-mtext">Medical service</span><span class="nxl-arrow"><i
                                 class="feather-chevron-right"></i></span>
                     </a>
@@ -164,9 +193,14 @@
                     </ul>
                 </li>
                 <% if(user.role=="SUPERADMIN" ) { %>
+                    <li class="nxl-item nxl-caption">
+                        <label>Administration</label>
+                    </li>
                     <li class="nxl-item nxl-hasmenu">
                         <a href="javascript:void(0);" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-at-sign"></i></span>
+                            <span class="nxl-micon">
+                                <i class="feather-shield"></i>
+                            </span>
                             <span class="nxl-mtext">Users</span><span class="nxl-arrow"><i
                                     class="feather-chevron-right"></i></span>
                         </a>
@@ -182,7 +216,9 @@
                     <% if(user.role=="SUPERADMIN" ) { %>
                         <li class="nxl-item nxl-hasmenu">
                             <a href="javascript:void(0);" class="nxl-link">
-                                <span class="nxl-micon"><i class="feather-skip-back"></i></span>
+                                <span class="nxl-micon">
+                                    <i class="feather-clock"></i>
+                                </span>
                                 <span class="nxl-mtext">History</span><span class="nxl-arrow"><i
                                         class="feather-chevron-right"></i></span>
                             </a>

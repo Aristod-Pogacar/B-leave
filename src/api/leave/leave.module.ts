@@ -13,6 +13,8 @@ import { EmployeeService } from 'src/employee/employee.service';
 import { UserService } from 'src/user/user.service';
 import { User } from 'src/user/entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
+import { EmployeeHistory } from 'src/employee-history/entities/employee-history.entity';
+import { EmployeeHistoryService } from 'src/employee-history/employee-history.service';
 
 @Module({
   imports: [
@@ -37,9 +39,9 @@ import { JwtService } from '@nestjs/jwt';
         },
       }),
     }),
-    TypeOrmModule.forFeature([Leave, Employee, History, User])],
+    TypeOrmModule.forFeature([Leave, Employee, History, User, EmployeeHistory])],
   controllers: [LeaveController],
-  providers: [LeaveService, CryptoService, HistoryService, EmployeeService, UserService, JwtService],
-  exports: [LeaveService, TypeOrmModule, CryptoService, HistoryService, EmployeeService, UserService, JwtService],
+  providers: [LeaveService, CryptoService, HistoryService, EmployeeService, UserService, JwtService, EmployeeHistoryService],
+  exports: [LeaveService, TypeOrmModule, CryptoService, HistoryService, EmployeeService, UserService, JwtService, EmployeeHistoryService],
 })
 export class ApiLeaveModule { }
