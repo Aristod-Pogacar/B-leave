@@ -1,0 +1,212 @@
+<%- include('partials/head.ejs') %>
+
+    <body>
+        <%- include('partials/sidebar.ejs') %>
+            <%- include('partials/header.ejs') %>
+                <main class="nxl-container">
+                    <div class="nxl-content">
+                        <div class="page-header">
+                            <div class="page-header-left d-flex align-items-center">
+                                <div class="page-header-title">
+                                    <h5 class="m-b-10">B-Leave</h5>
+                                </div>
+                                <ul class="breadcrumb">
+                                    <li class="breadcrumb-item">Leaves</li>
+                                    <li class="breadcrumb-item">Holidays</li>
+                                </ul>
+                            </div>
+                            <div class="page-header-right ms-auto">
+                                <div class="page-header-right-items">
+                                    <div class="d-flex d-md-none">
+                                        <a href="javascript:void(0)" class="page-header-right-close-toggle">
+                                            <i class="feather-arrow-left me-2"></i>
+                                            <span>Back</span>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="d-md-none d-flex align-items-center">
+                                    <a href="javascript:void(0)" class="page-header-right-open-toggle">
+                                        <i class="feather-align-right fs-20"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- [ page-header ] end -->
+                        <div class="bg-white py-3 border-bottom rounded-0 p-md-0 mb-0">
+                            <div class="d-md-none d-flex align-items-center justify-content-between">
+                                <a href="javascript:void(0)" class="page-content-left-open-toggle">
+                                    <i class="feather-align-left fs-20"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <!-- [ Main Content ] start -->
+                        <div class="main-content">
+                            <div class="tab-content">
+                                <div class="tab-pane fade active show" id="overviewTab">
+                                    <div class="row">
+
+                                        <div class="col-12">
+                                            <div class="card stretch stretch-full">
+                                                <div class="card-body border-bottom border-1">
+                                                    <div
+                                                        class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+
+                                                        <div>
+                                                            <h3 class="fw-bold mb-1">
+                                                                Holidays List
+                                                            </h3>
+
+                                                            <p class="text-muted mb-0">
+                                                                Manage application holidays.
+                                                            </p>
+                                                        </div>
+
+                                                        <div class="d-flex gap-2">
+
+                                                            <a href="/holiday/new-holiday" class="btn btn-primary">
+                                                                <i class="feather-plus me-2"></i>
+                                                                New Holiday
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="card-body border-bottom bg-light">
+                                                    <form method="GET">
+
+                                                        <div class="row g-3 align-items-end">
+
+                                                            <div class="col-md-6">
+                                                                <label class="form-label">
+                                                                    Select Year
+                                                                </label>
+
+                                                                <div class="input-group">
+
+                                                                    <span class="input-group-text">
+                                                                        <i class="feather-calendar"></i>
+                                                                    </span>
+
+                                                                    <select name="year" id="year" class="form-select">
+                                                                        <% years.forEach(year=> { %>
+                                                                            <option value="<%= year %>" <% if
+                                                                                (year==currentYear) { %>selected
+                                                                                <% } %>>
+                                                                                    <%= year %>
+                                                                            </option>
+                                                                            <% }) %>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-md-6">
+                                                                <div class="d-flex gap-2">
+
+                                                                    <button type="submit" class="btn btn-primary">
+
+                                                                        <i class="feather-search me-2"></i>
+                                                                        Search
+                                                                    </button>
+
+                                                                    <a href="/holiday/holidays" class="btn btn-light">
+
+                                                                        Reset
+                                                                    </a>
+
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+
+                                                    </form>
+                                                </div>
+                                                <div class="card-body custom-card-action p-0">
+                                                    <div class="table-responsive mb-3">
+                                                        <table class="table table-hover mb-0">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th style="width:80px;" class="text-center">
+                                                                        #
+                                                                    </th>
+                                                                    <th>Holidays</th>
+                                                                    <% if(user.role=="SUPERADMIN" ||
+                                                                        user.role=="PAYROLL" ) { %>
+                                                                        <th class="text-end"
+                                                                            style="width: 200px !important;">Action
+                                                                        </th>
+                                                                        <% } %>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <% var i=1; %>
+                                                                    <% holidays.forEach((holiday, index)=> { %>
+                                                                        <tr>
+                                                                            <td style="width:80px;" class="text-center fw-semibold
+                                                                                    text-muted">
+                                                                                <%= i++ %>
+                                                                            </td>
+
+                                                                            <td>
+                                                                                <div class="d-flex align-items-center">
+
+                                                                                    <div
+                                                                                        class="avatar-text avatar-md bg-soft-primary text-primary m-0 me-3">
+                                                                                        <i class="feather-calendar"></i>
+                                                                                    </div>
+
+                                                                                    <div>
+                                                                                        <div class="fw-semibold">
+                                                                                            <%= holiday.name %>
+                                                                                        </div>
+
+                                                                                        <small class="text-muted">
+                                                                                            <%= new
+                                                                                                Date(holiday.date).toLocaleDateString('en-US',
+                                                                                                { month: 'short' ,
+                                                                                                day: 'numeric' ,
+                                                                                                year: 'numeric' }) %>
+                                                                                        </small>
+                                                                                    </div>
+
+                                                                                </div>
+                                                                            </td>
+
+                                                                            <% if(user.role=="SUPERADMIN" ||
+                                                                                user.role=="PAYROLL" ) { %>
+                                                                                <td>
+
+                                                                                    <div
+                                                                                        class="d-flex justify-content-end gap-2 m-0 p-0">
+
+
+                                                                                        <a href="/holiday/edit-holiday/<%= holiday.id %>"
+                                                                                            class="btn btn-primary">
+
+                                                                                            <i
+                                                                                                class="feather-edit-2"></i>
+                                                                                        </a>
+
+                                                                                        <a href="/holiday/delete-holiday/<%= holiday.id %>"
+                                                                                            class="btn btn-danger">
+
+                                                                                            <i
+                                                                                                class="feather-trash-2"></i>
+                                                                                        </a>
+
+                                                                                    </div>
+
+                                                                                </td>
+                                                                                <% } %>
+                                                                        </tr>
+                                                                        <% }) %>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <%- include('partials/footer.ejs') %>

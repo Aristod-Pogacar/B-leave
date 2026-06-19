@@ -12,7 +12,7 @@ export class EmployeeHistoryController {
 
   @Get('get-employee-history/:employeeId')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HR_LEAD, UserRole.MANAGER, UserRole.PAYROLL, UserRole.HR_LEAD)
+  @Roles(UserRole.SUPERADMIN, UserRole.HR_LEAD)
   @Render('history')
   async getEmployeeHistory(@Req() req, @Param('employeeId') employeeId: string, @Res() res) {
     const data = await this.employeeHistoryService.employeeHistory(employeeId);
@@ -25,7 +25,7 @@ export class EmployeeHistoryController {
 
   @Get('rehire/:id')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HR_LEAD, UserRole.MANAGER, UserRole.PAYROLL, UserRole.HR_LEAD)
+  @Roles(UserRole.SUPERADMIN, UserRole.HR_LEAD)
   @Render('rehire')
   async getrehire(@Req() req, @Param('id') id: string, @Res() res) {
     const data = await this.employeeHistoryService.findOne(id);
@@ -38,7 +38,7 @@ export class EmployeeHistoryController {
 
   @Post('rehire/:id')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HR_LEAD, UserRole.MANAGER, UserRole.PAYROLL, UserRole.HR_LEAD)
+  @Roles(UserRole.SUPERADMIN, UserRole.HR_LEAD)
   async rehire(@Req() req, @Param('id') id: string, @Res() res, @Body() body: any) {
     const data = await this.employeeHistoryService.rehire(id, body);
     // if (data == `Employee not found`) {
@@ -51,7 +51,7 @@ export class EmployeeHistoryController {
 
   @Get('archives')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HR_LEAD, UserRole.MANAGER, UserRole.PAYROLL, UserRole.HR_LEAD)
+  @Roles(UserRole.SUPERADMIN, UserRole.HR_LEAD)
   @Render('archive')
   async archives(
     @Req() req,

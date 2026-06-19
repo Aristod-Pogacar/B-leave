@@ -129,18 +129,19 @@
                                                     </div>
                                                 </div>
 
-                                                <% if(user.role==='SUPERADMIN' || user.role==='ADMIN' ) { %>
+                                                <% if(user.role==='SUPERADMIN' || user.role==='ADMIN' ||
+                                                    user.role=='HR_LEAD' ) { %>
                                                     <div class="d-flex gap-2">
                                                         <a href="/employee/edit/<%= employee.id %>"
                                                             class="btn btn-primary">
                                                             <i class="bi bi-pencil-square me-2"></i>
                                                             Edit
                                                         </a>
-                                                        <% if(employee.is_active==true) { %>
+                                                        <% if(employee.is_active==true && user.role=='HR_LEAD' ) { %>
                                                             <a href="/employee/confirm-archive/<%= employee.id %>"
                                                                 class="btn btn-danger">
-                                                                <i class="bi bi-archive me-2"></i>
-                                                                Archive
+                                                                <i class="bi bi-person-x-fill me-2"></i>
+                                                                Deactivate
                                                             </a>
                                                             <% } %>
                                                     </div>

@@ -3,7 +3,7 @@ import { CreateLeaveDto } from './dto/create-leave.dto';
 import { UpdateLeaveDto } from './dto/update-leave.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Leave, LeaveStatus } from './entities/leave.entity';
-import { Between, In, IsNull, LessThanOrEqual, Like, MoreThanOrEqual, Repository } from 'typeorm';
+import { Between, In, IsNull, LessThanOrEqual, Like, MoreThanOrEqual, Not, Repository } from 'typeorm';
 import { Employee } from 'src/employee/entities/employee.entity';
 import * as express from 'express';
 import * as ExcelJS from 'exceljs';
@@ -657,7 +657,16 @@ export class LeaveService {
 
   async getPaginateEmployeeLeaves(employeeId: string, skip: number = 0, take: number = 1000, startDate: Date, endDate: Date, status: string) {
     const [data, count] = await this.leaveRepository.findAndCount({
-      where: { employee: { id: employeeId, is_active: true, is_deleted: false }, start_date: Between(startDate, endDate), status: In(this.getLeavesByStatus(status)) },
+      where: {
+        employee: {
+          id: employeeId,
+          is_active: true,
+          is_deleted: false
+        },
+        start_date: Between(startDate, endDate),
+        status: In(this.getLeavesByStatus(status)),
+        leave_type: Not("Permission_AMD")
+      },
       order: { start_date: 'DESC' },
       relations: ['approver', 'employee'],
       // skip,

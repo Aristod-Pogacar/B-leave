@@ -46,6 +46,9 @@ import { SmiaOstieService } from './smia_ostie/smia_ostie.service';
 import { EmployeeHistoryModule } from './employee-history/employee-history.module';
 import { EmployeeHistory } from './employee-history/entities/employee-history.entity';
 import { EmployeeHistoryService } from './employee-history/employee-history.service';
+import { HolidayModule } from './holiday/holiday.module';
+import { Holiday } from './holiday/entities/holiday.entity';
+import { HolidayService } from './holiday/holiday.service';
 
 @Module({
   imports: [
@@ -82,7 +85,8 @@ import { EmployeeHistoryService } from './employee-history/employee-history.serv
         MedicalService,
         SmiaOstie,
         History,
-        EmployeeHistory
+        EmployeeHistory,
+        Holiday
       ],
       synchronize: true,
     }),
@@ -106,6 +110,7 @@ import { EmployeeHistoryService } from './employee-history/employee-history.serv
     HistoryModule,
     FingerprintModule,
     EmployeeHistoryModule,
+    HolidayModule,
   ],
   controllers: [AppController, PuppeteerController],
   providers: [AppService, MailService, AuthService, JwtService, EmployeeService, PuppeteerService, CryptoService, PuppeteerManagerService, TaskService, HistoryService, FingerprintGateway, FortestGateway, FingerprintService, Permission2hService, SmiaOstieService, EmployeeHistoryService],

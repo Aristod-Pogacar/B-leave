@@ -8,11 +8,13 @@
     const reasonInput1 = document.getElementById('reason1');
     // const simulateButton = document.getElementById('simulateButton');
     const simulateDate = document.getElementById('simulate_date');
+    const returnDate = document.getElementById('return_date');
     const formSimulation = document.getElementById('formSimulation');
     const leaveType = document.getElementById('leave_type');
     const balance_type = document.getElementById('balance_type');
 
     const days_taken = document.getElementById('days_taken');
+    const days_display = document.getElementById('days_display');
 
     const startDate1 = document.getElementById('startDate1');
     const endDate1 = document.getElementById('endDate1');
@@ -24,17 +26,38 @@
     endDate1.addEventListener('change', checkSimulationLeave);
 
     simulateDate.value = new Date().toISOString().slice(0, 10);
+    returnDate.value = new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().slice(0, 10);
     startDate1.value = new Date().toISOString().slice(0, 10);
     endDate1.value = new Date().toISOString().slice(0, 10);
 
     simulateDate.addEventListener('change', () => {
         startDate1.value = simulateDate.value;
+        console.log("SIMULATE DATE", simulateDate.value)
+        console.log("RETURN DATE", returnDate.value)
+        returnDate.min = simulateDate.value;
+        days_taken.value = getNumberOfDays(startDate1.value, returnDate.value) - 1;
         endDate1.value = new Date(new Date(simulateDate.value).setDate(new Date(simulateDate.value).getDate() + parseInt(days_taken.value) - 1)).toISOString().slice(0, 10);
+        console.log("END DATE", endDate1.value)
+        console.log("NUMBER OF DAYS:", days_taken.value)
+        days_display.textContent = days_taken.value;
+        checkSimulationLeave();
+    });
+
+    returnDate.addEventListener('change', () => {
+        startDate1.value = simulateDate.value;
+        console.log("SIMULATE DATE", simulateDate.value)
+        console.log("RETURN DATE", returnDate.value)
+        days_taken.value = getNumberOfDays(startDate1.value, returnDate.value) - 1;
+        endDate1.value = new Date(new Date(simulateDate.value).setDate(new Date(simulateDate.value).getDate() + parseInt(days_taken.value) - 1)).toISOString().slice(0, 10);
+        console.log("END DATE", endDate1.value)
+        console.log("NUMBER OF DAYS:", days_taken.value)
+        days_display.textContent = days_taken.value;
         checkSimulationLeave();
     });
 
     days_taken.addEventListener('change', () => {
         endDate1.value = new Date(new Date(startDate1.value).setDate(new Date(startDate1.value).getDate() + parseInt(days_taken.value) - 1)).toISOString().slice(0, 10);
+        days_display.textContent = days_taken.value;
         checkSimulationLeave();
     });
 
@@ -87,7 +110,7 @@
                 const data = await res.json();
 
                 results1.innerHTML = '';
-                console.log("Data:", data);
+                // console.log("Data:", data);
                 data.forEach(emp => {
                     const li = document.createElement('li');
                     li.classList.add('list-group-item');
@@ -143,8 +166,6 @@
             messageContainer.className = "alert alert-" + styleAlert;
             return;
         }
-        console.log("Matricule:", hiddenInputMatricule1.value);
-        console.log("Date:", simulateDate.value);
         const simulation = fetch('/leave/simulate-cumul-balance', {
             method: 'POST',
             headers: {
@@ -155,7 +176,7 @@
                 date: simulateDate.value,
             }),
         }).then(res => res.json()).then(data => {
-            console.log("Data:", data);
+            // console.log("Data:", data);
             solde_simulate = data.solde_restant;
             solde_pris_simulate = data.solde_pris;
             solde_cumule_simulate = data.solde_cumul;
@@ -173,12 +194,12 @@
             soldePris2.textContent = solde_pris_simulate + numberOfDays;
             soldePermissions2.textContent = soldePermissions1.textContent;
             soldeRestant2.textContent = (solde_simulate - numberOfDays).toFixed(2);
-            console.log("SOLDE SIMULATE:", solde_simulate);
-            console.log("SOLDE PRIS:", solde_pris_simulate);
-            console.log("SOLDE CUMULE:", solde_cumule_simulate);
-            console.log("NUMBER OF DAYS:", numberOfDays)
+            // console.log("SOLDE SIMULATE:", solde_simulate);
+            // console.log("SOLDE PRIS:", solde_pris_simulate);
+            // console.log("SOLDE CUMULE:", solde_cumule_simulate);
+            // console.log("NUMBER OF DAYS:", numberOfDays)
             if (numberOfDays > solde_simulate) {
-                console.log("Solde de congé: " + solde_simulate + " jours. Insuffisant pour cette demande (" + numberOfDays + " jours)");
+                // console.log("Solde de congé: " + solde_simulate + " jours. Insuffisant pour cette demande (" + numberOfDays + " jours)");
             }
             if (!checkDate(startDate, endDate) || numberOfDays <= 0) {
                 messageContainer.innerHTML = "Invalid number of days";

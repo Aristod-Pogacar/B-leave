@@ -567,3 +567,12 @@ thead {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
     opacity: 1;
 }
+
+.holiday {
+    background: #f50743;
+    color: white;
+}
+
+.holiday:hover {
+    background: #e1063e;
+}

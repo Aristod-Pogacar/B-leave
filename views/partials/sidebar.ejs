@@ -3,8 +3,8 @@
         <div class="m-header">
             <a href="/" class="b-brand">
                 <!-- ========   change your logo hear   ============ -->
-                <img src="/assets/logo/b-leave-icon-text.png" alt="" class="logo logo-lg">
-                <img src="/assets/logo/b-leave-icon.png" alt="" class="logo logo-sm">
+                <img src="/assets/logo/3-5.png" alt="" class="logo logo-lg">
+                <img src="/assets/logo/2-2.png" alt="" class="logo logo-sm">
             </a>
         </div>
         <div class="navbar-content">
@@ -62,6 +62,9 @@
                                                             href="/leave/import-leaves">Import
                                                             leaves</a>
                                                     </li>
+                                                    <li class="nxl-item"><a class="nxl-link"
+                                                            href="/holiday/holidays">Holidays</a>
+                                                    </li>
                                                     <% } %>
                     </ul>
                 </li>
@@ -74,11 +77,11 @@
                     <ul class="nxl-submenu">
                         <li class="nxl-item nxl-hasmenu">
                             <a href="javascript:void(0);" class="nxl-link">
-                                <span class="nxl-mtext">Permission exceptionnelle</span><span class="nxl-arrow"><i
+                                <span class="nxl-mtext">Exceptional Permissions</span><span class="nxl-arrow"><i
                                         class="feather-chevron-right"></i></span>
                             </a>
                             <ul class="nxl-submenu">
-                                <li class="nxl-item"><a class="nxl-link" href="/leave/permissions">List</a></li>
+                                <li class="nxl-item"><a class="nxl-link" href="/leave/permissions">History</a></li>
                                 <% if(user.role=="SUPERADMIN" || user.role=="MANAGER" ) { %>
                                     <li class="nxl-item"><a class="nxl-link"
                                             href="/leave/approuve-permissions">Approval</a>
@@ -87,11 +90,11 @@
                             </ul>
                         <li class="nxl-item nxl-hasmenu">
                             <a href="javascript:void(0);" class="nxl-link">
-                                <span class="nxl-mtext">Permission 2h</span><span class="nxl-arrow"><i
+                                <span class="nxl-mtext">2h Permissions</span><span class="nxl-arrow"><i
                                         class="feather-chevron-right"></i></span>
                             </a>
                             <ul class="nxl-submenu">
-                                <li class="nxl-item"><a class="nxl-link" href="/permission2h/list">List</a></li>
+                                <li class="nxl-item"><a class="nxl-link" href="/permission2h/list">History</a></li>
                                 <% if(user.role=="SUPERADMIN" || user.role=="MANAGER" ) { %>
                                     <li class="nxl-item"><a class="nxl-link"
                                             href="/permission2h/approuve-permission-2h">Approval</a>

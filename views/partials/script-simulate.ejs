@@ -77,8 +77,6 @@
     });
 
     function checkSimulationLeave() {
-        console.log("Matricule:", hiddenInputMatricule1.value);
-        console.log("Date:", startDate1.value);
         const simulation = fetch('/leave/simulate-cumul-balance', {
             method: 'POST',
             headers: {

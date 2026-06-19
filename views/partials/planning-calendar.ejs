@@ -29,11 +29,9 @@
 </div>
 
 <script>
-    function clean(d) {
-        const c = new Date(d);
-        c.setHours(0, 0, 0, 0);
-        return c;
-    }
+
+    const holidayColor = '#ffeedc'
+
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
     const tooltipList = [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el))
     const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
@@ -44,6 +42,12 @@
     const datesContainer = document.getElementById("datesContainer");
     const datesGrid = document.getElementById("datesGrid");
     const searchInput = document.getElementById("search");
+
+    function clean(d) {
+        const c = new Date(d);
+        c.setHours(0, 0, 0, 0);
+        return c;
+    }
 
     let searchTimeout = null;
     searchInput.addEventListener("input", () => {
@@ -63,7 +67,6 @@
     const endDateFilter = document.getElementById("endDateFilter");
 
     const titre = document.title;
-    console.log(titre);
     startDateFilter.value = startD.toISOString().split("T")[0];
     endDateFilter.value = endD.toISOString().split("T")[0];
     if (titre.trim() == 'B-Leave || Dashboard') {
@@ -75,9 +78,6 @@
         startDateFilter.value = startD.toISOString().split("T")[0];
         endDateFilter.value = endD.toISOString().split("T")[0];
     }
-
-    console.log("Start date Filter value: ", startDateFilter.value)
-    console.log("End date Filter value: ", endDateFilter.value)
 
     startDateFilter.addEventListener("change", loadPlanning);
     endDateFilter.addEventListener("change", loadPlanning);
@@ -91,6 +91,7 @@
 
     let employees = [];
     let leaves = [];
+    let holidays = [];
     let currentStartDate = new Date();
     currentStartDate.setDate(currentStartDate.getDate() - 15);
     let currentEndDate = new Date(new Date().getFullYear(), new Date().getMonth() + 2, 0);
@@ -114,7 +115,6 @@
             const today = new Date();
             startD = new Date(today.getFullYear(), today.getMonth(), 1);
             endD = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-            console.log("Titre:", titre)
         } else {
             startD = new Date(startDateFilter.value);
             endD = new Date(endDateFilter.value);
@@ -143,6 +143,10 @@
         const startMonth = startD.getMonth();
         const endMonth = endD.getMonth();
 
+        const holidaysUrl = `/holiday/by-date/${startD.toISOString().split("T")[0]}/${endD.toISOString().split("T")[0]}`;
+        const resHolidays = await fetch(holidaysUrl);
+        holidays = await resHolidays.json();
+
         const employeeUrl = `/employee/find-all?line=${line}&section=${section}&division=${division}&site=${site}&skip=0&take=1000&search=${encodeURIComponent(search)}`;
         const res = await fetch(employeeUrl);
         if (!res.ok) { console.error("Erreur API"); return; }
@@ -152,10 +156,8 @@
 
         const leaveUrl = `/leave/range?year=${year}&startMonth=${startMonth}&endMonth=${endMonth}&line=${line}&section=${section}&division=${division}&site=${site}&search=${encodeURIComponent(search)}`;
         const resLeave = await fetch(leaveUrl);
-        console.log('Leave URL:', leaveUrl)
 
         leaves = await resLeave.json();
-        console.log('Leaves:', leaves)
 
         renderEmployees();
         renderCalendar();
@@ -202,7 +204,6 @@
             const today = new Date();
             startD = new Date(today.getFullYear(), today.getMonth(), 1);
             endD = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-            console.log("Titre:", titre)
             currentStartDate = new Date(startD);
             currentEndDate = new Date(endD);
         } else {
@@ -227,8 +228,20 @@
                 cell.classList.add("header-today");
                 cell.dataset.date = isoDate;
             }
+
             if (d.getDay() === 6) cell.classList.add("day-off-saturday");
             if (d.getDay() === 0) cell.classList.add("day-off-sunday");
+
+            holidays.forEach(holiday => {
+                const holidayDate = new Date(holiday.date);
+                holidayDate.setDate(holidayDate.getDate() - 1);
+                if (d.toISOString().split("T")[0] === holidayDate.toISOString().split("T")[0]) {
+                    cell.classList.add("holiday");
+                    cell.dataset.date = holiday.date;
+                    cell.title = holiday.name;
+                    cell.style.backgroundColor = holidayColor;
+                }
+            });
 
             const dayNames = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
             cell.innerHTML = `<div>${dayNames[d.getDay()]}</div><div>${d.getDate()}</div>`;
@@ -270,7 +283,6 @@
                     if (dateStartFilter > sss) sss = dateStartFilter;
                     if (dateEndFilter < eee) eee = dateEndFilter;
                     const nb = getNumberOfDays(sss, eee);
-                    console.log("nb", nb);
 
                     const typeKey = leave.leave_type.replace(/\s+/g, "_");
 
@@ -335,6 +347,17 @@
                     if (d.getDay() === 6) cell.classList.add("day-off-saturday");
                     if (d.getDay() === 0) cell.classList.add("day-off-sunday");
                 }
+
+                holidays.forEach(holiday => {
+                    const holidayDate = new Date(holiday.date);
+                    holidayDate.setDate(holidayDate.getDate() - 1);
+                    if (d.toISOString().split("T")[0] === holidayDate.toISOString().split("T")[0]) {
+                        cell.classList.add("holiday");
+                        cell.dataset.date = holiday.date;
+                        cell.title = holiday.name;
+                        cell.style.backgroundColor = holidayColor;
+                    }
+                });
 
                 datesGrid.appendChild(cell);
             });

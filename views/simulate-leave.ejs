@@ -8,7 +8,7 @@
                         <div class="page-header">
                             <div class="page-header-left d-flex align-items-center">
                                 <div class="page-header-title">
-                                    <h5 class="m-b-10">Be-Leave</h5>
+                                    <h5 class="m-b-10">B-Leave</h5>
                                 </div>
                                 <ul class="breadcrumb">
                                     <li class="breadcrumb-item">Leaves</li>
@@ -113,9 +113,9 @@
 
                                                             <div class="row g-3">
 
-                                                                <div class="col-md-12">
+                                                                <div class="col-md-6">
                                                                     <label class="form-label">
-                                                                        Simulation Date
+                                                                        Start date
                                                                     </label>
 
                                                                     <input type="date" class="form-control"
@@ -125,17 +125,29 @@
 
                                                                 <div class="col-md-6">
                                                                     <label class="form-label">
-                                                                        Days Taken
+                                                                        Return date
                                                                     </label>
 
-                                                                    <input type="number" name="days_taken" value="1"
-                                                                        min="0" max="30" id="days_taken"
-                                                                        class="form-control" required>
+                                                                    <input type="date" class="form-control"
+                                                                        name="return_date" id="return_date" required>
                                                                 </div>
 
                                                                 <div class="col-md-6">
                                                                     <label class="form-label">
-                                                                        Balance Type
+                                                                        Days Taken
+                                                                    </label>
+                                                                    <div class="form-control bg-light"
+                                                                        id="days_display">0
+                                                                    </div>
+
+                                                                    <input type="number" name="days_taken" value="1"
+                                                                        min="0" max="30" id="days_taken"
+                                                                        class="form-control d-none" required>
+                                                                </div>
+
+                                                                <div class="col-md-6">
+                                                                    <label class="form-label">
+                                                                        Accrual Basis
                                                                     </label>
 
                                                                     <select name="balance_type" id="balance_type"
@@ -233,7 +245,7 @@
                                                                         <strong id="soldeDebut1">-</strong>
                                                                     </div>
 
-                                                                    <div class="d-flex justify-content-between py-2 border-bottom"
+                                                                    <div class="d-flex justify-content-between py-2 border-bottom d-none"
                                                                         name="entitlement-day">
 
                                                                         <span>Entitlement To Date</span>
@@ -241,7 +253,7 @@
 
                                                                     </div>
 
-                                                                    <div class="d-flex justify-content-between py-2 border-bottom d-none"
+                                                                    <div class="d-flex justify-content-between py-2 border-bottom "
                                                                         name="entitlement-month">
 
                                                                         <span>Entitlement To Date</span>

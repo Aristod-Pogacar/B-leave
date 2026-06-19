@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Render, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Render, Req, UseGuards, Query } from '@nestjs/common';
 import { HistoryService } from './history.service';
 import { CreateHistoryDto } from './dto/create-history.dto';
 import { UpdateHistoryDto } from './dto/update-history.dto';
@@ -14,9 +14,43 @@ export class HistoryController {
   @Render('b-leave-history')
   @UseGuards(RolesGuard)
   @Roles(UserRole.SUPERADMIN)
-  async bLeaveHistory(@Req() req: any) {
-    const histories = await this.historyService.findAll();
-    return { title: "B-Leave History", histories: histories };
+  async bLeaveHistory(
+    @Req() req,
+    @Query('search') search: string = '',
+    @Query('page') page: number = 1,
+    @Query('startDate') startDate: string = new Date().toISOString().split('T')[0],
+    @Query('endDate') endDate: string = new Date().toISOString().split('T')[0],
+  ) {
+    const limit = 20;
+    const { data, total, totalPages } = await this.historyService.paginate(
+      search,
+      Number(page),
+      limit,
+      startDate,
+      endDate
+    );;
+
+    const currentPage = Number(page);
+    const maxButtons = 7;
+    let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+    let endPage = startPage + maxButtons - 1;
+
+    if (endPage > totalPages) {
+      endPage = totalPages;
+      startPage = Math.max(1, endPage - maxButtons + 1);
+    }
+    return {
+      title: "B-Leave History",
+      histories: data,
+      total,
+      totalPages,
+      currentPage,
+      startPage,
+      endPage,
+      search,
+      startDate,
+      endDate,
+    };
   }
 
   @Post()
