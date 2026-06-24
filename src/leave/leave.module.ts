@@ -24,6 +24,8 @@ import { UserService } from 'src/user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { EmployeeHistoryService } from 'src/employee-history/employee-history.service';
 import { EmployeeHistory } from 'src/employee-history/entities/employee-history.entity';
+import { Holiday } from 'src/holiday/entities/holiday.entity';
+import { HolidayService } from 'src/holiday/holiday.service';
 
 @Module({
   imports: [
@@ -49,10 +51,10 @@ import { EmployeeHistory } from 'src/employee-history/entities/employee-history.
       }),
     }),
 
-    TypeOrmModule.forFeature([Leave, Employee, ManagerAssignation, User, History, Task, SmiaOstie, Permission2h, EmployeeHistory]),
+    TypeOrmModule.forFeature([Leave, Employee, ManagerAssignation, User, History, Task, SmiaOstie, Permission2h, EmployeeHistory, Holiday]),
   ],
   controllers: [LeaveController],
-  providers: [LeaveService, EmployeeService, CryptoService, HistoryService, TaskService, PuppeteerManagerService, PuppeteerService, SmiaOstieService, Permission2hService, UserService, JwtService, EmployeeHistoryService],
-  exports: [LeaveService, TypeOrmModule, CryptoService, HistoryService, TaskService, PuppeteerManagerService, PuppeteerService, SmiaOstieService, Permission2hService, UserService, JwtService, EmployeeHistoryService],
+  providers: [LeaveService, EmployeeService, CryptoService, HistoryService, TaskService, PuppeteerManagerService, PuppeteerService, SmiaOstieService, Permission2hService, UserService, JwtService, EmployeeHistoryService, HolidayService],
+  exports: [LeaveService, TypeOrmModule, CryptoService, HistoryService, TaskService, PuppeteerManagerService, PuppeteerService, SmiaOstieService, Permission2hService, UserService, JwtService, EmployeeHistoryService, HolidayService],
 })
 export class LeaveModule { }

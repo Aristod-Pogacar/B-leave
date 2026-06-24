@@ -459,6 +459,8 @@ export class LeaveService {
       .createQueryBuilder('leave')
       .leftJoin('leave.employee', 'employee')
       .select('employee.id', 'employeeId')
+      .addSelect('leave.start_date', 'start_date')
+      .addSelect('leave.end_date', 'end_date')
       .addSelect(
         'SUM(DATEDIFF(leave.end_date, leave.start_date) + 1)',
         'daysTaken'
@@ -476,8 +478,11 @@ export class LeaveService {
 
     const takenMap = new Map<string, number>();
 
-    takenLeaves.forEach(l => {
-      takenMap.set(l.employeeId, Number(l.daysTaken));
+    takenLeaves.forEach(async l => {
+      const holidays = await this.employeeService.getDaysTakenWithHoliday(l.start_date, l.end_date);
+      const daysTaken = Number(l.daysTaken) - holidays;
+      takenMap.set(l.employeeId, Number(daysTaken.toFixed(2)));
+      // takenMap.set(l.employeeId, Number(l.daysTaken));
     });
 
     const promises = data.map(async (emp) => {
@@ -527,6 +532,8 @@ export class LeaveService {
       .createQueryBuilder('leave')
       .leftJoin('leave.employee', 'employee')
       .select('employee.id', 'employeeId')
+      .addSelect('leave.start_date', 'start_date')
+      .addSelect('leave.end_date', 'end_date')
       .addSelect(
         'SUM(DATEDIFF(leave.end_date, leave.start_date) + 1)',
         'daysTaken'
@@ -542,8 +549,12 @@ export class LeaveService {
 
     const takenLeavesMap = new Map<string, number>();
 
-    takenLeaves.forEach(l => {
-      takenLeavesMap.set(l.employeeId, Number(l.daysTaken));
+    takenLeaves.forEach(async l => {
+      const holidays = await this.employeeService.getDaysTakenWithHoliday(l.start_date, l.end_date);
+      const daysTaken = Number(l.daysTaken) - holidays;
+      takenLeavesMap.set(l.employeeId, Number(daysTaken.toFixed(2)));
+      // takenMap.set(l.employeeId, Number(l.daysTaken));
+
     });
 
     function estDernierJourDuMois(date: Date) {

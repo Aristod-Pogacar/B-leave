@@ -10,6 +10,19 @@ import { UserRole } from 'src/user/entities/user.entity';
 export class HolidayController {
   constructor(private readonly holidayService: HolidayService) { }
 
+  @Get('by-date/:start_date/:end_date')
+  async getByDate(@Param('start_date') start_date: string, @Param('end_date') end_date: string) {
+    console.log('start_date', start_date);
+    console.log('end_date', end_date);
+    const date1 = new Date(start_date);
+    const date2 = new Date(end_date);
+    if (date1 > date2) {
+      return [];
+    }
+    const holidays = await this.holidayService.findByDateRange(start_date, end_date);
+    return holidays;
+  }
+
   @Get('holidays')
   @UseGuards(RolesGuard)
   @Roles(UserRole.SUPERADMIN, UserRole.HR_LEAD)
@@ -120,17 +133,6 @@ export class HolidayController {
       user: req.session.user,
       years
     }
-  }
-
-  @Get('by-date/:start_date/:end_date')
-  async getByDate(@Param('start_date') start_date: string, @Param('end_date') end_date: string) {
-    const date1 = new Date(start_date);
-    const date2 = new Date(end_date);
-    if (date1 > date2) {
-      return [];
-    }
-    const holidays = await this.holidayService.findByDateRange(start_date, end_date);
-    return holidays;
   }
 
   @Post()

@@ -17,11 +17,13 @@ import { Permission2hService } from 'src/permission2h/permission2h.service';
 import { SmiaOstieService } from 'src/smia_ostie/smia_ostie.service';
 import { SmiaOstie } from 'src/smia_ostie/entities/smia_ostie.entity';
 import { EmployeeHistory } from 'src/employee-history/entities/employee-history.entity';
+import { Holiday } from 'src/holiday/entities/holiday.entity';
+import { HolidayService } from 'src/holiday/holiday.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Leave, Employee, ManagerAssignation, User, History, Permission2h, SmiaOstie, EmployeeHistory])],
+  imports: [TypeOrmModule.forFeature([Leave, Employee, ManagerAssignation, User, History, Permission2h, SmiaOstie, EmployeeHistory, Holiday])],
   controllers: [EmployeeController],
-  providers: [EmployeeService, LeaveService, CryptoService, UserService, JwtService, HistoryService, Permission2hService, SmiaOstieService],
-  exports: [EmployeeService, TypeOrmModule, CryptoService, UserService, JwtService, HistoryService, Permission2hService, SmiaOstieService],
+  providers: [EmployeeService, LeaveService, CryptoService, UserService, JwtService, HistoryService, Permission2hService, SmiaOstieService, HolidayService],
+  exports: [EmployeeService, TypeOrmModule, CryptoService, UserService, JwtService, HistoryService, Permission2hService, SmiaOstieService, HolidayService],
 })
 export class EmployeeModule { }

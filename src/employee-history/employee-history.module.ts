@@ -15,11 +15,13 @@ import { HistoryService } from 'src/history/history.service';
 import { CryptoService } from 'src/crypto/crypto.service';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
+import { Holiday } from 'src/holiday/entities/holiday.entity';
+import { HolidayService } from 'src/holiday/holiday.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Leave, Employee, ManagerAssignation, User, History, Permission2h, SmiaOstie, EmployeeHistory])],
+  imports: [TypeOrmModule.forFeature([Leave, Employee, ManagerAssignation, User, History, Permission2h, SmiaOstie, EmployeeHistory, Holiday])],
   controllers: [EmployeeHistoryController],
-  providers: [EmployeeHistoryService, EmployeeService, HistoryService, CryptoService, JwtService, UserService],
+  providers: [EmployeeHistoryService, EmployeeService, HistoryService, CryptoService, JwtService, UserService, HolidayService],
   exports: [
     EmployeeHistoryService,
     TypeOrmModule,
@@ -28,6 +30,7 @@ import { UserService } from 'src/user/user.service';
     CryptoService,
     JwtService,
     UserService,
+    HolidayService
   ],
 })
 export class EmployeeHistoryModule { }

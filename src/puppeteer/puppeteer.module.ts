@@ -20,12 +20,14 @@ import { UserService } from 'src/user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { EmployeeHistoryService } from 'src/employee-history/employee-history.service';
 import { EmployeeHistory } from 'src/employee-history/entities/employee-history.entity';
+import { Holiday } from 'src/holiday/entities/holiday.entity';
+import { HolidayService } from 'src/holiday/holiday.service';
 
 
 @Module({
     imports: [
         ConfigModule.forRoot({ isGlobal: true }),
-        TypeOrmModule.forFeature([Employee, Leave, User, History, Permission2h, SmiaOstie, User, Leave, EmployeeHistory]),
+        TypeOrmModule.forFeature([Employee, Leave, User, History, Permission2h, SmiaOstie, User, Leave, EmployeeHistory, Holiday]),
     ],
     controllers: [PuppeteerController],
     providers: [
@@ -40,7 +42,8 @@ import { EmployeeHistory } from 'src/employee-history/entities/employee-history.
         UserService,
         JwtService,
         UserService,
-        EmployeeHistoryService
+        EmployeeHistoryService,
+        HolidayService
     ],
     exports: [
         PuppeteerService,
@@ -54,7 +57,8 @@ import { EmployeeHistory } from 'src/employee-history/entities/employee-history.
         UserService,
         JwtService,
         UserService,
-        EmployeeHistoryService
+        EmployeeHistoryService,
+        HolidayService
     ],
 })
 export class PuppeteerModule { }

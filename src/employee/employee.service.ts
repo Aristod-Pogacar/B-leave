@@ -14,6 +14,7 @@ import { CompareAdminDto } from './dto/compare-admin.dto';
 import { HistoryService } from 'src/history/history.service';
 import { HistoryReason } from 'src/history/entities/history.entity';
 import { EmployeeHistory } from 'src/employee-history/entities/employee-history.entity';
+import { HolidayService } from 'src/holiday/holiday.service';
 
 @Injectable()
 export class EmployeeService {
@@ -28,6 +29,7 @@ export class EmployeeService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly cryptoService: CryptoService,
+    private readonly holidayService: HolidayService,
     private readonly historyService: HistoryService
   ) { }
 
@@ -319,6 +321,8 @@ export class EmployeeService {
       .createQueryBuilder('leave')
       .leftJoin('leave.employee', 'employee')
       .select('employee.id', 'employeeId')
+      .addSelect('leave.start_date', 'start_date')
+      .addSelect('leave.end_date', 'end_date')
       .addSelect(
         'SUM(DATEDIFF(leave.end_date, leave.start_date) + 1)',
         'daysTaken'
@@ -327,7 +331,7 @@ export class EmployeeService {
       .andWhere('leave.status = :status', { status: LeaveStatus.APPROVED })
       .andWhere('leave.leave_type = :type', { type: 'Local_Leave_AMD' })
       .andWhere('YEAR(leave.start_date) = :year', { year })
-      .andWhere('leave.start_date <= :today', { today })
+      // .andWhere('leave.start_date <= :today', { today })
       .andWhere('employee.site = :site', { site })
       .groupBy('employee.id')
       .getRawMany();
@@ -338,6 +342,8 @@ export class EmployeeService {
       .createQueryBuilder('leave')
       .leftJoin('leave.employee', 'employee')
       .select('employee.id', 'employeeId')
+      .addSelect('leave.start_date', 'start_date')
+      .addSelect('leave.end_date', 'end_date')
       .addSelect(
         'SUM(DATEDIFF(leave.end_date, leave.start_date) + 1)',
         'daysTaken'
@@ -346,25 +352,29 @@ export class EmployeeService {
       .andWhere('leave.status = :status', { status: LeaveStatus.APPROVED })
       .andWhere('leave.leave_type = :type', { type: 'Permission_AMD' })
       .andWhere('YEAR(leave.start_date) = :year', { year })
-      .andWhere('leave.start_date <= :today', { today })
+      // .andWhere('leave.start_date <= :today', { today })
       .andWhere('employee.site = :site', { site })
       .groupBy('employee.id')
       .getRawMany();
 
     const takenLeaveMap = new Map<string, number>();
 
-    takenLeaves.forEach(l => {
-      takenLeaveMap.set(l.employeeId, Number(l.daysTaken));
+    takenLeaves.forEach(async l => {
+      // console.log(l);
+      const holidays = await this.getDaysTakenWithHoliday(l.start_date, l.end_date);
+      const daysTaken = Number(l.daysTaken) - holidays;
+      takenLeaveMap.set(l.employeeId, Number(daysTaken.toFixed(2)));
+      // takenLeaveMap.set(l.employeeId, Number(l.daysTaken));
     });
 
     const takenPermissionMap = new Map<string, number>();
 
-    takenPermissions.forEach(l => {
-      takenPermissionMap.set(l.employeeId, Number(l.daysTaken));
+    takenPermissions.forEach(async l => {
+      const holidays = await this.getDaysTakenWithHoliday(l.start_date, l.end_date);
+      const daysTaken = Number(l.daysTaken) - holidays;
+      takenPermissionMap.set(l.employeeId, Number(daysTaken.toFixed(2)));
+      // takenPermissionMap.set(l.employeeId, Number(l.daysTaken));
     });
-
-    // 3️⃣ Calcul solde cumulatif dynamique
-    // const today = new Date();
 
     let soldeCumul = 0;
 
@@ -387,10 +397,6 @@ export class EmployeeService {
       }
     }
 
-    // console.log("employees", employees);
-
-    // 4️⃣ Fusion finale
-    // 1. Crée le tableau de promesses avec .map()
     const promises = employees.map(async (emp) => {
       const cumulSolde = (await this.getEmployeeSolde(emp.matricule, today)).solde_cumul;
       const pris = takenLeaveMap.get(emp.id) || 0;
@@ -697,6 +703,8 @@ export class EmployeeService {
       .createQueryBuilder('leave')
       .leftJoin('leave.employee', 'employee')
       .select('employee.id', 'employeeId')
+      .addSelect('leave.start_date', 'start_date')
+      .addSelect('leave.end_date', 'end_date')
       .addSelect(
         'SUM(DATEDIFF(leave.end_date, leave.start_date) + 1)',
         'daysTaken'
@@ -713,8 +721,11 @@ export class EmployeeService {
 
     const takenLeavesMap = new Map<string, number>();
 
-    takenLeaves.forEach(l => {
-      takenLeavesMap.set(l.employeeId, Number(l.daysTaken));
+    takenLeaves.forEach(async l => {
+      const holidays = await this.getDaysTakenWithHoliday(l.start_date, l.end_date);
+      const daysTaken = Number(l.daysTaken) - holidays;
+      takenLeavesMap.set(l.employeeId, Number(daysTaken.toFixed(2)));
+      // takenLeavesMap.set(l.employeeId, Number(l.daysTaken));
     });
     // 3️⃣ Calcul solde cumulatif dynamique
     let soldeCumul = 0;
@@ -803,6 +814,8 @@ export class EmployeeService {
       .createQueryBuilder('leave')
       .leftJoin('leave.employee', 'employee')
       .select('employee.id', 'employeeId')
+      .addSelect('leave.start_date', 'start_date')
+      .addSelect('leave.end_date', 'end_date')
       .addSelect(
         'SUM(DATEDIFF(leave.end_date, leave.start_date) + 1)',
         'daysTaken'
@@ -820,6 +833,8 @@ export class EmployeeService {
       .createQueryBuilder('leave')
       .leftJoin('leave.employee', 'employee')
       .select('employee.id', 'employeeId')
+      .addSelect('leave.start_date', 'start_date')
+      .addSelect('leave.end_date', 'end_date')
       .addSelect(
         'SUM(DATEDIFF(leave.end_date, leave.start_date) + 1)',
         'daysTaken'
@@ -840,12 +855,18 @@ export class EmployeeService {
     const takenLeavesMap = new Map<string, number>();
     const takenPermissionsMap = new Map<string, number>();
 
-    takenLeaves.forEach(l => {
-      takenLeavesMap.set(l.employeeId, Number(l.daysTaken));
+    takenLeaves.forEach(async l => {
+      const holidays = await this.getDaysTakenWithHoliday(l.start_date, l.end_date);
+      const daysTaken = Number(l.daysTaken) - holidays;
+      takenLeavesMap.set(l.employeeId, Number(daysTaken.toFixed(2)));
+      // takenLeavesMap.set(l.employeeId, Number(l.daysTaken));
     });
 
-    takenPermissions.forEach(l => {
-      takenPermissionsMap.set(l.employeeId, Number(l.daysTaken));
+    takenPermissions.forEach(async l => {
+      const holidays = await this.getDaysTakenWithHoliday(l.start_date, l.end_date);
+      const daysTaken = Number(l.daysTaken) - holidays;
+      takenPermissionsMap.set(l.employeeId, Number(daysTaken.toFixed(2)));
+      // takenLeavesMap.set(l.employeeId, Number(l.daysTaken));
     });
 
     // 3️⃣ Calcul solde cumulatif dynamique
@@ -971,6 +992,15 @@ export class EmployeeService {
       .andWhere('employee.is_deleted = :isDeleted', { isDeleted: false })
       .distinct(true) // évite les doublons si un employé a plusieurs leaves
       .getCount();
+  }
+
+  async getDaysTakenWithHoliday(startDate: string, endDate: string) {
+
+    const holidays = await this.holidayService.findBetweenDate(startDate, endDate);
+
+    const daysTakenWithHoliday = holidays.length;
+
+    return daysTakenWithHoliday;
   }
 
   async findOneByMatricule(matricule: string) {

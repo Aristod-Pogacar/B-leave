@@ -48,45 +48,40 @@
                                         <div class="col-xl-12">
                                             <div class="card stretch stretch-full d-flex">
                                                 <div class="card-header">
-                                                    <!-- <div class="row w-100"> -->
-                                                    <!-- <div class="col-md-8"> -->
-                                                    <h5 class="header">Leave Plan</h5>
-                                                    <!-- </div> -->
-                                                    <% if(user.role==='MANAGER' ) { %>
-                                                        <div class="col-md-2">
-                                                            <label for="startDateFilter"
-                                                                class="form-label ms-3">Start:</label>
-                                                            <input type="date" class="form-control mx-3"
-                                                                name="startDateFilter" id="startDateFilter">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="avatar-text avatar-lg bg-soft-primary me-3">
+                                                            <i class="feather-calendar"></i>
                                                         </div>
-                                                        <div class="col-md-2">
-                                                            <label for="endDateFilter"
-                                                                class="form-label ms-3">End:</label>
-                                                            <input type="date" class="form-control mx-3"
-                                                                name="endDateFilter" id="endDateFilter">
+
+                                                        <div>
+                                                            <h4 class="mb-1">Leave Planning</h4>
+                                                            <p class="text-muted mb-0">
+                                                                Plan and manage employee leave.
+                                                            </p>
                                                         </div>
-                                                        <% } %>
-                                                            <div class="">
-                                                                <label class="form-label mb-1">Search</label>
-                                                                <input type="text" name="search" id="search"
-                                                                    class="form-control"
-                                                                    placeholder="Employee ID, name..." />
-                                                            </div>
-                                                            <!-- </div> -->
+                                                    </div>
                                                 </div>
-                                                <div class="card-body p-0 m-0">
-                                                    <div
-                                                        class="col-12 mb-3 task-header d-md-flex align-items-center justify-content-between">
-                                                        <div class="me-4 w-100 no-global-wrap">
-                                                            <div
-                                                                class="d-flex align-items-center no-global-wrap row g-1">
-                                                                <div class="col-md-3 mt-3">
+                                                <div class="card-body border-bottom bg-light">
+
+                                                    <!-- ===== LEFT: FORM ===== -->
+                                                    <div class="col-md-12">
+
+                                                        <!-- Recherche Employé -->
+                                                        <div class="mb-0">
+                                                            <div class="row">
+                                                                <div class="col-md-12 mb-3">
+                                                                    <label class=" form-label">Search</label>
+                                                                    <input type="text" class="form-control" id="search"
+                                                                        name="search" autocomplete="off"
+                                                                        placeholder="Employee ID, name...">
+                                                                </div>
+                                                                <div class="col-md-3 mb-3">
                                                                     <label for="sectionFilter"
-                                                                        class="form-label ms-3 <% if(user.role==='MANAGER' ) { %>d-none<% } %>">
+                                                                        class="form-label <% if(user.role==='MANAGER' ) { %>d-none<% } %>">
                                                                         Section:
                                                                     </label>
                                                                     <select
-                                                                        class="form-select mx-3 <% if(user.role==='MANAGER' ) { %>d-none<% } %>"
+                                                                        class="form-select <% if(user.role==='MANAGER' ) { %>d-none<% } %>"
                                                                         name="sectionFilter" id="sectionFilter">
 
                                                                         <% sectionList.forEach(function(section) { %>
@@ -103,11 +98,11 @@
 
                                                                     </select>
                                                                 </div>
-                                                                <div class="col-md-3 mt-3">
+                                                                <div class="col-md-3 mb-3">
                                                                     <label for="divisionFilter"
-                                                                        class="form-label ms-3 <% if(user.role==='MANAGER' ) { %>d-none<% } %>">Division:</label>
+                                                                        class="form-label <% if(user.role==='MANAGER' ) { %>d-none<% } %>">Division:</label>
                                                                     <select
-                                                                        class="form-select mx-3 <% if(user.role==='MANAGER' ) { %>d-none<% } %>"
+                                                                        class="form-select <% if(user.role==='MANAGER' ) { %>d-none<% } %>"
                                                                         name="divisionFilter" id="divisionFilter">
                                                                         <% divisionList.forEach(function(division) { %>
                                                                             <% if(division==='Administration' ) { %>
@@ -123,10 +118,10 @@
                                                                                         <% }); %>
                                                                     </select>
                                                                 </div>
-                                                                <div class="col-md-2 mt-3 d-none">
+                                                                <div class="col-md-3 mb-3 d-none">
                                                                     <label for="departementFilter"
-                                                                        class="form-label ms-3">Departement:</label>
-                                                                    <select class="form-select mx-3 d-none"
+                                                                        class="form-label">Departement:</label>
+                                                                    <select class="form-select d-none"
                                                                         name="departementFilter" id="departementFilter">
                                                                         <% departementList.forEach(function(departement)
                                                                             { %>
@@ -143,12 +138,11 @@
                                                                                         <% }); %>
                                                                     </select>
                                                                 </div>
-                                                                <div class="col-md-2 mt-3">
+                                                                <div class="col-md-3 mb-3">
                                                                     <label for="lineFilter"
-                                                                        class="form-label ms-3
-                                                                <% if(user.role==='MANAGER' ) { %>d-none<% } %>">Line:</label>
+                                                                        class="form-label <% if(user.role==='MANAGER' ) { %>d-none<% } %>">Line:</label>
                                                                     <select
-                                                                        class="form-select mx-3 <% if(user.role==='MANAGER' ) { %>d-none<% } %>"
+                                                                        class="form-select <% if(user.role==='MANAGER' ) { %>d-none<% } %>"
                                                                         name="lineFilter" id="lineFilter">
                                                                         <% lineList.forEach(line=> { %>
                                                                             <% if (line==='NULL' ) { %>
@@ -164,10 +158,10 @@
                                                                     </select>
                                                                 </div>
                                                                 <div
-                                                                    class="col-md-2 <% if(user.role!=='SUPERADMIN' ) { %>d-none<% } %>">
+                                                                    class="col-md-3 mb-3 <% if(user.role!=='SUPERADMIN' ) { %>d-none<% } %>">
                                                                     <label for="siteFilter"
-                                                                        class="form-label ms-3">Site:</label>
-                                                                    <select class="form-select mx-3" name="siteFilter"
+                                                                        class="form-label">Site:</label>
+                                                                    <select class="form-select" name="siteFilter"
                                                                         id="siteFilter">
                                                                         <% allowedSites.forEach(function(site) { %>
                                                                             <% const maValeur=site ; const
@@ -187,24 +181,30 @@
                                                                                             <% }); %>
                                                                     </select>
                                                                 </div>
-                                                                <% if(user.role!=='MANAGER' ) { %>
-                                                                    <div class="col-md-2">
-                                                                        <label for="startDateFilter"
-                                                                            class="form-label ms-3">Start:</label>
-                                                                        <input type="date" class="form-control mx-3"
-                                                                            name="startDateFilter" id="startDateFilter">
-                                                                    </div>
-                                                                    <div class="col-md-2">
-                                                                        <label for="endDateFilter"
-                                                                            class="form-label ms-3">End:</label>
-                                                                        <input type="date" class="form-control mx-3"
-                                                                            name="endDateFilter" id="endDateFilter">
-                                                                    </div>
-                                                                    <% } %>
-
+                                                                <div class="col-md-6 mb-3">
+                                                                    <label for="startDateFilter"
+                                                                        class="form-label">Start:</label>
+                                                                    <input type="date" class="form-control"
+                                                                        name="startDateFilter" id="startDateFilter">
+                                                                </div>
+                                                                <div class="col-md-6 mb-3">
+                                                                    <label for="endDateFilter"
+                                                                        class="form-label">End:</label>
+                                                                    <input type="date" class="form-control"
+                                                                        name="endDateFilter" id="endDateFilter">
+                                                                </div>
                                                             </div>
                                                         </div>
+
                                                     </div>
+
+                                                    <div class="row mt-2 d-none">
+                                                        <div class="col-md-12 text-center">
+                                                            <p id="message" class="fw-bold"></p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="card-body p-0 m-0">
                                                     <%- include('partials/planning-calendar') %>
                                                 </div>
                                             </div>

@@ -72,7 +72,7 @@
     if (titre.trim() == 'B-Leave || Dashboard') {
         const today = new Date();
         startD = new Date(today.getFullYear(), today.getMonth(), 1);
-        endD = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        endD = new Date(today.getFullYear(), today.getMonth() + 2, 0);
         startD.setDate(startD.getDate() + 1);
         endD.setDate(endD.getDate() + 1);
         startDateFilter.value = startD.toISOString().split("T")[0];
@@ -114,7 +114,7 @@
         if (titre.trim() == 'B-Leave || Dashboard') {
             const today = new Date();
             startD = new Date(today.getFullYear(), today.getMonth(), 1);
-            endD = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            endD = new Date(today.getFullYear(), today.getMonth() + 2, 0);
         } else {
             startD = new Date(startDateFilter.value);
             endD = new Date(endDateFilter.value);
@@ -203,7 +203,7 @@
         if (titre.trim() == 'B-Leave || Dashboard') {
             const today = new Date();
             startD = new Date(today.getFullYear(), today.getMonth(), 1);
-            endD = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            endD = new Date(today.getFullYear(), today.getMonth() + 2, 0);
             currentStartDate = new Date(startD);
             currentEndDate = new Date(endD);
         } else {
@@ -240,6 +240,7 @@
                     cell.dataset.date = holiday.date;
                     cell.title = holiday.name;
                     cell.style.backgroundColor = holidayColor;
+                    cell.style.zIndex = 1005;
                 }
             });
 
@@ -356,6 +357,7 @@
                         cell.dataset.date = holiday.date;
                         cell.title = holiday.name;
                         cell.style.backgroundColor = holidayColor;
+                        cell.style.zIndex = 1000
                     }
                 });
 

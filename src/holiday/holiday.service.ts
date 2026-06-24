@@ -35,6 +35,17 @@ export class HolidayService {
     return holidays;
   }
 
+  async findBetweenDate(start_date: string, end_date: string) {
+    return await this.holidayRepository.find({
+      where: {
+        date: Between(
+          new Date(start_date),
+          new Date(end_date)
+        )
+      }
+    });
+  }
+
   create(createHolidayDto: CreateHolidayDto) {
     return this.holidayRepository.save(createHolidayDto);
   }
