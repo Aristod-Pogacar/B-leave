@@ -1,7 +1,7 @@
 import { Employee } from 'src/employee/entities/employee.entity';
 import { Leave } from 'src/leave/entities/leave.entity';
 import { ManagerAssignation } from 'src/manager_assignation/entities/manager_assignation.entity';
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, OneToOne, JoinColumn } from 'typeorm';
 
 export enum UserRole {
     // USER = 'USER',
@@ -28,19 +28,19 @@ export class User {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @Column()
-    matricule: string;
+    // @Column()
+    // matricule: string;
 
-    @Column()
-    name: string;
+    // @Column()
+    // name: string;
 
-    @Column({ nullable: true })
-    firstName: string;
+    // @Column({ nullable: true })
+    // firstName: string;
 
     @Column({ nullable: true })
     phone: string;
 
-    @Column()
+    @Column({ unique: true })
     email: string;
 
     @Column()
@@ -53,8 +53,8 @@ export class User {
     })
     role: UserRole;
 
-    @Column({ nullable: true })
-    verificationCode: string;
+    // @Column({ nullable: true })
+    // verificationCode: string;
 
     @Column({ type: 'enum', enum: Site, default: Site.ABE1 })
     site: Site;
@@ -86,17 +86,17 @@ export class User {
     @Column({ default: false })
     isArchived: boolean;
 
-    @OneToMany(() => Employee, employee => employee.manager)
-    employees: Employee[];
+    // @OneToMany(() => Employee, employee => employee.manager)
+    // employees: Employee[];
 
     @OneToMany(() => Leave, leave => leave.approver)
     leaves: Leave[];
 
-    @ManyToOne(() => User, user => user.subordinates, {
-        nullable: true
-    })
-    approver: User;
-
-    @OneToMany(() => User, user => user.approver)
-    subordinates: User[];
+    // @ManyToOne(() => User, user => user.subordinates, {
+    //     nullable: true
+    // })
+    // approver: User;
+    @OneToOne(() => Employee, employee => employee.user, { nullable: true, onDelete: 'CASCADE' })
+    @JoinColumn({ name: 'employee_id' })
+    employee?: Employee | null;
 }

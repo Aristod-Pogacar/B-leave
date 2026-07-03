@@ -9,6 +9,8 @@ import { Leave, LeaveStatus, WithdrawStatus } from 'src/leave/entities/leave.ent
 import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
 import { EmployeeService } from 'src/employee/employee.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { LeaveCreatedEvent } from 'src/notification/events/leave-created.event';
 
 @Injectable()
 export class LeaveService {
@@ -20,6 +22,7 @@ export class LeaveService {
     private readonly mailerService: MailerService,
     private readonly configService: ConfigService,
     private readonly employeeService: EmployeeService,
+    private readonly eventEmitter: EventEmitter2,
   ) { }
 
   async findAllHistory(matricule: string) {
@@ -128,7 +131,7 @@ export class LeaveService {
     const leaveSaved = await this.leaveRepository.save(leave);
     var email: string[] = [];
     const manager = employee.manager;
-    if (manager) email.push(manager.email);
+    if (manager) email.push(manager.user?.email ?? '');
     const emailAdress = this.configService.get<string>('EMAIL_ADRESS')
     const emailPassword = this.configService.get<string>('EMAIL_PASSWORD')
     if (email.length > 0) {
@@ -183,6 +186,10 @@ export class LeaveService {
         });
       }
     }
+    this.eventEmitter.emit(
+      'leave.created',
+      new LeaveCreatedEvent(leave.id),
+    );
 
     return res.status(200).json(leaveSaved);
   }

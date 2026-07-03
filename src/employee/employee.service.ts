@@ -105,7 +105,7 @@ export class EmployeeService {
     const query = this.employeeRepository.createQueryBuilder('e');
     query.leftJoinAndSelect('e.manager', 'manager');
     query.orderBy('e.matricule', 'ASC');
-    query.where({ manager: { id: user.id }, is_active: true, is_deleted: false });
+    query.where({ manager: { id: user.employee?.id }, is_active: true, is_deleted: false });
 
     if (search && search.trim() !== '') {
       query.andWhere(
@@ -122,7 +122,7 @@ export class EmployeeService {
   async updateManager(data: { matricule: any; manager: any; }) {
     const employee = await this.employeeRepository.findOne({ where: { matricule: data.matricule, is_active: true, is_deleted: false } });
     if (employee) {
-      const manager = await this.userRepository.findOne({ where: { matricule: data.manager, role: UserRole.MANAGER } });
+      const manager = await this.employeeRepository.findOne({ where: { matricule: data.manager, is_active: true, is_deleted: false } });
       if (manager) {
         employee.manager = manager;
         await this.employeeRepository.save(employee);
@@ -255,6 +255,8 @@ export class EmployeeService {
   async getEmployeesWithBalances(
     line: string, departement: string, section: string, division: string, site: string, skip: number, take: number, year: number, user: any, search: string = '') {
 
+    console.log("USER : ", user);
+
     let employees: Employee[];
     let total: number;
 
@@ -262,11 +264,11 @@ export class EmployeeService {
       if (search && search.trim() !== "") {
         [employees, total] = await this.employeeRepository.findAndCount({
           where: [
-            { manager: { id: user.id }, matricule: Like(`%${search}%`), is_active: true, is_deleted: false },
-            { manager: { id: user.id }, name: Like(`%${search}%`), is_active: true, is_deleted: false },
-            { manager: { id: user.id }, firstname: Like(`%${search}%`), is_active: true, is_deleted: false },
-            { manager: { id: user.id }, division: Like(`%${search}%`), is_active: true, is_deleted: false },
-            { manager: { id: user.id }, section: Like(`%${search}%`), is_active: true, is_deleted: false },
+            { manager: { id: user.employee?.id }, matricule: Like(`%${search}%`), is_active: true, is_deleted: false },
+            { manager: { id: user.employee?.id }, name: Like(`%${search}%`), is_active: true, is_deleted: false },
+            { manager: { id: user.employee?.id }, firstname: Like(`%${search}%`), is_active: true, is_deleted: false },
+            { manager: { id: user.employee?.id }, division: Like(`%${search}%`), is_active: true, is_deleted: false },
+            { manager: { id: user.employee?.id }, section: Like(`%${search}%`), is_active: true, is_deleted: false },
           ],
           order: { matricule: 'ASC' },
           skip,
@@ -274,7 +276,7 @@ export class EmployeeService {
         });
       } else {
         [employees, total] = await this.employeeRepository.findAndCount({
-          where: { manager: { id: user.id }, is_active: true, is_deleted: false },
+          where: { manager: { id: user.employee?.id }, is_active: true, is_deleted: false },
           order: { matricule: 'ASC' },
           skip,
           take,
@@ -517,7 +519,7 @@ export class EmployeeService {
   }
 
   findOne(id: string) {
-    return this.employeeRepository.findOne({ where: { id }, relations: ['manager'] });
+    return this.employeeRepository.findOne({ where: { id }, relations: ['manager', 'user'] });
   }
 
   update(id: string, updateEmployeeDto: UpdateEmployeeDto) {
@@ -566,7 +568,7 @@ export class EmployeeService {
         departement: row['Dept'],
         section: row['Sect'],
         line: row['Line'],
-        matricule: row['Emp No'],
+        matricule: row['Emp Id'],
         gender: row['Gender'],
         DOE: row['D.O.E'],
         division: row['Division'],
@@ -634,7 +636,7 @@ export class EmployeeService {
     });
 
     // 2️⃣ Vérifier que les colonnes obligatoires existent
-    const requiredColumns = ['emp no', 'type', 'division'];
+    const requiredColumns = ['emp id', 'type', 'division'];
 
     for (const column of requiredColumns) {
       if (!headerMap[column]) {
@@ -652,7 +654,7 @@ export class EmployeeService {
         departement: row.getCell(headerMap['dept']).value?.toString(),
         section: row.getCell(headerMap['sect']).value?.toString(),
         line: row.getCell(headerMap['line']).value?.toString(),
-        matricule: row.getCell(headerMap['emp no']).value?.toString(),
+        matricule: row.getCell(headerMap['emp id']).value?.toString(),
         gender: row.getCell(headerMap['gender']).value?.toString(),
         DOE: row.getCell(headerMap['d.o.e']).value as Date,
         division: row.getCell(headerMap['division']).value?.toString(),
@@ -776,8 +778,195 @@ export class EmployeeService {
     return result;
   }
 
-  async search(q: string, user: any) {
+  async searchForUser(q: string, user: any) {
     const allowedSites = this.getAllowedSites(user.site);
+    if (!q) return [];
+    const year = new Date().getFullYear();
+    const queryBuilder = this.employeeRepository
+      .createQueryBuilder('e')
+      .leftJoin('e.user', 'u')
+      .where(
+        '(e.matricule LIKE :q OR e.name LIKE :q OR e.firstname LIKE :q)',
+        { q: `%${q}%` },
+      )
+      .andWhere('e.is_active = true')
+      .andWhere('e.is_deleted = false')
+      .andWhere('u.id IS NULL')
+      .select([
+        'e.id',
+        'e.matricule',
+        'e.name',
+        'e.firstname',
+        'e.line',
+        'e.departement',
+        'e.section',
+        'e.site',
+        'e.DOE',
+      ])
+      .take(10);
+
+    if (user.role === UserRole.MANAGER) {
+      queryBuilder.andWhere('e.manager = :managerId', { managerId: user.employee.id });
+    } else {
+      queryBuilder.andWhere('e.site IN (:...allowedSites)', { allowedSites });
+    }
+
+    const [data] = await queryBuilder.getManyAndCount();
+
+    if (data.length === 0 || !data) return [];
+    const date = new Date(data[0].DOE);
+    date.setFullYear(date.getFullYear() + 1);
+    let yearAfter3 = date.getFullYear();
+    while (2026 - yearAfter3 > 3) {
+      yearAfter3 = yearAfter3 + 3;
+    }
+    date.setFullYear(yearAfter3);
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const takenLeaves = await this.leaveRepository
+      .createQueryBuilder('leave')
+      .leftJoin('leave.employee', 'employee')
+      .select('employee.id', 'employeeId')
+      .addSelect('leave.start_date', 'start_date')
+      .addSelect('leave.end_date', 'end_date')
+      .addSelect(
+        'SUM(DATEDIFF(leave.end_date, leave.start_date) + 1)',
+        'daysTaken'
+      )
+      .where('employee.id IN (:...employeeIds)', { employeeIds: data.map((e) => e.id) })
+      .andWhere('leave.status = :status', { status: LeaveStatus.APPROVED })
+      .andWhere('leave.leave_type = :type', { type: 'Local_Leave_AMD' })
+      .andWhere('YEAR(leave.start_date) = :year', { year })
+      .andWhere('leave.start_date <= :today', { today })
+      .andWhere('employee.site IN (:...allowedSites)', { allowedSites })
+      .groupBy('employee.id')
+      .getRawMany();
+
+    const takenPermissions = await this.leaveRepository
+      .createQueryBuilder('leave')
+      .leftJoin('leave.employee', 'employee')
+      .select('employee.id', 'employeeId')
+      .addSelect('leave.start_date', 'start_date')
+      .addSelect('leave.end_date', 'end_date')
+      .addSelect(
+        'SUM(DATEDIFF(leave.end_date, leave.start_date) + 1)',
+        'daysTaken'
+      )
+      .where('employee.id IN (:...employeeIds)', { employeeIds: data.map((e) => e.id) })
+      .andWhere('leave.status = :status', { status: LeaveStatus.APPROVED })
+      .andWhere('leave.leave_type = :type', { type: 'Permission_AMD' })
+      .andWhere('YEAR(leave.start_date) = :year', { year })
+      .andWhere('leave.start_date <= :today', { today })
+      .andWhere('employee.site IN (:...allowedSites)', { allowedSites })
+      .groupBy('employee.id')
+      .getRawMany();
+    // console.log("Data:", takenLeaves);
+    // // return data;
+
+    // console.log("takenLeaves:", takenLeaves);
+
+    const takenLeavesMap = new Map<string, number>();
+    const takenPermissionsMap = new Map<string, number>();
+
+    takenLeaves.forEach(async l => {
+      const holidays = await this.getDaysTakenWithHoliday(l.start_date, l.end_date);
+      const daysTaken = Number(l.daysTaken) - holidays;
+      takenLeavesMap.set(l.employeeId, Number(daysTaken.toFixed(2)));
+      // takenLeavesMap.set(l.employeeId, Number(l.daysTaken));
+    });
+
+    takenPermissions.forEach(async l => {
+      const holidays = await this.getDaysTakenWithHoliday(l.start_date, l.end_date);
+      const daysTaken = Number(l.daysTaken) - holidays;
+      takenPermissionsMap.set(l.employeeId, Number(daysTaken.toFixed(2)));
+      // takenLeavesMap.set(l.employeeId, Number(l.daysTaken));
+    });
+
+    // 3️⃣ Calcul solde cumulatif dynamique
+    let soldeCumul = 0;
+
+    if (year < today.getFullYear()) {
+      // année passée → solde plein
+      soldeCumul = 2.5 * 12;
+    } else if (year > today.getFullYear()) {
+      // année future → rien
+      soldeCumul = 0;
+    } else {
+      // année en cours → calcul journalier
+      for (let m = 0; m <= today.getMonth(); m++) {
+        const daysInMonth = new Date(year, m + 1, 0).getDate();
+
+        if (m === today.getMonth()) {
+          soldeCumul += (2.5 / daysInMonth) * today.getDate();
+        } else {
+          soldeCumul += 2.5;
+        }
+      }
+    }
+
+    // 4️⃣ Fusion finale
+    const promises = data.map(async (emp) => {
+      const cumulSolde = (await this.getEmployeeSolde(emp.matricule, today)).solde_cumul;
+      const pris = takenLeavesMap.get(emp.id) || 0;
+      const prisPermission = takenPermissionsMap.get(emp.id) || 0;
+      const restant = cumulSolde - pris;
+
+      const doeDate = new Date(emp.DOE);
+
+      let soldeDebut = 0;
+      if (year > doeDate.getFullYear() + 1) {
+        const dateDebutCompte = new Date(doeDate.getFullYear() + 1, doeDate.getMonth(), doeDate.getDate());
+        for (let i = dateDebutCompte.getFullYear(); i <= year; i += 3) {
+          if (year - i < 3) {
+            for (let y = i; y < year; y++) {
+              soldeDebut += (await this.getEmployeeSolde(emp.matricule, new Date(y, 11, 31))).solde_restant;
+            }
+          }
+        }
+      }
+      function estDernierJourDuMois(date: Date) {
+        // 1. On récupère l'année et le mois de la date testée
+        const annee = date.getFullYear();
+        const mois = date.getMonth();
+
+        // 2. On crée une date pour le jour suivant
+        const demain = new Date(date);
+        demain.setDate(date.getDate() + 1);
+
+        // 3. Si le mois de "demain" est différent, c'est que "date" était le dernier jour
+        return demain.getMonth() !== mois;
+      }
+      let soldeCumulMensuel = 2.5 * today.getMonth();
+
+      if (estDernierJourDuMois(today)) {
+        soldeCumulMensuel = 2.5 * (today.getMonth() + 1);
+      }
+
+      return {
+        ...emp,
+        solde_cumul: Number(cumulSolde.toFixed(2)),
+        solde_cumul_mensuel: Number(soldeCumulMensuel.toFixed(2)),
+        solde_debut: Number(soldeDebut.toFixed(2)),
+        solde_pris: Number(pris.toFixed(2)),
+        solde_pris_permission: Number(prisPermission.toFixed(2)),
+        solde_restant: Number((restant + soldeDebut).toFixed(2)),
+        solde_restant_mensuel: Number((soldeCumulMensuel - pris).toFixed(2)),
+      };
+    });
+
+    // 2. Attends que TOUTES les promesses soient résolues
+    const results = await Promise.all(promises);
+
+    return results;
+  }
+
+  async search(q: string, user: any) {
+    console.log("Q: ", q);
+    console.log("USER: ", user);
+    const allowedSites = this.getAllowedSites(user.site);
+    console.log("ALLOWED SITES: ", allowedSites);
     if (!q) return [];
     const year = new Date().getFullYear();
     const queryBuilder = this.employeeRepository
@@ -791,7 +980,7 @@ export class EmployeeService {
       .take(10);
 
     if (user.role === UserRole.MANAGER) {
-      queryBuilder.andWhere('e.manager = :managerId', { managerId: user.id });
+      queryBuilder.andWhere('e.manager = :managerId', { managerId: user.employee.id });
     } else {
       queryBuilder.andWhere('e.site IN (:...allowedSites)', { allowedSites });
     }

@@ -89,36 +89,21 @@
                                                                             </h5>
 
                                                                             <div class="row g-3">
-                                                                                <div class="col-lg-2">
-                                                                                    <label class="form-label fw-medium">
-                                                                                        Employee ID *
-                                                                                    </label>
+                                                                                <div class="col-md-10 mb-3">
+                                                                                    <label
+                                                                                        class=" form-label">Employee</label>
                                                                                     <input type="text"
                                                                                         class="form-control"
-                                                                                        id="matricule" name="matricule"
-                                                                                        placeholder="AMAA000000"
-                                                                                        required>
-                                                                                </div>
-
-                                                                                <div class="col-lg-4">
-                                                                                    <label class="form-label fw-medium">
-                                                                                        Last Name *
-                                                                                    </label>
-                                                                                    <input type="text"
-                                                                                        class="form-control" id="name"
-                                                                                        name="name"
-                                                                                        placeholder="Enter last name"
-                                                                                        required>
-                                                                                </div>
-
-                                                                                <div class="col-lg-4">
-                                                                                    <label class="form-label">First
-                                                                                        Name</label>
-                                                                                    <input type="text"
-                                                                                        class="form-control"
-                                                                                        id="firstName"
-                                                                                        placeholder="Enter first name"
-                                                                                        name="firstName">
+                                                                                        id="employeeSearch"
+                                                                                        name="employeeSearch"
+                                                                                        autocomplete="off"
+                                                                                        placeholder="Search an employee...">
+                                                                                    <input type="text" class="input"
+                                                                                        name="employee" id="employee"
+                                                                                        hidden required>
+                                                                                    <ul id="employeeResults"
+                                                                                        class="autocomplete-list ps-0 w-75 z-200">
+                                                                                    </ul>
                                                                                 </div>
 
                                                                                 <div class="col-lg-2">
@@ -132,6 +117,7 @@
                                                                                 </div>
 
                                                                             </div>
+
                                                                         </div>
 
                                                                         <hr>
@@ -250,6 +236,8 @@
                                                                             </div>
                                                                         </div>
 
+                                                                        <hr>
+
                                                                     </form>
                                                                 </div>
 
@@ -284,6 +272,50 @@
                         <%- include('partials/footer.ejs') %>
     </body>
     <script>
+        const input = document.getElementById('employeeSearch');
+        const results = document.getElementById('employeeResults');
+        const hiddenInput = document.getElementById('employee');
+        let timeout = null;
+
+        input.addEventListener('input', () => {
+            clearTimeout(timeout);
+
+            const query = input.value.trim();
+            if (query.length < 2) {
+                results.innerHTML = '';
+                return;
+            }
+
+            timeout = setTimeout(async () => {
+                try {
+                    const res = await fetch(`/employee/finding/search-for-user?q=${query}`);
+
+                    if (!res.ok) {
+                        console.error('HTTP error', res.status);
+                        return;
+                    }
+
+                    const data = await res.json();
+
+                    results.innerHTML = '';
+                    data.forEach(emp => {
+                        const li = document.createElement('li');
+                        li.classList.add('list-group-item');
+                        li.textContent = `${emp.matricule} - ${emp.name + " " + emp.firstname}`;
+                        li.onclick = async () => {
+                            input.value = li.textContent;
+                            hiddenInput.value = emp.id;
+                            results.innerHTML = '';
+                        };
+                        results.appendChild(li);
+                    });
+
+                } catch (err) {
+                    console.error('Autocomplete error:', err);
+                }
+            }, 300);
+        });
+
         const roleSelect = document.getElementById("role");
         const siteSelect = document.getElementById("site");
 
@@ -294,7 +326,7 @@
             const role = roleSelect.value;
 
             // Roles limités
-            const restrictedRoles = ["HR_LEAD", "MANAGER", "ADMIN", "PAYROLL"];
+            const restrictedRoles = ["MANAGER", "ADMIN", "PAYROLL"];
 
             // Sites autorisés pour ces rôles
             const allowedSites = ["TANA", "ABE 1", "ABE 2"];

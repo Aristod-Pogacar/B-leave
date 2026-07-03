@@ -85,13 +85,13 @@ export class LeaveController {
 
   @Post('reject-permission/:leaveId')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER)
+  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.HR_LEAD)
   async rejectPermission(@Param('leaveId') leaveId: string, @Res() res: express.Response, @Req() req: any) {
     await this.leaveService.rejectLeave(leaveId, req.session.user.id);
     const message = "Permission rejected successfully."
     await this.historyService.create({
       reason: HistoryReason.LEAVE,
-      message: "Permission rejected by " + req.session.user.firstName + " " + req.session.user.name,
+      message: "Permission rejected by " + req.session.user.employee.firstname + " " + req.session.user.employee.name,
       created_by: req.session.user.matricule,
     });
     res.redirect('/leave/approuve-permissions?message=' + message);
@@ -99,16 +99,16 @@ export class LeaveController {
 
   @Get('approuve-permissions')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER)
+  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.HR_LEAD)
   @Render('approuve-leaves')
   async approuvePermissions(@Req() req: any) {
-    const leaves = await this.leaveService.getNonApprouvedLeaves(req.session.user.id, ["Permission_AMD"]);
+    const leaves = await this.leaveService.getNonApprouvedLeaves(req.session.user, ["Permission_AMD"]);
     return { title: "Approuve Permissions", error: req.query.error, leaves: leaves, message: req.query.message };
   }
 
   @Post('approve-permission/:leaveId')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER)
+  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.HR_LEAD)
   async approvePermission(@Param('leaveId') leaveId: string, @Res() res: express.Response, @Req() req: any) {
     // await this.leaveService.approveLeave(leaveId, req.session.user.id);
     const message = "Permission approved successfully. You are pleased to validate also on OneHR platfrom."
@@ -128,7 +128,7 @@ export class LeaveController {
       await this.leaveService.approveLeave(leaveId, req.session.user.id);
       await this.historyService.create({
         reason: HistoryReason.LEAVE,
-        message: "Permission approved by " + req.session.user.firstName + " " + req.session.user.name,
+        message: "Permission approved by " + req.session.user.employee.firstname + " " + req.session.user.employee.name,
         created_by: req.session.user.matricule,
       });
     }
@@ -137,16 +137,16 @@ export class LeaveController {
 
   @Get('approuve-leaves')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER)
+  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.HR_LEAD)
   @Render('approuve-leaves')
   async approuveLeaves(@Req() req: any) {
-    const leaves = await this.leaveService.getNonApprouvedLeaves(req.session.user.id);
+    const leaves = await this.leaveService.getNonApprouvedLeaves(req.session.user);
     return { title: "Approuve Leaves", error: req.query.error, leaves: leaves, message: req.query.message };
   }
 
   @Post('approve-leave/:leaveId')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER)
+  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.HR_LEAD)
   async approveLeave(@Param('leaveId') leaveId: string, @Res() res: express.Response, @Req() req: any) {
     await this.leaveService.approveLeave(leaveId, req.session.user.id);
     const message = "Leave approved successfully. You are pleased to validate also on OneHR platfrom."
@@ -166,7 +166,7 @@ export class LeaveController {
       await this.leaveService.approveLeave(leaveId, req.session.user.id);
       await this.historyService.create({
         reason: HistoryReason.LEAVE,
-        message: "Leave approved by " + req.session.user.firstName + " " + req.session.user.name,
+        message: "Leave approved by " + req.session.user.employee.firstname + " " + req.session.user.employee.name,
         created_by: req.session.user.matricule,
       });
     }
@@ -175,13 +175,13 @@ export class LeaveController {
 
   @Post('reject-leave/:leaveId')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER)
+  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.HR_LEAD)
   async rejectLeave(@Param('leaveId') leaveId: string, @Res() res: express.Response, @Req() req: any) {
     await this.leaveService.rejectLeave(leaveId, req.session.user.id);
     const message = "Leave rejected successfully."
     await this.historyService.create({
       reason: HistoryReason.LEAVE,
-      message: "Leave rejected by " + req.session.user.firstName + " " + req.session.user.name,
+      message: "Leave rejected by " + req.session.user.employee.firstname + " " + req.session.user.employee.name,
       created_by: req.session.user.matricule,
     });
     res.redirect('/leave/approuve-leaves?message=' + message);
@@ -313,7 +313,7 @@ export class LeaveController {
       }
       await this.historyService.create({
         reason: HistoryReason.LEAVE,
-        message: "Import leaves by " + req.session.user.firstName + " " + req.session.user.name,
+        message: "Import leaves by " + req.session.user.employee.firstname + " " + req.session.user.employee.name,
         created_by: req.session.user.matricule,
       });
       return res.redirect(`/leave/planning-view`);
@@ -374,7 +374,7 @@ export class LeaveController {
     // console.log("Exported successfully");
     await this.historyService.create({
       reason: HistoryReason.LEAVE,
-      message: "Export leaves by " + req.session.user.firstName + " " + req.session.user.name,
+      message: "Export leaves by " + req.session.user.employee.firstname + " " + req.session.user.employee.name,
       created_by: req.session.user.matricule,
     });
     res.end();
@@ -415,7 +415,7 @@ export class LeaveController {
     console.log("Exported successfully");
     await this.historyService.create({
       reason: HistoryReason.LEAVE,
-      message: "Export leaves of employee " + employee.name + " " + employee.firstname + " by " + req.session.user.firstName + " " + req.session.user.name,
+      message: "Export leaves of employee " + employee.name + " " + employee.firstname + " by " + req.session.user.employee.firstname + " " + req.session.user.employee.name,
       created_by: req.session.user.matricule,
     });
     res.end();

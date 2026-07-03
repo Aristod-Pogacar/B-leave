@@ -7,11 +7,12 @@ import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { memoryStorage } from 'multer';
 import { RolesGuard } from 'src/user/role.guard';
 import { Roles } from 'src/user/role.decorator';
-import { Site, UserRole } from 'src/user/entities/user.entity';
+import { Site, User, UserRole } from 'src/user/entities/user.entity';
 import * as XLSX from 'xlsx';
 import { UserService } from 'src/user/user.service';
 import { HistoryService } from 'src/history/history.service';
 import { HistoryReason } from 'src/history/entities/history.entity';
+import * as bcrypt from 'bcrypt';
 
 @Controller('employee')
 export class EmployeeController {
@@ -268,6 +269,11 @@ export class EmployeeController {
     return this.employeeService.search(q, req.session.user);
   }
 
+  @Get('finding/search-for-user')
+  async searchForUser(@Query('q') q: string, @Req() req: any) {
+    return this.employeeService.searchForUser(q, req.session.user);
+  }
+
   @Get('find-one-by-matricule')
   async findOneByMatricule(@Query('matricule') matricule: string) {
     console.log('FIND ONE BY MATRICULE');
@@ -441,7 +447,6 @@ export class EmployeeController {
     @Res() res: express.Response,
     @Req() req: any,
   ) {
-    console.log("FILE:", file);
 
     try {
       const workbook = XLSX.read(file.buffer, { type: 'buffer' });
@@ -452,7 +457,7 @@ export class EmployeeController {
 
       // 🎯 Sélectionner uniquement certains champs
       const filtered = rows.map(row => ({
-        matricule: "" + row['Emp No'],
+        matricule: "" + row['Emp Id'],
         manager: "" + row['Manager']
       }));
 
@@ -471,8 +476,47 @@ export class EmployeeController {
       });
 
       // 🎯 Sélectionner uniquement certains champs
+      const rolesFiltered = rows
+        // .filter(row => {
+        //   return row['Role'] != 'undefined';
+        // })
+        .map(row => ({
+          matricule: "" + row['Emp Id'],
+          role: "" + row['Role'],
+          email: "" + row['Email'],
+        }));
+
+      // ❗ ignorer lignes vides
+      const cleanDataRole = rolesFiltered.filter(x => x.matricule);
+
+      for (const data of cleanDataRole) {
+        if (data.role !== 'undefined') {
+          console.log("DATA:", data);
+          const u = await this.userService.findOneByMatricule(data.matricule);
+          const employee = await this.employeeService.findOneByMatricule(data.matricule);
+          if (!u && employee) {
+            const user = new User();
+            user.email = data.email;
+            user.role = data.role as UserRole;
+            user.employee = employee;
+            user.site = employee.site as Site;
+            const hashedPassword = await bcrypt.hash(data.matricule, 10);
+            user.password = hashedPassword;
+            await this.userService.save(user);
+          }
+
+          // await this.employeeService.updateRole(data);
+        }
+      }
+      await this.historyService.create({
+        reason: HistoryReason.EMPLOYEE,
+        message: "Import manager by " + req.session.user.firstName + " " + req.session.user.name,
+        created_by: req.session.user.matricule,
+      });
+
+      // 🎯 Sélectionner uniquement certains champs
       const filtered2 = rows.map(row => ({
-        matricule: "" + row['Emp No'],
+        matricule: "" + row['Emp Id'],
         app_password: "" + row['App password'],
         onehr_password: "" + row['Onehr password']
       }));

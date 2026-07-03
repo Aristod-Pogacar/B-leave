@@ -64,22 +64,13 @@
 
                                                                     <div class="row">
 
-                                                                        <div class="col-md-4 mb-3">
+                                                                        <div class="col-md-8 mb-3">
                                                                             <label class="form-label">
-                                                                                Name *
+                                                                                Employee ID
                                                                             </label>
                                                                             <input type="text" class="form-control"
-                                                                                id="name" name="name"
-                                                                                value="<%= users.name %>" required>
-                                                                        </div>
-
-                                                                        <div class="col-md-4 mb-3">
-                                                                            <label class="form-label">
-                                                                                First Name *
-                                                                            </label>
-                                                                            <input type="text" class="form-control"
-                                                                                id="firstName" name="firstName"
-                                                                                value="<%= users.firstName %>" required>
+                                                                                value="<%= users.employee.matricule %> - <%= users.employee.name %> <%= users.employee.firstname %>"
+                                                                                disabled>
                                                                         </div>
 
                                                                         <div class="col-md-4 mb-3">
@@ -216,7 +207,6 @@
             const role = roleSelect.value;
 
             const restrictedRoles = [
-                "HR_LEAD",
                 "MANAGER",
                 "ADMIN",
                 "PAYROLL"

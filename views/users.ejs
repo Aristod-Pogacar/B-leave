@@ -151,19 +151,23 @@
 
                                                                                     <div
                                                                                         class="avatar-text avatar-md bg-soft-primary me-3">
-                                                                                        <%= users.firstName?.charAt(0)
-                                                                                            || users.name?.charAt(0) %>
+                                                                                        <%= users.employee?.name?.charAt(0)
+                                                                                            ||
+                                                                                            users.employee?.firstname?.charAt(0)
+                                                                                            %>
                                                                                     </div>
 
                                                                                     <div>
                                                                                         <div
                                                                                             class="fw-semibold text-dark">
-                                                                                            <%= users.firstName %>
-                                                                                                <%= users.name %>
+                                                                                            <%= users.employee?.name %>
+                                                                                                <%= users.employee?.firstname
+                                                                                                    %>
                                                                                         </div>
 
                                                                                         <small class="text-muted">
-                                                                                            <%= users.matricule %>
+                                                                                            <%= users.employee?.matricule
+                                                                                                %>
                                                                                         </small>
                                                                                     </div>
 

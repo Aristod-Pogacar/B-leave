@@ -208,7 +208,7 @@ export class SmiaOstieService {
 
     var email: string[] = [];
     const manager = employee.manager;
-    if (manager) email.push(manager.email);
+    if (manager) email.push(manager.user?.email ?? '');
     const emailAdress = this.configService.get<string>('EMAIL_ADRESS')
     const emailPassword = this.configService.get<string>('EMAIL_PASSWORD')
     console.log(email)
@@ -579,7 +579,7 @@ export class SmiaOstieService {
 
         managerMap.set(managerId, {
           id: managerId,
-          manager: employee.manager.name + ' ' + employee.manager.firstName,
+          manager: employee.manager.name + ' ' + employee.manager.firstname,
           consultation: 0,
           employees: 0,
           employeeIds: [],

@@ -49,6 +49,10 @@ import { EmployeeHistoryService } from './employee-history/employee-history.serv
 import { HolidayModule } from './holiday/holiday.module';
 import { Holiday } from './holiday/entities/holiday.entity';
 import { HolidayService } from './holiday/holiday.service';
+import { NotificationModule } from './notification/notification.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { Notification } from './notification/entities/notification.entity';
+import { NotificationService } from './notification/notification.service';
 
 @Module({
   imports: [
@@ -68,6 +72,7 @@ import { HolidayService } from './holiday/holiday.service';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    EventEmitterModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: 'localhost',
@@ -86,7 +91,8 @@ import { HolidayService } from './holiday/holiday.service';
         SmiaOstie,
         History,
         EmployeeHistory,
-        Holiday
+        Holiday,
+        Notification
       ],
       synchronize: true,
     }),
@@ -111,6 +117,7 @@ import { HolidayService } from './holiday/holiday.service';
     FingerprintModule,
     EmployeeHistoryModule,
     HolidayModule,
+    NotificationModule,
   ],
   controllers: [AppController, PuppeteerController],
   providers: [AppService, MailService, AuthService, JwtService, EmployeeService, PuppeteerService, CryptoService, PuppeteerManagerService, TaskService, HistoryService, FingerprintGateway, FortestGateway, FingerprintService, Permission2hService, SmiaOstieService, EmployeeHistoryService],

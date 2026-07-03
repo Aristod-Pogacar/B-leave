@@ -91,8 +91,8 @@ export class UserController {
     await this.userService.updatePassword(req.session.user.id, body);
     await this.historyService.create({
       reason: HistoryReason.USER,
-      message: "Password changed for " + user.firstName + " " + user.name + " by " + req.session.user.firstName + " " + req.session.user.name,
-      created_by: req.session.user.matricule,
+      message: "Password changed for " + user.employee?.firstname + " " + user.employee?.name + " by " + req.session.user.employee?.firstname + " " + req.session.user.employee?.name,
+      created_by: req.session.user.employee?.matricule,
     });
     return res.redirect('/user/my-profil?success=true');
   }
@@ -224,7 +224,7 @@ export class UserController {
         error: 'Phone number is required'
       });
     }
-    if (body.matricule == null || body.matricule == undefined || body.matricule == '') {
+    if (body.employee == null || body.employee == undefined || body.employee == '' || body.employeeSearch == null || body.employeeSearch == undefined || body.employeeSearch == '') {
       const userSite = req.session.user.site;
       const sites = this.getAllowedSitesForNewUsers(userSite)
       const allowedKeys = this.enumAllowed(userSite);
@@ -233,7 +233,7 @@ export class UserController {
         userRole: UserRole,
         sites: sites,
         allowedKeys: allowedKeys,
-        error: 'Phone number is required'
+        error: 'Employee is required'
       });
     }
     console.log("BODY", body)
@@ -253,8 +253,8 @@ export class UserController {
     }
     await this.historyService.create({
       reason: HistoryReason.USER,
-      message: "User " + user.firstName + " " + user.name + " created by " + req.session.user.firstName + " " + req.session.user.name,
-      created_by: req.session.user.matricule,
+      message: "User " + user.employee?.firstname + " " + user.employee?.name + " created by " + req.session.user.employee?.firstname + " " + req.session.user.employee?.name,
+      created_by: req.session.user.employee?.matricule,
     });
 
     return res.redirect('/user/list');
@@ -285,8 +285,8 @@ export class UserController {
     this.userService.remove(id);
     await this.historyService.create({
       reason: HistoryReason.USER,
-      message: "User " + user.firstName + " " + user.name + " deleted by " + req.session.user.firstName + " " + req.session.user.name,
-      created_by: req.session.user.matricule,
+      message: "User " + user.employee?.firstname + " " + user.employee?.name + " deleted by " + req.session.user.employee?.firstname + " " + req.session.user.employee?.name,
+      created_by: req.session.user.employee?.matricule,
     });
     return res.redirect('/user/list');
   }
@@ -318,8 +318,8 @@ export class UserController {
     this.userService.update(id, updateUserDto);
     await this.historyService.create({
       reason: HistoryReason.USER,
-      message: "User " + user.firstName + " " + user.name + " updated by " + req.session.user.firstName + " " + req.session.user.name,
-      created_by: req.session.user.matricule,
+      message: "User " + user.employee?.firstname + " " + user.employee?.name + " updated by " + req.session.user.employee?.firstname + " " + req.session.user.employee?.name,
+      created_by: req.session.user.employee?.matricule,
     });
     return res.redirect('/user/list');
   }
@@ -370,8 +370,8 @@ export class UserController {
     req.session.user = updatedUser;
     await this.historyService.create({
       reason: HistoryReason.USER,
-      message: "User " + user.firstName + " " + user.name + " updated by " + req.session.user.firstName + " " + req.session.user.name,
-      created_by: req.session.user.matricule,
+      message: "User " + user.employee?.firstname + " " + user.employee?.name + " updated by " + req.session.user.employee?.firstname + " " + req.session.user.employee?.name,
+      created_by: req.session.user.employee?.matricule,
     });
     return res.redirect('/user/my-profil?success=true');
   }

@@ -253,7 +253,7 @@ export class Permission2hService {
 
     var email: string[] = [];
     const manager = employee.manager;
-    if (manager) email.push(manager.email);
+    if (manager) email.push(manager.user?.email ?? '');
 
     const emailAdress = this.configService.get<string>('EMAIL_ADRESS')
     const emailPassword = this.configService.get<string>('EMAIL_PASSWORD')

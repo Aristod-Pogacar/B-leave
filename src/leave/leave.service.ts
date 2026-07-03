@@ -47,22 +47,109 @@ export class LeaveService {
     return this.leaveRepository.save(leave);
   }
 
-  async getNonApprouvedLeaves(id: string, typeLeaves: string[] = ['Local_Leave_AMD', 'Indisponibilite_AMD']) {
-    return this.leaveRepository.find({
-      where: {
-        employee: {
-          manager: {
-            id: id
+  async getNonApprouvedLeaves(
+    user: any,
+    typeLeaves: string[] = ['Local_Leave_AMD', 'Indisponibilite_AMD']
+  ) {
+    var leaves: Leave[];
+
+    const today = new Date();
+    console.log(user)
+
+    if (user.role === UserRole.HR_LEAD) {
+      leaves = await this.leaveRepository.find({
+        where: {
+          employee: {
+            is_active: true,
+            is_deleted: false
           },
-          is_active: true,
-          is_deleted: false
+          status: LeaveStatus.PENDING,
+          leave_type: In(typeLeaves)
         },
-        status: LeaveStatus.PENDING,
-        leave_type: In(typeLeaves)
-      },
-      relations: ['employee'],
-      order: { created_at: 'ASC' }
-    });
+        relations: [
+          'employee',
+          'employee.manager',
+          'employee.manager.manager'
+        ],
+        order: { created_at: 'ASC' }
+      });
+
+      return leaves.filter(leave => {
+        const start = new Date(leave.start_date);
+
+        const daysBefore = Math.ceil(
+          (start.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+        );
+
+        return daysBefore <= 3;
+      });
+    } else if (user.role === UserRole.SUPERADMIN) {
+      leaves = await this.leaveRepository.find({
+        where: {
+          employee: {
+            is_active: true,
+            is_deleted: false
+          },
+          status: LeaveStatus.PENDING,
+          leave_type: In(typeLeaves)
+        },
+        relations: [
+          'employee',
+          'employee.manager',
+          'employee.manager.manager'
+        ],
+        order: { created_at: 'ASC' }
+      });
+      return leaves
+    } else {
+      const employee = await this.employeeRepository.findOne({
+        where: { user: { id: user.id } },
+        relations: ['manager', 'user']
+      });
+
+      if (!employee) return [];
+
+      leaves = await this.leaveRepository.find({
+        where: {
+          employee: {
+            manager: [
+              { id: employee.id },
+              { manager: { id: employee.id } }
+            ],
+            is_active: true,
+            is_deleted: false
+          },
+          status: LeaveStatus.PENDING,
+          leave_type: In(typeLeaves)
+        },
+        relations: [
+          'employee',
+          'employee.manager',
+          'employee.manager.manager'
+        ],
+        order: { created_at: 'ASC' }
+      });
+
+      return leaves.filter(leave => {
+        const start = new Date(leave.start_date);
+
+        const daysBefore = Math.ceil(
+          (start.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+        );
+
+        // Manager direct
+        if (leave.employee.manager?.id === employee.id) {
+          return true;
+        }
+
+        // Manager N+2
+        if (leave.employee.manager?.manager?.id === employee.id) {
+          return daysBefore <= 5;
+        }
+
+        return false;
+      });
+    }
   }
 
   async getPermissions(user: any, startDate: Date, endDate: Date, status: string) {
@@ -75,7 +162,7 @@ export class LeaveService {
           ),
           employee: {
             manager: {
-              id: user.id
+              id: user.employee?.id
             },
             is_active: true,
             is_deleted: false
@@ -157,11 +244,11 @@ export class LeaveService {
               new Date(year, endMonth + 1, 0)
             ),
             employee: [
-              { manager: { id: user.id }, matricule: Like(`%${search}%`), is_active: true, is_deleted: false },
-              { manager: { id: user.id }, name: Like(`%${search}%`), is_active: true, is_deleted: false },
-              { manager: { id: user.id }, firstname: Like(`%${search}%`), is_active: true, is_deleted: false },
-              { manager: { id: user.id }, division: Like(`%${search}%`), is_active: true, is_deleted: false },
-              { manager: { id: user.id }, section: Like(`%${search}%`), is_active: true, is_deleted: false },
+              { manager: { id: user.employee?.id }, matricule: Like(`%${search}%`), is_active: true, is_deleted: false },
+              { manager: { id: user.employee?.id }, name: Like(`%${search}%`), is_active: true, is_deleted: false },
+              { manager: { id: user.employee?.id }, firstname: Like(`%${search}%`), is_active: true, is_deleted: false },
+              { manager: { id: user.employee?.id }, division: Like(`%${search}%`), is_active: true, is_deleted: false },
+              { manager: { id: user.employee?.id }, section: Like(`%${search}%`), is_active: true, is_deleted: false },
             ],
             status: In([
               LeaveStatus.APPROVED,
@@ -182,7 +269,7 @@ export class LeaveService {
           ),
           employee: {
             manager: {
-              id: user.id
+              id: user.employee?.id
             },
             is_active: true,
             is_deleted: false
@@ -288,12 +375,12 @@ export class LeaveService {
     const leaveSaved = await this.leaveRepository.save(leave);
     await this.historyService.create({
       reason: HistoryReason.LEAVE,
-      message: "New leave " + leaveSaved.id + " by " + req.session.user.firstName + " " + req.session.user.name,
+      message: "New leave " + leaveSaved.id + " by " + req.session.user.employee.firstname + " " + req.session.user.employee.name,
       created_by: req.session.user.matricule,
     });
     var email: string[] = [];
     const manager = employee.manager;
-    if (manager) email.push(manager.email);
+    if (manager) email.push(manager.user?.email ?? '');
     const emailAdress = this.configService.get<string>('EMAIL_ADRESS')
     const emailPassword = this.configService.get<string>('EMAIL_PASSWORD')
     if (email.length > 0) {
@@ -679,7 +766,7 @@ export class LeaveService {
         leave_type: Not("Permission_AMD")
       },
       order: { start_date: 'DESC' },
-      relations: ['approver', 'employee'],
+      relations: ['approver', 'approver.employee', 'employee'],
       // skip,
       // take,
     });
@@ -835,7 +922,7 @@ export class LeaveService {
           section,
           division,
           site,
-          manager: { id: user.id },
+          manager: { id: user.employee?.id },
           is_active: true,
           is_deleted: false
         },
@@ -850,7 +937,7 @@ export class LeaveService {
               section,
               division,
               site,
-              manager: { id: user.id },
+              manager: { id: user.employee?.id },
             },
             status: In(leaveEx),
           },
@@ -1023,7 +1110,7 @@ export class LeaveService {
     });
 
     leaves.forEach(leave => {
-      const approver = leave.approver ? leave.approver.firstName : ""
+      const approver = leave.approver ? leave.approver.employee?.firstname + " " + leave.approver.employee?.name : ""
       const approvedDate = leave.approved_date ? new Date(leave.approved_date).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" }) : ""
       const rowData = [
         leave.employee.matricule,
@@ -1640,7 +1727,7 @@ export class LeaveService {
       if (!managerMap.has(managerId)) {
 
         managerMap.set(managerId, {
-          manager: employee.manager.name + ' ' + employee.manager.firstName,
+          manager: employee.manager.name + ' ' + employee.manager.firstname,
           id: employee.manager.id,
           employees: 0,
           absent: 0,

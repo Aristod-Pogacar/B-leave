@@ -1075,12 +1075,12 @@
                                 </div>
 
                                 <!-- Utilisateurs système -->
-                                <% function getInitials(user){ return `${user.name?.[0] || "" }${user.firstName?.[0]
-                                    || "" }`.toUpperCase(); } function getAvatarClass(i){ const colors=[ "av-blue"
-                                    , "av-green" , "av-amber" , "av-purple" ]; return colors[i % colors.length]; }
-                                    function getStatusColor(user){ if(user.isBlocked) return "#c81e1e" ;
-                                    if(user.isSuspended) return "#b00718" ; if(user.isActive) return "#108e05" ;
-                                    return "#9ca3af" ; } %>
+                                <% function getInitials(user){ return `${user.employee.name?.[0] || ""
+                                    }${user.employee.firstName?.[0] || "" }`.toUpperCase(); } function
+                                    getAvatarClass(i){ const colors=[ "av-blue" , "av-green" , "av-amber" , "av-purple"
+                                    ]; return colors[i % colors.length]; } function getStatusColor(user){
+                                    if(user.isBlocked) return "#c81e1e" ; if(user.isSuspended) return "#b00718" ;
+                                    if(user.isActive) return "#108e05" ; return "#9ca3af" ; } %>
                                     <div class="card">
                                         <div class="card-header">
                                             <div class="card-title">
@@ -1101,8 +1101,8 @@
 
                                                         <div>
                                                             <div class="team-name">
-                                                                <%= user.name %>
-                                                                    <%= user.firstName || "" %>
+                                                                <%= user.employee?.name %>
+                                                                    <%= user.employee?.firstname || "" %>
                                                             </div>
 
                                                             <div class="team-role">

@@ -89,61 +89,214 @@
                                                                         <table class="table table-hover mb-0">
                                                                             <thead>
                                                                                 <tr>
-                                                                                    <th style="width: 10%;">
-                                                                                        Employee ID</th>
-                                                                                    <th style="width: 30%;">Fullname
+                                                                                    <th style="width: 35%;">Employee
                                                                                     </th>
-                                                                                    <th style="width: 10%;">Applied at
-                                                                                    </th>
-                                                                                    <th style="width: 10%;">Start date
-                                                                                    </th>
-                                                                                    <th style="width: 10%;">Duration
-                                                                                    </th>
-                                                                                    <th style="width: 10%;">Reason</th>
-                                                                                    <th class="text-center"
-                                                                                        style="width: 10%;">Approver
-                                                                                    </th>
+
+                                                                                    <th>Permission
+                                                                                        Information</th>
+
+                                                                                    <th>Schedule</th>
+                                                                                    <th style="width:20%;">
+                                                                                        Approved/Rejected by</th>
                                                                                 </tr>
                                                                             </thead>
                                                                             <tbody>
-                                                                                <% leaves.forEach(leave=> { %>
-                                                                                    <tr>
-                                                                                        <td style="width: 10%;">
-                                                                                            <%= leave.employee.matricule
-                                                                                                %>
-                                                                                        </td>
-                                                                                        <td style="width: 30%;">
-                                                                                            <a
-                                                                                                href="/employee/details/<%= leave.employee.id %>">
-                                                                                                <%= leave.employee.name
-                                                                                                    %>
-                                                                                                    <%= leave.employee.firstname
+                                                                                <% leaves.forEach(leave=> {
+
+                                                                                    let leaveColor = "primary";
+
+                                                                                    if(leave.leave_type ===
+                                                                                    "Permission_AMD"){
+                                                                                    leaveColor = "success";
+                                                                                    }
+
+                                                                                    if(leave.leave_type ===
+                                                                                    "Indisponibilite_AMD"){
+                                                                                    leaveColor = "danger";
+                                                                                    }
+
+                                                                                    const createdAt = new
+                                                                                    Date(leave.created_at);
+                                                                                    const startDate = new
+                                                                                    Date(leave.start_date);
+
+                                                                                    const diffDays =
+                                                                                    (startDate - createdAt) /
+                                                                                    (1000*60*60*24);
+
+                                                                                    const returnDate = new
+                                                                                    Date(leave.end_date);
+                                                                                    returnDate.setDate(returnDate.getDate()
+                                                                                    + 1);
+
+                                                                                    const urgent = diffDays < 8; %>
+                                                                                        <tr>
+                                                                                            <td style="width: 35%;">
+
+                                                                                                <div
+                                                                                                    class="d-flex align-items-center">
+
+                                                                                                    <div
+                                                                                                        class="avatar-text avatar-md bg-soft-success text-success me-3">
+
+                                                                                                        <%= leave.leave_type.charAt(0)
+                                                                                                            %>
+
+                                                                                                    </div>
+
+                                                                                                    <div>
+
+                                                                                                        <div
+                                                                                                            class="fw-semibold">
+
+                                                                                                            <a href="/employee/details/<%= leave.employee.id %>"
+                                                                                                                class="text-decoration-none text-dark">
+
+                                                                                                                <%= leave.employee.name
+                                                                                                                    %>
+                                                                                                                    <%= leave.employee.firstname
+                                                                                                                        %>
+
+                                                                                                            </a>
+
+                                                                                                        </div>
+
+                                                                                                        <small
+                                                                                                            class="text-muted">
+
+                                                                                                            <i
+                                                                                                                class="feather-hash me-1"></i>
+
+                                                                                                            <%= leave.employee.matricule
+                                                                                                                %>
+
+                                                                                                        </small>
+
+                                                                                                    </div>
+
+                                                                                                </div>
+
+                                                                                            </td>
+                                                                                            <td style="width: 30%;">
+                                                                                                <a
+                                                                                                    href="/employee/details/<%= leave.employee.id %>">
+                                                                                                    <%= leave.employee.name
                                                                                                         %>
-                                                                                            </a>
-                                                                                        </td>
-                                                                                        <td style="width: 10%;">
-                                                                                            <%= new
-                                                                                                Date(leave.created_at).toLocaleDateString('fr-FR')
-                                                                                                %>
-                                                                                        </td>
-                                                                                        <td style="width: 10%;">
-                                                                                            <%= new
-                                                                                                Date(leave.start_date).toLocaleDateString('fr-FR')
-                                                                                                %>
-                                                                                        </td>
-                                                                                        <td style="width: 10%;">
-                                                                                            <%= leave.duration %> day(s)
-                                                                                        </td>
-                                                                                        <td style="width: 10%;">
-                                                                                            <%= leave.reason %>
-                                                                                        </td>
-                                                                                        <td style="width: 10%;">
-                                                                                            <%= leave.approver?.name %>
-                                                                                                <%= leave.approver?.firstName
+                                                                                                        <%= leave.employee.firstname
+                                                                                                            %>
+                                                                                                </a>
+                                                                                            </td>
+
+                                                                                            <td>
+                                                                                                <div class="small">
+
+                                                                                                    <div
+                                                                                                        class="mb-1 mt-0 ms-4">
+                                                                                                        <span
+                                                                                                            class="badge bg-soft-<%= leaveColor %> text-<%= leaveColor %>">
+
+                                                                                                            <%= leave.leave_type
+                                                                                                                .replace("_AMD","")
+                                                                                                                .replace("_"," ") %>
+                                                                                                                    </span>
+
+                                                                                                            </div>
+
+                                                                                                            <div
+                                                                                                                class="
+                                                                                                                mb-1">
+
+                                                                                                                <i
+                                                                                                                    class="feather-message-circle text-success me-2"></i>
+
+                                                                                                                <strong>Reason
+                                                                                                                    :</strong>
+
+                                                                                                                <%= leave.reason
+                                                                                                                    %>
+
+                                                                                                    </div>
+
+                                                                                                    <div class="mb-1">
+
+                                                                                                        <i
+                                                                                                            class="feather-corner-down-right text-warning me-2"></i>
+
+                                                                                                        <strong>Duration
+                                                                                                            :</strong>
+
+                                                                                                        <%= leave.duration
+                                                                                                            %>
+                                                                                                            day(s)
+
+                                                                                                    </div>
+
+                                                                                                </div>
+
+                                                                                            </td>
+
+                                                                                            <!-- Schedule -->
+
+                                                                                            <td>
+
+                                                                                                <div class="small">
+
+                                                                                                    <div class="mb-1">
+
+                                                                                                        <i
+                                                                                                            class="feather-edit-3 text-primary me-2"></i>
+
+                                                                                                        <strong>Applied
+                                                                                                            :</strong>
+
+                                                                                                        <span
+                                                                                                            class="badge bg-soft-success text-success">
+                                                                                                            <%= new
+                                                                                                                Date(leave.created_at).toLocaleDateString("fr-FR")
+                                                                                                                %>
+                                                                                                        </span>
+
+                                                                                                    </div>
+
+                                                                                                    <div class="mb-1">
+
+                                                                                                        <i
+                                                                                                            class="feather-play text-success me-2"></i>
+
+                                                                                                        <strong>Start
+                                                                                                            :</strong>
+
+                                                                                                        <%= new
+                                                                                                            Date(leave.start_date).toLocaleDateString("fr-FR")
+                                                                                                            %>
+
+                                                                                                    </div>
+
+                                                                                                    <div class="mb-1">
+
+                                                                                                        <i
+                                                                                                            class="feather-corner-down-right text-warning me-2"></i>
+
+                                                                                                        <strong>Return
+                                                                                                            :
+                                                                                                            :</strong>
+
+                                                                                                        <%= returnDate.toLocaleDateString("fr-FR")
+                                                                                                            %>
+
+                                                                                                    </div>
+
+                                                                                                </div>
+
+                                                                                            </td>
+                                                                                            <td style="width: 10%;">
+                                                                                                <%= leave.approver?.name
                                                                                                     %>
-                                                                                        </td>
-                                                                                    </tr>
-                                                                                    <% }) %>
+                                                                                                    <%= leave.approver?.firstName
+                                                                                                        %>
+                                                                                            </td>
+                                                                                        </tr>
+                                                                                        <% }) %>
                                                                             </tbody>
                                                                         </table>
                                                                     </div>

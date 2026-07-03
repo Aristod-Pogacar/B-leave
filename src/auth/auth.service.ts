@@ -16,39 +16,38 @@ export class AuthService {
         private readonly jwtService: JwtService,
     ) { }
 
-    async register(email: any, password: any, name: any, firstName: any, phone: any, role: any, res: any) {
-        const existing = await this.userRepo.findOne({ where: { email } });
+    // async register(email: any, password: any, name: any, firstName: any, phone: any, role: any, res: any) {
+    //     const existing = await this.userRepo.findOne({ where: { email } });
 
-        if (existing) {
-            return res.status(400).redirect('/auth/register?error=emailAlreadyExists');
-        }
+    //     if (existing) {
+    //         return res.status(400).redirect('/auth/register?error=emailAlreadyExists');
+    //     }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+    //     const hashedPassword = await bcrypt.hash(password, 10);
 
-        const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    //     const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-        const user = this.userRepo.create({
-            email,
-            password: hashedPassword,
-            name,
-            firstName,
-            phone,
-            role,
-            verificationCode,
-        });
+    //     const user = this.userRepo.create({
+    //         email,
+    //         password: hashedPassword,
+    //         name,
+    //         firstName,
+    //         phone,
+    //         role,
+    //         verificationCode,
+    //     });
 
-        await this.userRepo.save(user);
+    //     await this.userRepo.save(user);
 
-        await this.mailService.sendVerificationEmail(user.email, verificationCode);
+    //     await this.mailService.sendVerificationEmail(user.email, verificationCode);
 
-        return res.status(200).redirect('/auth/login?message=checkYourEmailForVerificationCode');
-    }
+    //     return res.status(200).redirect('/auth/login?message=checkYourEmailForVerificationCode');
+    // }
 
     async getEmailOrMatricule(login: any) {
         if (
             login === process.env.SUPERADMIN_EMAIL
         ) {
-            console.log('🔥 SUPERADMIN LOGGED IN 🔥');
             return {
                 id: 'superadmin',
                 matricule: 'SUPERADMIN',
@@ -61,7 +60,7 @@ export class AuthService {
             };
         }
         const user = await this.userRepo.findOne({
-            where: [{ email: login, role: Not(UserRole.MANAGER) }, { matricule: login, role: Not(UserRole.MANAGER) }]
+            where: [{ email: login, role: Not(UserRole.MANAGER) }, { employee: { matricule: login }, role: Not(UserRole.MANAGER) }]
         });
         return user;
     }
@@ -74,7 +73,6 @@ export class AuthService {
             email === process.env.SUPERADMIN_EMAIL &&
             isSuperAdmin
         ) {
-            console.log('🔥 SUPERADMIN LOGGED IN 🔥');
             return {
                 id: 'superadmin',
                 matricule: 'SUPERADMIN',
@@ -84,6 +82,11 @@ export class AuthService {
                 role: UserRole.SUPERADMIN,
                 isSuperAdmin: true,
                 site: Site.MADA,
+                employee: {
+                    name: 'Admin',
+                    firstname: 'Super',
+                    matricule: 'SUPERADMIN',
+                },
             };
         }
 
@@ -94,8 +97,8 @@ export class AuthService {
             where: [
                 { email: userLogin },
                 { phone: userLogin },
-                { matricule: userLogin }
-            ]
+                { employee: { matricule: userLogin } }
+            ], relations: ['employee']
         });
 
         if (!user) return null;

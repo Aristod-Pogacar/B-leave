@@ -2,17 +2,10 @@ import { IsEnum, IsNotEmpty, IsOptional, IsString } from "class-validator";
 import { Site, UserRole } from "../entities/user.entity";
 
 export class CreateUserDto {
-    @IsString()
-    @IsNotEmpty()
-    name: string;
-
-    @IsString()
-    @IsNotEmpty()
-    matricule: string;
 
     @IsString()
     @IsOptional()
-    firstName: string;
+    employee: string;
 
     @IsString()
     @IsOptional()

@@ -13,6 +13,17 @@ import { JwtService } from '@nestjs/jwt';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { History } from 'src/history/entities/history.entity';
 import { HistoryService } from 'src/history/history.service';
+import { EmployeeService } from 'src/employee/employee.service';
+import { EmployeeHistoryService } from 'src/employee-history/employee-history.service';
+import { CryptoService } from 'src/crypto/crypto.service';
+import { HolidayService } from 'src/holiday/holiday.service';
+import { MailService } from 'src/mail/mail.service';
+import { EmployeeHistory } from 'src/employee-history/entities/employee-history.entity';
+import { Holiday } from 'src/holiday/entities/holiday.entity';
+import { Leave } from 'src/leave/entities/leave.entity';
+import { LeaveService } from 'src/leave/leave.service';
+import { SmiaOstieService } from 'src/smia_ostie/smia_ostie.service';
+import { SmiaOstie } from 'src/smia_ostie/entities/smia_ostie.entity';
 
 @Module({
   imports: [
@@ -40,8 +51,12 @@ import { HistoryService } from 'src/history/history.service';
     TypeOrmModule.forFeature([
       Permission2h,
       Employee,
+      EmployeeHistory,
+      Holiday,
+      Leave,
       History,
-      User
+      User,
+      SmiaOstie,
     ]),
   ],
   controllers: [Permission2hController],
@@ -49,7 +64,14 @@ import { HistoryService } from 'src/history/history.service';
     Permission2hService,
     HistoryService,
     UserService,
-    JwtService
+    JwtService,
+    EmployeeService,
+    EmployeeHistoryService,
+    CryptoService,
+    HolidayService,
+    LeaveService,
+    SmiaOstieService
+    // MailService,
   ],
 })
 export class Permission2hModule { }

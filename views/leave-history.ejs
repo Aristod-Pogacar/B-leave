@@ -173,25 +173,18 @@
                                                     <div class="modal-body">
                                                         <div class="row mt-4">
                                                             <div class="col-12 pt-3">
-                                                                <div class="table-responsive">
+                                                                <div class="table-responsive" id="leaveHistoryWrapper">
                                                                     <table class="table table-hover align-middle mb-0">
                                                                         <thead>
                                                                             <tr>
-                                                                                <th style="width:25%;">Employee</th>
-                                                                                <th style="width:15%;"
-                                                                                    class="text-center">Leave Type</th>
-                                                                                <th style="width:10%;"
-                                                                                    class="text-center">Start Date</th>
-                                                                                <th style="width:10%;"
-                                                                                    class="text-center">Duration</th>
-                                                                                <th style="width:10%;"
-                                                                                    class="text-center">Applied At</th>
+                                                                                <!-- <th style="width:25%;">Employee</th> -->
+                                                                                <th style="width:15%;">Leave
+                                                                                    Information</th>
+                                                                                <th style="width:10%;">Schedule</th>
                                                                                 <th style="width:10%;"
                                                                                     class="text-center">Status</th>
-                                                                                <th style="width:10%;"
-                                                                                    class="text-center">
-                                                                                    Sign-off at</th>
-                                                                                <th style="width:10%;">Sign-off by</th>
+                                                                                <th style="width:20%;">
+                                                                                    Approved/Rejected by</th>
                                                                             </tr>
                                                                         </thead>
 
@@ -318,6 +311,7 @@
         const soldePermission = document.getElementById('soldePermission');
 
         input.addEventListener('input', () => {
+            console.log("INPUT :", input.value);
             clearTimeout(timeout);
 
             const query = input.value.trim();
@@ -338,6 +332,7 @@
                     const data = await res.json();
 
                     results.innerHTML = '';
+                    console.log("DATA:", data);
                     data.forEach(emp => {
                         const li = document.createElement('li');
                         li.classList.add('list-group-item');
@@ -456,8 +451,10 @@
                     leaveTypeClass = "bg-soft-danger text-danger";
                 }
 
-                const approver = leave.approver ? leave.approver.firstName : "-";
+                const approver = leave.approver ? leave.approver.employee.name + " " + leave.approver.employee.firstname : "-";
                 let approvedDate = "-";
+                const returnDate = new Date(leave.end_date);
+                returnDate.setDate(returnDate.getDate() + 1);
                 if (leave.approved_date) {
                     approvedDate = new Date(leave.approved_date).toLocaleDateString("en-US",
                         {
@@ -472,43 +469,95 @@
                 }
 
                 row.innerHTML = `
-    <td style="width:25%;">
-        <div class="d-flex align-items-center">
-            <div class="avatar-text avatar-md bg-soft-primary me-3">
-                ${leave.employee?.firstname?.charAt(0) || "E"}
+
+    <td style="width:15%;">
+        <div
+            class="small">
+
+            <div
+                class="mb-1 mt-0 ms-4">
+                <span
+                    class="badge bg-soft-primary text-primary">
+
+                    ${leave.leave_type.replace("_AMD", "").replace("_", " ")}
+                </span>
+
             </div>
 
-            <div>
-                <div class="fw-semibold text-dark">
-                    ${leave.employee?.name || ""}
-                    ${leave.employee?.firstname || ""}
-                </div>
+            <div
+                class="
+                        mb-1">
 
-                <small class="text-muted">
-                    ${leave.employee?.matricule || "-"}
-                </small>
+                        <i
+                            class="feather-message-circle text-success me-2"></i>
+
+                        <strong>Reason
+                            :</strong>
+
+                        ${leave.reason}
+
             </div>
+
+            <div
+                class="mb-1">
+
+                <i
+                    class="feather-corner-down-right text-warning me-2"></i>
+
+                <strong>Duration
+                    :</strong>
+
+                ${leave.duration} day(s)
+
+            </div>
+
         </div>
     </td>
 
-    <td class="text-center" style="width:15%;">
-        <span class="badge ${leaveTypeClass}">
-            ${leave.leave_type}
-        </span>
-    </td>
+    <td style="width:10%;">
+        <div
+            class="small">
 
-    <td class="text-center" style="width:10%;">
-        ${formatDate(leave.start_date)}
-    </td>
+            <div
+                class="mb-1">
 
-    <td class="text-center" style="width:10%;">
-        <span class="badge bg-soft-info text-info">
-            ${leave.duration} day(s)
-        </span>
-    </td>
+                <i
+                    class="feather-edit-3 text-primary me-2"></i>
 
-    <td class="text-center text-muted" style="width:10%;">
-        ${formatDate(leave.created_at)}
+                <strong>Applied
+                    :</strong>
+
+                    ${new Date(leave.created_at).toLocaleDateString("fr-FR")}
+            </div>
+
+            <div
+                class="mb-1">
+
+                <i
+                    class="feather-play text-success me-2"></i>
+
+                <strong>Start
+                    :</strong>
+
+                ${new
+                        Date(leave.start_date).toLocaleDateString("fr-FR")}
+
+            </div>
+
+            <div
+                class="mb-1">
+
+                <i
+                    class="feather-corner-down-right text-warning me-2"></i>
+
+                <strong>Return
+                    :</strong>
+
+                ${returnDate.toLocaleDateString("fr-FR")}
+
+            </div>
+
+        </div>
     </td>
 
     <td class="text-center" style="width:10%;">
@@ -517,23 +566,42 @@
         </span>
     </td>
 
-    <td class="text-center" style="width:10%;">
-        ${approvedDate}
-    </td>
-
-    <td style="width:10%;">
+    <td style="width:20%;">
         ${leave.approver ?
                         `
-            <div class="d-flex align-items-center">
-                <div class="avatar-text avatar-sm bg-soft-warning me-2">
-                    ${leave.approver.firstName.charAt(0)}
+        <div
+            class="d-flex align-items-center">
+
+            <div
+                class="avatar-text avatar-md bg-soft-warning text-warning me-3">
+
+                ${leave.approver?.employee?.name.charAt(0) + leave.approver?.employee?.firstname.charAt(0)}
+
+            </div>
+
+            <div>
+
+                <div
+                    class="fw-semibold">
+
+                        ${leave.approver?.employee?.name}
+                            ${leave.approver?.employee?.firstname}
+
                 </div>
 
-                <div>
-                    ${leave.approver.firstName}
-                    ${leave.approver.name}
-                </div>
+                <small
+                    class="text-muted">
+
+                    <i
+                        class="feather-clock me-1"></i>
+
+                    ${approvedDate}
+
+                </small>
+
             </div>
+
+        </div>
             `
                         :
                         `<span class="text-muted">-</span>`

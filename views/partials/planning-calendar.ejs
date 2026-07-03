@@ -326,12 +326,16 @@
                         `${emp.name} ${emp.firstname}`
                     );
 
+                    const returnDate = new Date(leave.end_date);
+                    returnDate.setDate(returnDate.getDate() + 1);
+
                     wrapper.setAttribute(
                         "data-bs-content",
                         `<div style="font-size:12px;line-height:1.9">
                             <b>Type:</b> ${leave.leave_type}<br>
                             <b>From:</b> ${start.toLocaleDateString("en-GB")}<br>
                             <b>To:</b> ${end.toLocaleDateString("en-GB")}<br>
+                            <b>Return:</b> ${returnDate.toLocaleDateString("en-GB")}<br>
                             <b>Duration:</b> ${leave.duration} day(s)<br>
                             <b>Approver:</b> ${approver}<br>
                             <b>OneHR:</b> ${onehrHTML}

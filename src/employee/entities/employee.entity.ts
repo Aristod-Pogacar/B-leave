@@ -4,7 +4,7 @@ import { ManagerAssignation } from 'src/manager_assignation/entities/manager_ass
 import { Permission2h } from 'src/permission2h/entities/permission2h.entity';
 import { SmiaOstie } from 'src/smia_ostie/entities/smia_ostie.entity';
 import { User } from 'src/user/entities/user.entity';
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, JoinColumn, Index } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, JoinColumn, Index, OneToOne } from 'typeorm';
 
 @Entity('employees')
 export class Employee {
@@ -72,9 +72,9 @@ export class Employee {
     smia_ostie: SmiaOstie[];
 
     @Index()
-    @ManyToOne(() => User, user => user.employees, { nullable: true, onDelete: 'SET NULL' })
+    @ManyToOne(() => Employee, manager => manager.subordinates, { nullable: true, onDelete: 'SET NULL' })
     @JoinColumn({ name: 'manager_id' })
-    manager?: User | null;
+    manager?: Employee | null;
 
     @Column()
     app_password!: string;
@@ -90,4 +90,10 @@ export class Employee {
 
     @Column({ type: 'varchar', nullable: true })
     deviceId?: string | null;
+
+    @OneToOne(() => User, user => user.employee, { nullable: true, onDelete: 'SET NULL' })
+    user?: User;
+
+    @OneToMany(() => Employee, employee => employee.manager)
+    subordinates: Employee[];
 }

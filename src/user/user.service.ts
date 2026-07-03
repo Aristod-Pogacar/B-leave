@@ -6,6 +6,8 @@ import { Site, User, UserRole } from './entities/user.entity';
 import { In, Like, Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { Employee } from 'src/employee/entities/employee.entity';
+import { EmployeeService } from 'src/employee/employee.service';
 
 @Injectable()
 export class UserService {
@@ -14,12 +16,22 @@ export class UserService {
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
     private readonly jwtService: JwtService,
+    private readonly employeeService: EmployeeService,
   ) { }
   async create(createUserDto: CreateUserDto) {
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    const employee = await this.employeeService.findOne(createUserDto.employee);
+    if (!employee) {
+      throw new BadRequestException("Employee not found");
+    }
+    if (employee.user) {
+      throw new BadRequestException("Employee already has a user");
+    }
     const user = await this.userRepo.save({
       ...createUserDto,
       password: hashedPassword,
+      employee,
+      site: employee.site as Site
     });
     return user;
   }
@@ -28,8 +40,13 @@ export class UserService {
     const allowedSites = this.getAllowedSites(site);
     console.log("ALLOWED SITES:", allowedSites);
     const result = await this.userRepo.find({
-      where: [{ site: In(allowedSites), role: UserRole.MANAGER, name: Like(`%${search}%`) }, { site: In(allowedSites), role: UserRole.MANAGER, firstName: Like(`%${search}%`) }, { site: In(allowedSites), role: UserRole.MANAGER, matricule: Like(`%${search}%`) }],
-      select: ['name', 'firstName', 'site', 'id', 'matricule']
+      where: [
+        { employee: { site: In(allowedSites), name: Like(`%${search}%`) }, role: UserRole.MANAGER },
+        { employee: { site: In(allowedSites), firstname: Like(`%${search}%`) }, role: UserRole.MANAGER },
+        { employee: { site: In(allowedSites), matricule: Like(`%${search}%`) }, role: UserRole.MANAGER }
+      ],
+      select: ['id', 'employee', 'email', 'phone', 'role'],
+      relations: ['employee']
     });
     console.log("RESULT:", result);
     return result;
@@ -53,29 +70,33 @@ export class UserService {
 
   async findAllManagers(site: any) {
     const allowedSites = this.getAllowedSites(site);
-    return await this.userRepo.find({ where: { site: In(allowedSites), role: UserRole.MANAGER } });
+    return await this.userRepo.find({ where: { employee: { site: In(allowedSites) }, role: UserRole.MANAGER } });
   }
 
-  async getAdminUser() {
-    const user = this.userRepo.create({
-      id: 'superadmin',
-      matricule: 'SUPERADMIN',
-      firstName: 'Super',
-      name: 'Admin',
-      phone: "-",
-      email: process.env.SUPERADMIN_EMAIL,
-      role: UserRole.SUPERADMIN,
-      site: Site.MADA,
-    })
+  async getAdminUser(): Promise<User> {
+    const employee = new Employee();
+    employee.matricule = "superadmin";
+    employee.firstname = "Super";
+    employee.name = "Admin";
+    employee.site = Site.MADA;
+
+    const user = new User();
+    user.id = "superadmin";
+    user.phone = "-";
+    user.email = process.env.SUPERADMIN_EMAIL!;
+    user.role = UserRole.SUPERADMIN;
+    user.employee = employee;
+    user.site = Site.MADA;
+
     return user;
   }
 
   async findAll() {
-    return await this.userRepo.find();
+    return await this.userRepo.find({ relations: ['employee'] });
   }
 
   async findOne(id: string) {
-    return await this.userRepo.findOne({ where: { id } });
+    return await this.userRepo.findOne({ where: { id }, relations: ['employee'] });
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
@@ -152,7 +173,8 @@ export class UserService {
       },
       order: {
         createdAt: "DESC"
-      }
+      },
+      relations: ['employee']
     });
 
     const admins = users.filter(
@@ -183,4 +205,13 @@ export class UserService {
       }
     };
   }
+
+  async findOneByMatricule(matricule: string) {
+    return this.userRepo.findOne({ where: { employee: { matricule } } });
+  }
+
+  async save(user: User) {
+    return this.userRepo.save(user);
+  }
+
 }
