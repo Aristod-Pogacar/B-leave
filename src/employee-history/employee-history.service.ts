@@ -17,7 +17,6 @@ export class EmployeeHistoryService {
   ) { }
 
   async rehire(id: string, body: any) {
-    console.log("Body:", body)
     const archive = await this.employeeHistoryRepository.findOne({ where: { id }, relations: ['employee'] });
     const employee = archive?.employee;
     if (employee) {
@@ -25,8 +24,6 @@ export class EmployeeHistoryService {
       var dor = new Date(body.DOR)
       doe.setUTCHours(12, 0, 0, 0);
       dor.setUTCHours(12, 0, 0, 0);
-      console.log("Doe:", doe)
-      console.log("Dor:", dor)
 
       employee.DOE = doe;
       if (body.DOR == null || body.DOR == '') {

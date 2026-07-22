@@ -28,7 +28,6 @@ export class SmiaOstieController {
     @Query('endDate') endDate: string = new Date().toISOString().split('T')[0],
   ) {
     const data = await this.smiaOstieService.toExport(search, req.session.user, startDate, endDate);
-    console.log('DATA:', data);
 
     await this.smiaOstieService.exportSmiaOstieToExcel(data, res, startDate, endDate);
   }

@@ -19,4 +19,45 @@ export class NotificationService {
 
   }
 
+  async findOne(id: string) {
+    return await this.repo.findOne({
+      where: { id },
+    });
+  }
+
+  async markAsRead(notificationId: string) {
+    const notification = await this.repo.findOne({
+      where: { id: notificationId },
+    });
+
+    if (!notification) {
+      throw new Error('Notification not found');
+    }
+
+    notification.isRead = true;
+
+    return await this.repo.save(notification);
+  }
+
+  async getNotifications(userId: string): Promise<[Notification[], number]> {
+    return await this.repo.findAndCount({
+      where: { recipient: { id: userId } },
+      order: { createdAt: 'DESC' },
+      take: 10,
+    });
+  }
+
+  async getUnreadNotifications(userId: string): Promise<[Notification[], number]> {
+    return await this.repo.findAndCount({
+      where: { recipient: { id: userId }, isRead: false },
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async getNotificationsCount(userId: string): Promise<number> {
+    return await this.repo.count({
+      where: { recipient: { id: userId }, isRead: false },
+    });
+  }
+
 }

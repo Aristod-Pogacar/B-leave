@@ -38,7 +38,7 @@ export class UserService {
 
   async searchManager(site: any, search: string) {
     const allowedSites = this.getAllowedSites(site);
-    console.log("ALLOWED SITES:", allowedSites);
+    // console.log("ALLOWED SITES:", allowedSites);
     const result = await this.userRepo.find({
       where: [
         { employee: { site: In(allowedSites), name: Like(`%${search}%`) }, role: UserRole.MANAGER },
@@ -48,7 +48,7 @@ export class UserService {
       select: ['id', 'employee', 'email', 'phone', 'role'],
       relations: ['employee']
     });
-    console.log("RESULT:", result);
+    // console.log("RESULT:", result);
     return result;
   }
 
@@ -208,6 +208,10 @@ export class UserService {
 
   async findOneByMatricule(matricule: string) {
     return this.userRepo.findOne({ where: { employee: { matricule } } });
+  }
+
+  async findUsersByRole(role: UserRole, site: Site) {
+    return this.userRepo.find({ where: { role, employee: { site } }, relations: ['employee'] });
   }
 
   async save(user: User) {

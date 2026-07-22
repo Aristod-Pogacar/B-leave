@@ -33,6 +33,96 @@
         <div class="header-right ms-auto">
             <div class="d-flex align-items-center">
                 <div class="dropdown nxl-h-item">
+                    <a class="nxl-head-link me-3" data-bs-toggle="dropdown" href="#" role="button"
+                        data-bs-auto-close="outside">
+                        <i class="feather-bell"></i>
+                        <% if(notificationCount> 0) { %>
+                            <span class="badge bg-danger nxl-h-badge" id="count">
+                                <%= notificationCount %>
+                            </span>
+                            <% } %>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end nxl-h-dropdown nxl-notifications-menu">
+                        <div class="d-flex justify-content-between align-items-center notifications-head">
+                            <h6 class="fw-bold text-dark mb-0">Notifications</h6>
+                            <a href="javascript:void(0);" class="fs-11 text-success text-end ms-auto"
+                                data-bs-toggle="tooltip" title="Make all as Read" onclick="markAllAsRead()">
+                                <i class="feather-check"></i>
+                                <span>Make all as Read</span>
+                            </a>
+                        </div>
+                        <% notifications.forEach(notification=> { %>
+                            <div class="notifications-item <%= notification.isRead ? '' : 'bg-light' %>"
+                                id="div-<%= notification.id %>">
+
+                                <div class="d-flex align-items-start gap-3">
+
+                                    <!-- Icône -->
+                                    <div class="notifications-icon">
+                                        <% if(notification.icon) { %>
+                                            <i class="<%= notification.icon %> fs-18"></i>
+                                            <% } else { %>
+                                                <i class="feather-bell fs-18 text-primary"></i>
+                                                <% } %>
+                                    </div>
+
+                                    <!-- Contenu -->
+                                    <div class="notifications-desc flex-grow-1">
+
+                                        <% if(notification.url) { %>
+                                            <a href="/notification/redirect/<%= notification.id %>"
+                                                class="fw-semibold text-dark">
+                                                <%= notification.title %>
+                                            </a>
+                                            <% } else { %>
+                                                <span class="fw-semibold text-dark">
+                                                    <%= notification.title %>
+                                                </span>
+                                                <% } %>
+
+                                                    <p class="mb-1 text-muted">
+                                                        <%= notification.message %>
+                                                    </p>
+
+                                                    <div class="d-flex justify-content-between align-items-center">
+
+                                                        <small class="text-muted">
+                                                            <%= notification.createdAt.toLocaleString('fr-FR') %>
+                                                        </small>
+
+                                                        <div class="d-flex align-items-center gap-2">
+
+                                                            <% if(!notification.isRead) { %>
+                                                                <a href="#" id="<%= notification.id %>"
+                                                                    onclick="markAsRead('<%= notification.id %>')"
+                                                                    class="text-success" title="Mark as read">
+                                                                    <i class="feather-check-circle"></i>
+                                                                </a>
+                                                                <% } %>
+
+                                                                    <a href="/notifications/<%= notification.id %>/delete"
+                                                                        class="text-danger" title="Delete">
+                                                                        <i class="feather-trash-2"></i>
+                                                                    </a>
+
+                                                        </div>
+
+                                                    </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+                            <% }) %>
+                                <div class="text-center notifications-footer">
+                                    <a href="javascript:void(0);" class="fs-13 fw-semibold text-dark">All
+                                        notifications</a>
+                                </div>
+                    </div>
+                </div>
+
+                <div class="dropdown nxl-h-item">
 
                     <!-- Trigger: avatar avec initiales -->
                     <a href="javascript:void(0);" data-bs-toggle="dropdown" role="button" data-bs-auto-close="outside">
@@ -130,6 +220,31 @@
             </div>
 
         </div>
-        <!--! [End] Header Right !-->
     </div>
+    <script>
+        async function markAsRead(id) {
+            const response = await fetch(`/notification/mark-as-read/${id}`);
+            console.log("test", response);
+            if (response.status === 200 || response.status === 201) {
+                const count = document.getElementById("count");
+                const notificationItem = document.getElementById("div-" + id);
+                notificationItem.className = 'notifications-item';
+                if (parseInt(count.innerText) - 1 > 0) {
+                    count.innerText = parseInt(count.innerText) - 1;
+                } else {
+                    count.style.display = "none";
+                }
+            }
+        }
+
+        async function markAllAsRead() {
+            const response = await fetch(`/notification/mark-all-as-read`);
+            console.log("test", response);
+            if (response.status === 200 || response.status === 201) {
+                const count = document.getElementById("count");
+                count.innerText = "0";
+                count.style.display = "none";
+            }
+        }
+    </script>
 </header>

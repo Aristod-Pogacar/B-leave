@@ -1,8 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateLeaveDto } from './dto/create-leave.dto';
 import { UpdateLeaveDto } from './dto/update-leave.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Leave, LeaveStatus } from './entities/leave.entity';
+import { Leave, LeaveStatus, WithdrawStatus } from './entities/leave.entity';
 import { Between, In, IsNull, LessThanOrEqual, Like, MoreThanOrEqual, Not, Repository } from 'typeorm';
 import { Employee } from 'src/employee/entities/employee.entity';
 import * as express from 'express';
@@ -17,6 +17,9 @@ import { HistoryReason } from 'src/history/entities/history.entity';
 import { HistoryService } from 'src/history/history.service';
 import { Permission2h } from 'src/permission2h/entities/permission2h.entity';
 import { SmiaOstie } from 'src/smia_ostie/entities/smia_ostie.entity';
+import { WithdrawLeaveDto } from '../api/leave/dto/with-draw-leave.dto';
+import { CarriedForwardService } from 'src/carried-forward/carried-forward.service';
+import { CarriedForward } from 'src/carried-forward/entities/carried-forward.entity';
 
 @Injectable()
 export class LeaveService {
@@ -36,7 +39,37 @@ export class LeaveService {
     private readonly configService: ConfigService,
     private readonly mailerService: MailerService,
     private readonly historyService: HistoryService,
+    private readonly carriedForwardService: CarriedForwardService,
   ) { }
+
+  async withdrawn(id: string) {
+    const leave = await this.leaveRepository.findOne({ where: { id } });
+    if (!leave) {
+      throw new BadRequestException("Leave not found");
+    }
+    leave.status = LeaveStatus.WITHDRAWN;
+    await this.leaveRepository.save(leave);
+    return leave;
+  }
+
+  async approveWithdrawn(id: string, userId: string) {
+    const leave = await this.leaveRepository.findOne({ where: { id }, relations: ['employee'] });
+    if (!leave) {
+      throw new BadRequestException("Leave not found");
+    }
+    leave.status = LeaveStatus.WITHDRAWN;
+    const user = await this.userRepository.findOne({ where: { id: userId }, relations: ['employee'] });
+    // if (!user) {
+    //   throw new BadRequestException("User not found");
+    // }
+    await this.leaveRepository.save(leave);
+    await this.historyService.create({
+      reason: HistoryReason.LEAVE,
+      message: "Wthdrawn leave " + leave.id + " (" + leave.start_date + " to " + leave.end_date + " of " + leave.leave_type + ") by " + user?.employee?.firstname + " " + user?.employee?.name,
+      created_by: "" + user?.employee?.matricule,
+    });
+    return leave;
+  }
 
   async findLeavesNotDone(limit?: number) {
     return this.leaveRepository.find({ where: { onehr_status: false }, relations: ['employee'], order: { start_date: 'ASC' }, take: limit });
@@ -54,7 +87,6 @@ export class LeaveService {
     var leaves: Leave[];
 
     const today = new Date();
-    console.log(user)
 
     if (user.role === UserRole.HR_LEAD) {
       leaves = await this.leaveRepository.find({
@@ -441,29 +473,20 @@ export class LeaveService {
 
   async importLeaves(file: Express.Multer.File) {
     try {
-      // console.log("LEAVE SERVICE IMPORT LEAVES");
       const workbook = new ExcelJS.Workbook();
       await workbook.xlsx.load(file.buffer as any);
-      // await workbook.xlsx.readFile(file.path);await workbook.xlsx.load(file.buffer as any);
 
-      // console.log("GETTING WORKSHEET");
       const worksheet = workbook.getWorksheet("donne saisie");
-      // console.log("WORKSHEET:", worksheet?.name);
 
       if (!worksheet) {
         const message = 'Aucune feuille trouvée dans le fichier Excel'
-        // console.log(message)
         throw new Error(message);
       }
-      // console.log("GETTING HEADER ROW");
       const headerRow = worksheet.getRow(1);
-      // console.log("HEADER ROW:", headerRow.values);
-
       const headerMap: Record<string, number> = {};
 
       headerRow.eachCell((cell, colNumber) => {
         const headerName = cell.value?.toString().trim().toLowerCase();
-        // console.log("COLUMN NAME:", headerName);
         if (headerName) {
           headerMap[headerName] = colNumber;
         }
@@ -478,7 +501,6 @@ export class LeaveService {
           throw new Error(`Missing column: ${column}`);
         }
       }
-      // console.log("HEADER MAP:", headerMap);
       const leaves: Partial<Leave>[] = [];
 
       for (let i = 2; i <= worksheet.rowCount; i++) {
@@ -493,7 +515,6 @@ export class LeaveService {
           leave_type = "Indisponibilite_AMD";
         }
         if (!employee) {
-          // console.log("EMPLOYEE NOT FOUND:", row.getCell(headerMap['mle']).value?.toString());
           continue;
         }
         const startDate = row.getCell(headerMap['debutcongé']).value as Date;
@@ -514,7 +535,65 @@ export class LeaveService {
         message: 'File readed successfully',
       };
     } catch (error) {
-      // console.log("ERROR:", error);
+      return {
+        result: 'error',
+        message: error.message,
+      };
+    }
+  }
+
+  async importCarriedForwardLeaves(file: Express.Multer.File, date: Date) {
+    try {
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(file.buffer as any);
+
+      const worksheet = workbook.getWorksheet("Carried");
+
+      if (!worksheet) {
+        const message = 'Aucune feuille trouvée dans le fichier Excel'
+        throw new Error(message);
+      }
+      const headerRow = worksheet.getRow(1);
+      const headerMap: Record<string, number> = {};
+
+      headerRow.eachCell((cell, colNumber) => {
+        const headerName = cell.value?.toString().trim().toLowerCase();
+        if (headerName) {
+          headerMap[headerName] = colNumber;
+        }
+      });
+
+      // 2️⃣ Vérifier que les colonnes obligatoires existent
+      const requiredColumns = ['matricule', 'fullname', 'carried forward', 'taken', 'current balance'];
+
+      for (const column of requiredColumns) {
+        if (!headerMap[column]) {
+          throw new Error(`Missing column: ${column}`);
+        }
+      }
+      const carriedForwards: CarriedForward[] = [];
+
+      for (let i = 2; i <= worksheet.rowCount; i++) {
+        const row = worksheet.getRow(i);
+        console.log('ROW:', i)
+        const employee = await this.employeeRepository.findOne({ where: { matricule: row.getCell(headerMap['matricule']).value?.toString() } });
+        if (!employee) {
+          continue;
+        }
+        const carriedForward = new CarriedForward();
+        carriedForward.employee = employee;
+        carriedForward.days = Number(row.getCell(headerMap['carried forward']).value);
+        carriedForward.daysTaken = Number(row.getCell(headerMap['taken']).value);
+        carriedForward.date = new Date(date);
+        carriedForwards.push(carriedForward);
+      }
+
+      await this.carriedForwardService.addAll(carriedForwards);
+      return {
+        result: 'success',
+        message: 'File readed successfully',
+      };
+    } catch (error) {
       return {
         result: 'error',
         message: error.message,
@@ -526,11 +605,8 @@ export class LeaveService {
     if (!employeeId) {
       return null;
     }
-    // console.log("Employee ID:", employeeId);
-    // console.log("Date:", date.toISOString());
     const [data] = await this.employeeRepository
       .createQueryBuilder('e')
-      // .leftJoin('users', 'u', 'u.employee = e.matricule')
       .where(
         'e.id = :id AND e.is_active = true AND e.is_deleted = false',
         { id: employeeId },
@@ -539,8 +615,6 @@ export class LeaveService {
       .select(['e.id', 'e.matricule', 'e.name', 'e.firstname', 'e.DOE'])
       .take(10)
       .getManyAndCount();
-
-    // console.log("EMPLOYEES:", data);
 
     const takenLeaves = await this.leaveRepository
       .createQueryBuilder('leave')
@@ -560,8 +634,6 @@ export class LeaveService {
       .groupBy('employee.id')
       .getRawMany();
     // // return data;
-
-    // console.log("takenLeaves:", takenLeaves);
 
     const takenMap = new Map<string, number>();
 
@@ -605,7 +677,6 @@ export class LeaveService {
       };
     });
     const results = await Promise.all(promises);
-    // console.log("Results:", results[0]);
 
     return results[0];
   }
@@ -767,11 +838,7 @@ export class LeaveService {
       },
       order: { start_date: 'DESC' },
       relations: ['approver', 'approver.employee', 'employee'],
-      // skip,
-      // take,
     });
-    // console.log("Data:", data);
-    // console.log("Count:", count);
     return { data, count };
   }
 
@@ -1228,8 +1295,6 @@ export class LeaveService {
       .andWhere('leave.end_date >= :start', { start })
       .getMany();
 
-    // console.log("Leaves:", leaves)
-
     let total = 0;
 
     for (const leave of leaves) {
@@ -1281,8 +1346,6 @@ export class LeaveService {
       .andWhere('leave.start_date <= :end', { end })
       .andWhere('leave.end_date >= :start', { start })
       .getMany();
-
-    // console.log("Leaves:", leaves)
 
     let total = 0;
 

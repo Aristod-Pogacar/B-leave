@@ -1,6 +1,7 @@
 import { Employee } from 'src/employee/entities/employee.entity';
 import { Leave } from 'src/leave/entities/leave.entity';
 import { ManagerAssignation } from 'src/manager_assignation/entities/manager_assignation.entity';
+import { Withdraw } from 'src/withdraw/entities/withdraw.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, OneToOne, JoinColumn } from 'typeorm';
 
 export enum UserRole {
@@ -91,6 +92,9 @@ export class User {
 
     @OneToMany(() => Leave, leave => leave.approver)
     leaves: Leave[];
+
+    @OneToMany(() => Withdraw, withdraw => withdraw.approver)
+    withdrawn: Withdraw[];
 
     // @ManyToOne(() => User, user => user.subordinates, {
     //     nullable: true

@@ -17,6 +17,7 @@ import { EmployeeHistory } from 'src/employee-history/entities/employee-history.
 import { EmployeeHistoryService } from 'src/employee-history/employee-history.service';
 import { Holiday } from 'src/holiday/entities/holiday.entity';
 import { HolidayService } from 'src/holiday/holiday.service';
+import { CarriedForward } from 'src/carried-forward/entities/carried-forward.entity';
 
 @Module({
   imports: [
@@ -41,7 +42,7 @@ import { HolidayService } from 'src/holiday/holiday.service';
         },
       }),
     }),
-    TypeOrmModule.forFeature([Leave, Employee, History, User, EmployeeHistory, Holiday])],
+    TypeOrmModule.forFeature([Leave, Employee, History, User, EmployeeHistory, Holiday, CarriedForward])],
   controllers: [LeaveController],
   providers: [LeaveService, CryptoService, HistoryService, EmployeeService, UserService, JwtService, EmployeeHistoryService, HolidayService],
   exports: [LeaveService, TypeOrmModule, CryptoService, HistoryService, EmployeeService, UserService, JwtService, EmployeeHistoryService, HolidayService],

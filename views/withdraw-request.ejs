@@ -1,0 +1,405 @@
+<%- include('partials/head.ejs') %>
+
+    <body>
+        <%- include('partials/sidebar.ejs') %>
+            <%- include('partials/header.ejs') %>
+                <main class="nxl-container">
+                    <div class="nxl-content">
+                        <div class="page-header">
+                            <div class="page-header-left d-flex align-items-center">
+                                <div class="page-header-title">
+                                    <h5 class="m-b-10">B-Leave</h5>
+                                </div>
+                                <ul class="breadcrumb">
+                                    <li class="breadcrumb-item">Leaves</li>
+                                    <li class="breadcrumb-item">Approve withdraw requests</li>
+                                </ul>
+                            </div>
+                            <div class="page-header-right ms-auto">
+                                <div class="page-header-right-items">
+                                    <div class="d-flex d-md-none">
+                                        <a href="javascript:void(0)" class="page-header-right-close-toggle">
+                                            <i class="feather-arrow-left me-2"></i>
+                                            <span>Back</span>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="d-md-none d-flex align-items-center">
+                                    <a href="javascript:void(0)" class="page-header-right-open-toggle">
+                                        <i class="feather-align-right fs-20"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- [ page-header ] end -->
+                        <div class="bg-white py-3 border-bottom rounded-0 p-md-0 mb-0">
+                            <div class="d-md-none d-flex align-items-center justify-content-between">
+                                <a href="javascript:void(0)" class="page-content-left-open-toggle">
+                                    <i class="feather-align-left fs-20"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <!-- [ Main Content ] start -->
+                        <div class="main-content">
+                            <div class="tab-content">
+                                <div class="tab-pane fade active show" id="overviewTab">
+                                    <div class="row">
+
+                                        <div class="col-12">
+                                            <div class="card stretch stretch-full">
+                                                <div class="card-header">
+                                                    <h5 class="card-title">Approve withdraw requests</h5>
+                                                    <div
+                                                        class="col-10 task-header d-md-flex align-items-center justify-content-between">
+                                                        <div class="me-4 w-75">
+                                                        </div>
+                                                        <div class="">
+                                                            <div class="d-flex gap-2">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="card-body custom-card-action p-0">
+                                                    <% if (locals.error) { %>
+                                                        <div class="alert alert-danger" role="alert" id="message">
+                                                            <%= error %>
+                                                        </div>
+                                                        <% } %>
+                                                            <% if (locals.message) { %>
+                                                                <div class="alert alert-success" role="alert"
+                                                                    id="message">
+                                                                    <%= message %>
+                                                                </div>
+                                                                <% } %>
+                                                                    <div class="table-responsive mb-3">
+
+                                                                        <table
+                                                                            class="table table-hover align-middle mb-0">
+
+                                                                            <thead class="table-light">
+
+                                                                                <tr>
+
+                                                                                    <th style="width: 35%;">Employee
+                                                                                    </th>
+
+                                                                                    <th>Leave
+                                                                                        Information</th>
+
+                                                                                    <th>Schedule</th>
+
+                                                                                    <!-- <th style="width:10%;"
+                                                                                        class="text-center">
+                                                                                        Status
+                                                                                    </th> -->
+
+                                                                                    <% if(user.role==='HR_LEAD' ||
+                                                                                        user.role==='SUPERADMIN' ) { %>
+
+                                                                                        <th style="width:10%;"
+                                                                                            class="text-center">
+                                                                                            Actions
+                                                                                        </th>
+
+                                                                                        <% } %>
+
+                                                                                </tr>
+
+                                                                            </thead>
+
+                                                                            <tbody>
+
+                                                                                <% if(requests.length===0){ %>
+
+                                                                                    <tr>
+
+                                                                                        <td colspan="5"
+                                                                                            class="text-center py-5">
+
+                                                                                            <i
+                                                                                                class="feather-inbox fs-1 text-muted"></i>
+
+                                                                                            <div
+                                                                                                class="mt-3 text-muted">
+
+                                                                                                No request found.
+
+                                                                                            </div>
+
+                                                                                        </td>
+
+                                                                                    </tr>
+
+                                                                                    <% } %>
+
+                                                                                        <% requests.forEach(request=> {
+
+                                                                                            let leaveColor = "primary";
+
+                                                                                            if(request.leave.leave_type
+                                                                                            ===
+                                                                                            "Permission_AMD"){
+                                                                                            leaveColor = "success";
+                                                                                            }
+
+                                                                                            if(request.leave.leave_type
+                                                                                            ===
+                                                                                            "Indisponibilite_AMD"){
+                                                                                            leaveColor = "danger";
+                                                                                            }
+
+                                                                                            const createdAt = new
+                                                                                            Date(request.leave.created_at);
+                                                                                            const startDate = new
+                                                                                            Date(request.leave.start_date);
+
+                                                                                            const diffDays =
+                                                                                            (startDate - createdAt) /
+                                                                                            (1000*60*60*24);
+
+                                                                                            const returnDate = new
+                                                                                            Date(request.leave.end_date);
+                                                                                            returnDate.setDate(returnDate.getDate()
+                                                                                            + 1);
+
+                                                                                            const urgent = diffDays < 8;
+                                                                                                %>
+
+                                                                                                <tr>
+
+                                                                                                    <!-- Employee -->
+
+                                                                                                    <td
+                                                                                                        style="width: 35%;">
+
+                                                                                                        <div
+                                                                                                            class="d-flex align-items-center">
+
+                                                                                                            <div
+                                                                                                                class="avatar-text avatar-md bg-soft-<%= leaveColor %> text-<%= leaveColor %> me-3">
+
+                                                                                                                <%= request.leave.leave_type.charAt(0)
+                                                                                                                    %>
+
+                                                                                                            </div>
+
+                                                                                                            <div>
+
+                                                                                                                <div
+                                                                                                                    class="fw-semibold">
+
+                                                                                                                    <a href="/employee/details/<%= request.leave.employee.id %>"
+                                                                                                                        class="text-decoration-none text-dark">
+
+                                                                                                                        <%= request.leave.employee.name
+                                                                                                                            %>
+                                                                                                                            <%= request.leave.employee.firstname
+                                                                                                                                %>
+
+                                                                                                                    </a>
+
+                                                                                                                </div>
+
+                                                                                                                <small
+                                                                                                                    class="text-muted">
+
+                                                                                                                    <i
+                                                                                                                        class="feather-hash me-1"></i>
+
+                                                                                                                    <%= request.leave.employee.matricule
+                                                                                                                        %>
+
+                                                                                                                </small>
+
+                                                                                                            </div>
+
+                                                                                                        </div>
+
+                                                                                                    </td>
+
+                                                                                                    <!-- Leave -->
+
+                                                                                                    <td>
+                                                                                                        <div
+                                                                                                            class="small">
+
+                                                                                                            <div
+                                                                                                                class="mb-1 mt-0 ms-4">
+                                                                                                                <span
+                                                                                                                    class="badge bg-soft-<%= leaveColor %> text-<%= leaveColor %>">
+
+                                                                                                                    <%= request.leave.leave_type
+                                                                                                                        .replace("_AMD","")
+                                                                                                                        .replace("_"," ") %>
+                                                                                                                    </span>
+
+                                                                                                            </div>
+
+                                                                                                            <div
+                                                                                                                class="
+                                                                                                                        mb-1">
+
+                                                                                                                        <i
+                                                                                                                            class="feather-message-circle text-success me-2"></i>
+
+                                                                                                                        <strong>Reason
+                                                                                                                            :</strong>
+
+                                                                                                                        <%= request.leave.reason
+                                                                                                                            %>
+
+                                                                                                            </div>
+
+                                                                                                            <div
+                                                                                                                class="mb-1">
+
+                                                                                                                <i
+                                                                                                                    class="feather-corner-down-right text-warning me-2"></i>
+
+                                                                                                                <strong>Duration
+                                                                                                                    :</strong>
+
+                                                                                                                <%= request.leave.duration
+                                                                                                                    %>
+                                                                                                                    day(s)
+
+                                                                                                            </div>
+
+                                                                                                        </div>
+
+                                                                                                    </td>
+
+                                                                                                    <!-- Schedule -->
+
+                                                                                                    <td>
+
+                                                                                                        <div
+                                                                                                            class="small">
+
+                                                                                                            <div
+                                                                                                                class="mb-1">
+
+                                                                                                                <i
+                                                                                                                    class="feather-edit-3 text-primary me-2"></i>
+
+                                                                                                                <strong>Applied
+                                                                                                                    :</strong>
+                                                                                                                <% if(urgent){
+                                                                                                                    %>
+
+                                                                                                                    <span
+                                                                                                                        class="badge bg-soft-danger text-danger">
+                                                                                                                        <%= new
+                                                                                                                            Date(request.leave.created_at).toLocaleDateString("fr-FR")
+                                                                                                                            %>
+                                                                                                                    </span>
+
+                                                                                                                    <% }else{
+                                                                                                                        %>
+
+                                                                                                                        <span
+                                                                                                                            class="badge bg-soft-success text-success">
+                                                                                                                            <%= new
+                                                                                                                                Date(request.leave.created_at).toLocaleDateString("fr-FR")
+                                                                                                                                %>
+                                                                                                                        </span>
+
+                                                                                                                        <% }
+                                                                                                                            %>
+
+                                                                                                            </div>
+
+                                                                                                            <div
+                                                                                                                class="mb-1">
+
+                                                                                                                <i
+                                                                                                                    class="feather-play text-success me-2"></i>
+
+                                                                                                                <strong>Start
+                                                                                                                    :</strong>
+
+                                                                                                                <%= new
+                                                                                                                    Date(request.leave.start_date).toLocaleDateString("fr-FR")
+                                                                                                                    %>
+
+                                                                                                            </div>
+
+                                                                                                            <div
+                                                                                                                class="mb-1">
+
+                                                                                                                <i
+                                                                                                                    class="feather-corner-down-right text-warning me-2"></i>
+
+                                                                                                                <strong>Return
+                                                                                                                    :
+                                                                                                                    :</strong>
+
+                                                                                                                <%= returnDate.toLocaleDateString("fr-FR")
+                                                                                                                    %>
+
+                                                                                                            </div>
+
+                                                                                                        </div>
+
+                                                                                                    </td>
+
+                                                                                                    <!-- Actions -->
+                                                                                                    <% if((user.role==='HR_LEAD'
+                                                                                                        ||
+                                                                                                        user.role==='SUPERADMIN'
+                                                                                                        ) && user.id
+                                                                                                        !='superadmin' )
+                                                                                                        { %>
+                                                                                                        <td style="width:10%;"
+                                                                                                            class="text-center">
+
+                                                                                                            <div
+                                                                                                                class="d-flex justify-content-center gap-2">
+
+                                                                                                                <form
+                                                                                                                    action="/withdraw/approve/<%= request.id %>"
+                                                                                                                    method="POST">
+
+                                                                                                                    <button
+                                                                                                                        type="submit"
+                                                                                                                        class="btn btn-success"
+                                                                                                                        title="Approve"><i
+                                                                                                                            class="feather-check"></i></button>
+
+                                                                                                                </form>
+
+                                                                                                                <form
+                                                                                                                    action="/withdraw/reject/<%= request.id %>"
+                                                                                                                    method="POST">
+
+                                                                                                                    <button
+                                                                                                                        type="submit"
+                                                                                                                        class="btn btn-danger"
+                                                                                                                        title="Reject"><i
+                                                                                                                            class="feather-x"></i></button>
+
+                                                                                                                </form>
+
+                                                                                                            </div>
+
+                                                                                                        </td>
+
+                                                                                                        <% } %>
+                                                                                                </tr>
+
+                                                                                                <% }) %>
+
+                                                                            </tbody>
+
+                                                                        </table>
+
+                                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <%- include('partials/footer.ejs') %>

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateLeaveDto } from './dto/create-leave.dto';
 import { UpdateLeaveDto } from './dto/update-leave.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -11,6 +11,7 @@ import { ConfigService } from '@nestjs/config';
 import { EmployeeService } from 'src/employee/employee.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { LeaveCreatedEvent } from 'src/notification/events/leave-created.event';
+import { WithdrawLeaveDto } from './dto/with-draw-leave.dto';
 
 @Injectable()
 export class LeaveService {
@@ -47,7 +48,6 @@ export class LeaveService {
   }
 
   async create(createLeaveDto: CreateLeaveDto, res: any) {
-    console.log("DTO:", createLeaveDto);
 
     const employee = await this.employeeRepository.findOne({
       where: { matricule: createLeaveDto.employee, is_active: true },
@@ -81,9 +81,6 @@ export class LeaveService {
 
     const date1 = createLeaveDto.start_date.toISOString().split('T')[0];
     const date2 = createLeaveDto.end_date.toISOString().split('T')[0];
-    console.log("DATE 1", date1);
-    console.log("DATE 2", date2);
-    // const overlappingLeave = await this.leaveRepository
     const overlappingLeave = await this.leaveRepository
       .createQueryBuilder('leave')
       .where(
@@ -97,7 +94,6 @@ export class LeaveService {
         status: [LeaveStatus.APPROVED, LeaveStatus.PENDING],
       })
       .getMany();
-    console.log("OVERLAPPING LEAVE:", overlappingLeave.length);
     if (overlappingLeave.length > 0) {
       return res.status(400).json({ message: 'Leave dates overlap with existing leave' });
     }
@@ -114,9 +110,6 @@ export class LeaveService {
 
     if (createLeaveDto.leave_type == 'Local_Leave_AMD') {
       const employeeSolde = await this.employeeService.getEmployeeSolde(employee.matricule, createLeaveDto.start_date);
-      console.log("EMPLOYEE SOLDE:", employeeSolde.solde_restant);
-      console.log("DURATION:", duration);
-      console.log("EMPLOYEE SOLDE - DURATION:", employeeSolde.solde_restant - duration);
       if ((employeeSolde.solde_restant - duration) < 0) {
         return res.status(400).json({ message: 'Local leave solde not enough', solde_left: employeeSolde.solde_restant });
       }

@@ -1,12 +1,13 @@
 import { Employee } from 'src/employee/entities/employee.entity';
 import { User } from 'src/user/entities/user.entity';
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Withdraw } from 'src/withdraw/entities/withdraw.entity';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 
 export enum LeaveStatus {
     PENDING = 'pending',
     APPROVED = 'approved',
     REJECTED = 'rejected',
-    CANCELLED = 'cancelled',
+    WITHDRAWN = 'withdrawn',
 }
 
 export enum WithdrawStatus {
@@ -57,4 +58,7 @@ export class Leave {
 
     @Column({ default: () => "CURRENT_TIMESTAMP" })
     created_at?: Date;
+
+    @OneToMany(() => Withdraw, withdraw => withdraw.leave)
+    withdraw_Request: Withdraw[];
 }

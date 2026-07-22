@@ -14,6 +14,9 @@ import { HistoryService } from 'src/history/history.service';
 import { HistoryReason } from 'src/history/entities/history.entity';
 import { TaskService } from 'src/task/task.service';
 import { LeaveStatus } from './entities/leave.entity';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { LeaveApproveEvent } from 'src/notification/events/leave-approve.event';
+import { WithdrawLeaveDto } from '../api/leave/dto/with-draw-leave.dto';
 
 @Controller('leave')
 export class LeaveController {
@@ -23,6 +26,7 @@ export class LeaveController {
     private readonly employeeService: EmployeeService,
     private readonly historyService: HistoryService,
     private readonly taskService: TaskService,
+    private readonly eventEmitter: EventEmitter2,
   ) { }
 
   private getAllowedSites(userSite: string): string[] {
@@ -110,10 +114,8 @@ export class LeaveController {
   @UseGuards(RolesGuard)
   @Roles(UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.HR_LEAD)
   async approvePermission(@Param('leaveId') leaveId: string, @Res() res: express.Response, @Req() req: any) {
-    // await this.leaveService.approveLeave(leaveId, req.session.user.id);
     const message = "Permission approved successfully. You are pleased to validate also on OneHR platfrom."
     const leave = await this.leaveService.findOne(leaveId);
-    // console.log("LEAVE:", leave);
     if (leave) {
       const data: CreateLeaveDto = {
         employee: leave.employee.matricule,
@@ -131,6 +133,10 @@ export class LeaveController {
         message: "Permission approved by " + req.session.user.employee.firstname + " " + req.session.user.employee.name,
         created_by: req.session.user.matricule,
       });
+      this.eventEmitter.emit(
+        'permission.approved',
+        new LeaveApproveEvent(leave.id, req.session.user.id),
+      );
     }
     res.redirect('/leave/approuve-permissions?message=' + message);
   }
@@ -151,7 +157,6 @@ export class LeaveController {
     await this.leaveService.approveLeave(leaveId, req.session.user.id);
     const message = "Leave approved successfully. You are pleased to validate also on OneHR platfrom."
     const leave = await this.leaveService.findOne(leaveId);
-    // console.log("LEAVE:", leave);
     if (leave) {
       const data: CreateLeaveDto = {
         employee: leave.employee.matricule,
@@ -162,13 +167,15 @@ export class LeaveController {
         leave_type: leave.leave_type
       }
 
-      this.taskService.runPuppeteerTask(data, leave);
-      await this.leaveService.approveLeave(leaveId, req.session.user.id);
       await this.historyService.create({
         reason: HistoryReason.LEAVE,
         message: "Leave approved by " + req.session.user.employee.firstname + " " + req.session.user.employee.name,
         created_by: req.session.user.matricule,
       });
+      this.eventEmitter.emit(
+        'leave.approved',
+        new LeaveApproveEvent(leave.id, req.session.user.id),
+      );
     }
     res.redirect('/leave/approuve-leaves?message=' + message);
   }
@@ -254,7 +261,6 @@ export class LeaveController {
     @Query('search') search: string,
   ) {
     const leaves = await this.leaveService.getLeavesByRange(year, startMonth, endMonth, line, "", section, division, site, req.session.user, search);
-    // console.log("LEAVES:", leaves);
     return leaves;
   }
 
@@ -298,6 +304,32 @@ export class LeaveController {
 
   @UseGuards(RolesGuard)
   @Roles(UserRole.SUPERADMIN, UserRole.PAYROLL)
+  @Post('import-carried-forward')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+    }),
+  )
+  async importCarriedForwardPost(@UploadedFile() file: Express.Multer.File, @Res() res: express.Response, @Req() req: any) {
+    try {
+      const date = new Date(req.body.date);
+      const result = await this.leaveService.importCarriedForwardLeaves(file, date);
+      if (result.result === 'error') {
+        return res.redirect(`/leave/import-leaves?error=${result.message}`);
+      }
+      await this.historyService.create({
+        reason: HistoryReason.LEAVE,
+        message: "Import carried forward leaves by " + req.session.user.employee.firstname + " " + req.session.user.employee.name,
+        created_by: req.session.user.matricule,
+      });
+      return res.redirect(`/leave/planning-view`);
+    } catch (error) {
+      return res.redirect(`/leave/import-leaves?error=${error.message}`);
+    }
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.SUPERADMIN, UserRole.PAYROLL)
   @Post('import-leaves')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -306,7 +338,6 @@ export class LeaveController {
   )
   async importLeavesPost(@UploadedFile() file: Express.Multer.File, @Res() res: express.Response, @Req() req: any) {
     try {
-      // console.log("FILE:", file);
       const result = await this.leaveService.importLeaves(file);
       if (result.result === 'error') {
         return res.redirect(`/leave/import-leaves?error=${result.message}`);
@@ -371,7 +402,6 @@ export class LeaveController {
     );
 
     await workbook.xlsx.write(res);
-    // console.log("Exported successfully");
     await this.historyService.create({
       reason: HistoryReason.LEAVE,
       message: "Export leaves by " + req.session.user.employee.firstname + " " + req.session.user.employee.name,
@@ -391,9 +421,7 @@ export class LeaveController {
     @Res() res: express.Response,
     @Req() req: any,
   ) {
-    // console.log("Employee ID:", employeeId);
     const employee = await this.employeeService.findOne(employeeId);
-    // console.log("Employee:", employee);
 
     if (!employee) {
       return res.status(404).send('Employee not found');
@@ -412,7 +440,6 @@ export class LeaveController {
     );
 
     await workbook.xlsx.write(res);
-    console.log("Exported successfully");
     await this.historyService.create({
       reason: HistoryReason.LEAVE,
       message: "Export leaves of employee " + employee.name + " " + employee.firstname + " by " + req.session.user.employee.firstname + " " + req.session.user.employee.name,

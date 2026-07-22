@@ -41,9 +41,6 @@ export class CryptoService {
         const iv = data.subarray(0, 12);
         const authTag = data.subarray(12, 28);
         const encrypted = data.subarray(28);
-        console.log("IV length:", iv.length);
-        console.log("Tag length:", authTag.length);
-        console.log("Encrypted length:", encrypted.length);
         const decipher = crypto.createDecipheriv(this.algorithm, this.key, iv) as crypto.DecipherGCM;
         decipher.setAuthTag(authTag);
 

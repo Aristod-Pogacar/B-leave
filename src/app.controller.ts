@@ -117,13 +117,9 @@ export class AppController {
   @Get('login')
   @Render('login')
   async getLogin(@I18n() i18n: I18nContext, @Req() req: any, @Res({ passthrough: true }) res: any) {
-    console.log(i18n.lang);
     if (req.session.user) {
       return res.redirect('/');
     }
-    console.log(i18n.t('LOGIN', { lang: 'fr' }));
-    console.log(i18n.t('LOGIN', { lang: 'en' }));
-    console.log(i18n.t('LOGIN', { lang: 'mg' }));
     return { t: (key: string) => i18n.t(key), title: 'Login' };
   }
 

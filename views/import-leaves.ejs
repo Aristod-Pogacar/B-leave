@@ -73,6 +73,36 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="card stretch stretch-full d-flex">
+                                                <div class="card-header">
+                                                    <h4 class="header">Import Carried Forward</h4>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <form action="/leave/import-carried-forward" method="post"
+                                                            enctype="multipart/form-data">
+                                                            <div class="col-md-12 mb-2">
+                                                                <label for="date">Date</label>
+                                                                <input type="date" class="form-control" name="date"
+                                                                    id="date" required />
+                                                            </div>
+                                                            <div class="col-md-12 mb-2">
+                                                                <label for="file2">File</label>
+                                                                <input type="file" class="form-control" id="file2"
+                                                                    name="file" required />
+                                                            </div>
+                                                            <div class="col-md-2">
+                                                                <button class="btn btn-primary" id="importBtn"
+                                                                    type="submit">Import</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

@@ -25,11 +25,13 @@ import { EmployeeHistoryService } from 'src/employee-history/employee-history.se
 import { EmployeeHistory } from 'src/employee-history/entities/employee-history.entity';
 import { Holiday } from 'src/holiday/entities/holiday.entity';
 import { HolidayService } from 'src/holiday/holiday.service';
+import { CarriedForward } from 'src/carried-forward/entities/carried-forward.entity';
+import { CarriedForwardService } from 'src/carried-forward/carried-forward.service';
 
 @Module({
   imports: [
     ScheduleModule.forRoot(),
-    TypeOrmModule.forFeature([Task, Employee, Leave, User, History, Permission2h, SmiaOstie, EmployeeHistory, Holiday])
+    TypeOrmModule.forFeature([Task, Employee, Leave, User, History, Permission2h, SmiaOstie, EmployeeHistory, Holiday, CarriedForward])
   ],
   controllers: [TaskController],
   providers: [
@@ -46,7 +48,8 @@ import { HolidayService } from 'src/holiday/holiday.service';
     Permission2hService,
     SmiaOstieService,
     EmployeeHistoryService,
-    HolidayService
+    HolidayService,
+    CarriedForwardService
   ],
   exports: [
     TaskService,
@@ -62,7 +65,8 @@ import { HolidayService } from 'src/holiday/holiday.service';
     Permission2hService,
     SmiaOstieService,
     EmployeeHistoryService,
-    HolidayService
+    HolidayService,
+    CarriedForwardService
   ],
 })
 export class TaskModule { }

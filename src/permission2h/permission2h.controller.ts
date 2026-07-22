@@ -8,17 +8,23 @@ import { Site, UserRole } from 'src/user/entities/user.entity';
 import { RolesGuard } from 'src/user/role.guard';
 import { HistoryReason } from 'src/history/entities/history.entity';
 import { HistoryService } from 'src/history/history.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Permission2hCreatedEvent } from 'src/notification/events/permission-created.event';
 
 @Controller('permission2h')
 export class Permission2hController {
-  constructor(private readonly permission2hService: Permission2hService, private readonly historyService: HistoryService) { }
+  constructor(
+    private readonly permission2hService: Permission2hService,
+    private readonly historyService: HistoryService,
+    private readonly eventEmitter: EventEmitter2,
+  ) { }
 
   @Get('approuve-permission-2h')
   @UseGuards(RolesGuard)
   @Roles(UserRole.SUPERADMIN, UserRole.MANAGER)
   @Render('approuve-permission-2h')
   async approuveLeaves(@Req() req: any, @Query() error?: string) {
-    const permissions = await this.permission2hService.getNonApprouvedLeaves(req.session.user.id);
+    const permissions = await this.permission2hService.getNonApprouvedLeaves(req.session.user.employee.id);
     return { title: "Approuve Permission 2h", error: error ? error : null, permissions: permissions };
   }
 
@@ -154,8 +160,13 @@ export class Permission2hController {
   }
 
   @Post()
-  create(@Body() createPermission2hDto: CreatePermission2hDto) {
-    return this.permission2hService.create(createPermission2hDto);
+  async create(@Body() createPermission2hDto: CreatePermission2hDto) {
+    const permission2h = await this.permission2hService.create(createPermission2hDto);
+    this.eventEmitter.emit(
+      'permission2h.created',
+      new Permission2hCreatedEvent(permission2h.id),
+    );
+    return permission2h;
   }
 
   @Get()

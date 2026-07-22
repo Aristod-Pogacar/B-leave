@@ -16,9 +16,10 @@ import { EmployeeHistoryService } from 'src/employee-history/employee-history.se
 import { CryptoService } from 'src/crypto/crypto.service';
 import { HolidayService } from 'src/holiday/holiday.service';
 import { Holiday } from 'src/holiday/entities/holiday.entity';
+import { CarriedForward } from 'src/carried-forward/entities/carried-forward.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Employee, Leave, History, EmployeeHistory, Holiday])],
+  imports: [TypeOrmModule.forFeature([User, Employee, Leave, History, EmployeeHistory, Holiday, CarriedForward])],
   controllers: [UserController],
   providers: [UserService, AuthService, MailService, JwtService, HistoryService, EmployeeService, EmployeeHistoryService, CryptoService, HolidayService],
   exports: [UserService, AuthService, MailService, JwtService, TypeOrmModule, HistoryService, EmployeeService, EmployeeHistoryService, CryptoService, HolidayService],

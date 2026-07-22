@@ -94,7 +94,8 @@
                                                                                     </th> -->
 
                                                                                     <% if(user.role==='MANAGER' ||
-                                                                                        user.role==='HR_LEAD' ) { %>
+                                                                                        user.role==='HR_LEAD' ||
+                                                                                        user.role==='SUPERADMIN' ) { %>
 
                                                                                         <th style="width:10%;"
                                                                                             class="text-center">
@@ -342,11 +343,14 @@
                                                                                                     </td>
 
                                                                                                     <!-- Actions -->
-                                                                                                    <% if(user.role==='MANAGER'
+                                                                                                    <% if((user.role==='MANAGER'
                                                                                                         ||
                                                                                                         user.role==='HR_LEAD'
+                                                                                                        ||
+                                                                                                        user.role==='SUPERADMIN'
+                                                                                                        ) &&
+                                                                                                        user.employee.matricule!==leave.employee.matricule
                                                                                                         ) { %>
-
                                                                                                         <td style="width:10%;"
                                                                                                             class="text-center">
 

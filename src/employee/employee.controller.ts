@@ -177,7 +177,6 @@ export class EmployeeController {
       const cleanData = filtered.filter(x => x.matricule);
 
       for (const data of cleanData) {
-        console.log("DATA:", data);
 
         await this.employeeService.updatePassword(data);
       }
@@ -227,7 +226,6 @@ export class EmployeeController {
       const cleanData = filtered.filter(x => x.matricule);
 
       for (const data of cleanData) {
-        console.log("DATA:", data);
 
         await this.employeeService.updateManager(data);
       }
@@ -248,7 +246,6 @@ export class EmployeeController {
       const cleanData2 = filtered2.filter(x => x.matricule);
 
       for (const data of cleanData2) {
-        console.log("DATA:", data);
 
         await this.employeeService.updatePassword(data);
       }
@@ -276,7 +273,6 @@ export class EmployeeController {
 
   @Get('find-one-by-matricule')
   async findOneByMatricule(@Query('matricule') matricule: string) {
-    console.log('FIND ONE BY MATRICULE');
     return await this.employeeService.findOneByMatricule(matricule);
   }
 
@@ -313,14 +309,10 @@ export class EmployeeController {
     @Query('year') year: number = new Date().getFullYear(),
     @Query('search') search: string = '',
   ) {
-    // const test = await this.employeeService.getEmployeeSolde("10784", new Date("2017-12-31"))
-    // console.log("TEST 10784 2017-01-10:", test);
 
     const employees = await this.employeeService.getEmployeesWithBalances(line, "", section, division, site, +skip, +take, +year, req.session.user, search);
-    // console.log("employees", employees);
-    // console.log("SESSION:", req.session.user);
+    // console.log('employees', employees)
     return employees;
-    // return this.employeeService.findAllByLineAndDepartement(line, departement, +skip, +take, year);
   }
 
   @Get('test')
@@ -336,9 +328,7 @@ export class EmployeeController {
     @Query('year') year: number = new Date().getFullYear(),
   ) {
     const employees = await this.employeeService.getEmployeesWithBalances(line, departement, section, division, site, +skip, +take, +year, req.session.user, '');
-    console.log("employees", employees);
     return employees;
-    // return this.employeeService.findAllByLineAndDepartement(line, departement, +skip, +take, year);
   }
 
   @Get('new-employee')
@@ -352,7 +342,6 @@ export class EmployeeController {
     @Query('error') error: string = '',
   ) {
     const allowedSites = this.getAllowedSites(req.session.user.site);
-    console.log("ALLOWERD SITES:", allowedSites);
     const employees = await this.employeeService.getEmployees(line, departement);
     const KEYS = allowedSites.map(val => {
       // On cherche la clé dans l'objet Site qui possède cette valeur
@@ -369,19 +358,14 @@ export class EmployeeController {
   @Roles(UserRole.SUPERADMIN, UserRole.MANAGER)
   @Render('my-team')
   async getMyTeam(@Req() req: any, @Query('search') search: string = '') {
-    // const employees = await this.employeeService.getNoManager(req.session.user.site, search);
-    console.log("SEARCH:", search);
     const employees = await this.employeeService.getMyTeam(req.session.user, search);
-    console.log("EMPLOYEES:", employees);
     return { title: "My Team", employees, search };
   }
 
   @Get('no-manager')
   async getNoManager(@Req() req: any, @Query('search') search: string) {
     // const employees = await this.employeeService.getNoManager(req.session.user.site, search);
-    console.log("SEARCH:", search);
     const employees = await this.employeeService.getNoManager(req.session.user.site, search);
-    console.log("EMPLOYEES:", employees);
     return employees;
   }
 
@@ -400,7 +384,6 @@ export class EmployeeController {
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   async assignManagerPost(@Body() body: any, @Res() res: express.Response, @Req() req: any) {
-    console.log("BODY:", body);
     await this.employeeService.assignManager(body.managerId, body.employeeIds);
     await this.historyService.create({
       reason: HistoryReason.EMPLOYEE,
@@ -413,7 +396,6 @@ export class EmployeeController {
   @Get('assigned-employees/:managerId')
   async getAssignedEmployees(@Req() req: any, @Param('managerId') managerId: string) {
     const employees = await this.employeeService.getAssignedEmployees(managerId);
-    console.log("EMPLOYEES:", employees);
     return employees;
   }
 
@@ -421,7 +403,6 @@ export class EmployeeController {
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   async newEmployeePost(@Body() body: any, @Res() res: express.Response, @Req() req: any) {
-    console.log("BODY:", body);
     await this.employeeService.create(body, res, req);
   }
 
@@ -465,7 +446,6 @@ export class EmployeeController {
       const cleanData = filtered.filter(x => x.matricule);
 
       for (const data of cleanData) {
-        console.log("DATA:", data);
 
         await this.employeeService.updateManager(data);
       }
@@ -491,7 +471,6 @@ export class EmployeeController {
 
       for (const data of cleanDataRole) {
         if (data.role !== 'undefined') {
-          console.log("DATA:", data);
           const u = await this.userService.findOneByMatricule(data.matricule);
           const employee = await this.employeeService.findOneByMatricule(data.matricule);
           if (!u && employee) {
@@ -539,7 +518,6 @@ export class EmployeeController {
       });
       res.redirect(`/`);
     } catch (error) {
-      console.log("ERROR:", error.message)
       res.redirect(`/employee/import-master-file?error=${encodeURIComponent(error.message)}`);
     }
   }
@@ -558,7 +536,6 @@ export class EmployeeController {
 
   @Get(':matricule')
   findOne(@Param('matricule') matricule: string) {
-    console.log("MATRICULE:", matricule);
 
     return this.employeeService.findOneByMatricule(matricule);
   }

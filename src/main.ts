@@ -40,6 +40,23 @@ async function bootstrap() {
     }
     next();
   });
+  app.enableCors({
+    origin: [
+      "http://localhost:8081",
+      "http://localhost:19006",
+      "tauri://localhost",
+      "http://tauri.localhost"
+    ],
+    methods: [
+      "GET",
+      "POST",
+      "PUT",
+      "PATCH",
+      "DELETE",
+      "OPTIONS"
+    ],
+    credentials: true,
+  });
   await app.listen(process.env.PORT ?? 4000);
 }
 bootstrap();

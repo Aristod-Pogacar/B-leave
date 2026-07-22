@@ -5,6 +5,7 @@ import { Permission2h } from 'src/permission2h/entities/permission2h.entity';
 import { SmiaOstie } from 'src/smia_ostie/entities/smia_ostie.entity';
 import { User } from 'src/user/entities/user.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, JoinColumn, Index, OneToOne } from 'typeorm';
+import { CarriedForward } from 'src/carried-forward/entities/carried-forward.entity';
 
 @Entity('employees')
 export class Employee {
@@ -96,4 +97,7 @@ export class Employee {
 
     @OneToMany(() => Employee, employee => employee.manager)
     subordinates: Employee[];
+
+    @OneToMany(() => CarriedForward, (carriedForward) => carriedForward.employee)
+    carriedForwards: CarriedForward[];
 }

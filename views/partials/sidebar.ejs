@@ -40,12 +40,7 @@
                                     <li class="nxl-item">
                                         <a class="nxl-link d-flex align-items-center justify-content-between"
                                             href="/leave/approuve-leaves">
-
                                             <span>Leave Approval</span>
-
-                                            <!-- <span class="badge bg-danger rounded-pill">
-                                                New
-                                            </span> -->
                                         </a>
                                     </li>
                                     <% } %>
@@ -66,6 +61,23 @@
                                                             href="/holiday/holidays">Holidays</a>
                                                     </li>
                                                     <% } %>
+                                                        <% if(user.role=="SUPERADMIN" || user.role=="PAYROLL" ) { %>
+                                                            <li class=" nxl-item">
+                                                                <a class="nxl-link d-flex align-items-center justify-content-between"
+                                                                    href="/withdraw/tasks">
+                                                                    <span>Withdraw tasks</span>
+                                                                </a>
+                                                            </li>
+                                                            <% } %>
+                                                                <% if(user.role=="SUPERADMIN" || user.role=="HR_LEAD" )
+                                                                    { %>
+                                                                    <li class=" nxl-item">
+                                                                        <a class="nxl-link d-flex align-items-center justify-content-between"
+                                                                            href="/withdraw/request">
+                                                                            <span>Withdraw Request</span>
+                                                                        </a>
+                                                                    </li>
+                                                                    <% } %>
                     </ul>
                 </li>
                 <li class="nxl-item nxl-hasmenu">
@@ -82,7 +94,7 @@
                             </a>
                             <ul class="nxl-submenu">
                                 <li class="nxl-item"><a class="nxl-link" href="/leave/permissions">History</a></li>
-                                <% if(user.role=="SUPERADMIN" || user.role=="MANAGER" ) { %>
+                                <% if(user.role=="SUPERADMIN" || user.role=="MANAGER" || user.role=="HR_LEAD" ) { %>
                                     <li class="nxl-item"><a class="nxl-link"
                                             href="/leave/approuve-permissions">Approval</a>
                                     </li>

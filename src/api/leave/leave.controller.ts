@@ -5,6 +5,7 @@ import { UpdateLeaveDto } from './dto/update-leave.dto';
 import type { Response } from 'express';
 import { HistoryService } from 'src/history/history.service';
 import { HistoryReason } from 'src/history/entities/history.entity';
+import { WithdrawLeaveDto } from './dto/with-draw-leave.dto';
 
 @Controller('api/leave')
 export class LeaveController {
@@ -16,7 +17,6 @@ export class LeaveController {
   @Post()
   async create(@Body() createLeaveDto: CreateLeaveDto, @Res() res: any) {
     const leave = await this.leaveService.create(createLeaveDto, res);
-    console.log("LEAVE", leave.body);
     if (leave?.status == 200 && leave?.body?.id) {
       await this.historyService.create({
         reason: HistoryReason.LEAVE,
@@ -27,9 +27,13 @@ export class LeaveController {
     return leave;
   }
 
+  // @Post('with-draw')
+  // async sendWithDrawRequest(@Body() dto: WithdrawLeaveDto) {
+  //   await this.leaveService.withDrawRequest(dto);
+  // }
+
   @Get('history/:matricule')
   async findAllHistory(@Param('matricule') matricule: string) {
-    console.log("MATRICULE", matricule);
     const leaves = await this.leaveService.findAllHistory(matricule);
     return leaves;
   }

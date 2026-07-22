@@ -5,15 +5,18 @@ import { UpdateHolidayDto } from './dto/update-holiday.dto';
 import { RolesGuard } from 'src/user/role.guard';
 import { Roles } from 'src/user/role.decorator';
 import { UserRole } from 'src/user/entities/user.entity';
+import { HistoryService } from 'src/history/history.service';
+import { HistoryReason } from 'src/history/entities/history.entity';
 
 @Controller('holiday')
 export class HolidayController {
-  constructor(private readonly holidayService: HolidayService) { }
+  constructor(
+    private readonly holidayService: HolidayService,
+    private readonly historyService: HistoryService
+  ) { }
 
   @Get('by-date/:start_date/:end_date')
   async getByDate(@Param('start_date') start_date: string, @Param('end_date') end_date: string) {
-    console.log('start_date', start_date);
-    console.log('end_date', end_date);
     const date1 = new Date(start_date);
     const date2 = new Date(end_date);
     if (date1 > date2) {
@@ -55,7 +58,15 @@ export class HolidayController {
   @UseGuards(RolesGuard)
   @Roles(UserRole.SUPERADMIN, UserRole.HR_LEAD)
   async postEditHolidays(@Req() req, @Body() createHolidayDto: CreateHolidayDto, @Res() res, @Param('id') id: string) {
+    const old_holiday = await this.holidayService.findOne(id);
     const holiday = await this.holidayService.update(id, createHolidayDto);
+    const holiday_details = await this.holidayService.findOne(id);
+    await this.historyService.create({
+      reason: HistoryReason.HOLIDAY,
+      message: "Holiday " + old_holiday?.name + " of " + old_holiday?.date + " updated to " + holiday_details?.name + " of " + holiday_details?.date + " by " + req.session.user.employee.matricule,
+      created_by: req.session.user.employee.matricule,
+    });
+
     if (holiday) {
       return res.redirect('/holiday/holidays?message=Holiday updated successfully!');
     }
@@ -79,8 +90,14 @@ export class HolidayController {
   @UseGuards(RolesGuard)
   @Roles(UserRole.SUPERADMIN, UserRole.HR_LEAD)
   async postDeleteHolidays(@Req() req, @Res() res, @Param('id') id: string) {
+    const old_holiday = await this.holidayService.findOne(id);
     const holiday = await this.holidayService.remove(id);
     if (holiday) {
+      await this.historyService.create({
+        reason: HistoryReason.HOLIDAY,
+        message: "Holiday " + old_holiday?.name + " of " + old_holiday?.date + " deleted by " + req.session.user.employee.matricule,
+        created_by: req.session.user.employee.matricule,
+      });
       return res.redirect('/holiday/holidays?message=Holiday deleted successfully!');
     }
     return res.redirect('/holiday/holidays?error=Failed to delete holiday!');
@@ -92,6 +109,11 @@ export class HolidayController {
   async postNewHolidays(@Req() req, @Body() createHolidayDto: CreateHolidayDto, @Res() res) {
     const holiday = await this.holidayService.create(createHolidayDto);
     if (holiday) {
+      await this.historyService.create({
+        reason: HistoryReason.HOLIDAY,
+        message: "Holiday " + createHolidayDto?.name + " of " + createHolidayDto?.date + " created by " + req.session.user.employee.matricule,
+        created_by: req.session.user.employee.matricule,
+      });
       return res.redirect('/holiday/holidays?message=Holiday created successfully!');
     }
     return res.redirect('/holiday/holidays?error=Failed to create holiday!');

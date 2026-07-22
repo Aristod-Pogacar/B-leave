@@ -253,7 +253,10 @@ export class Permission2hService {
 
     var email: string[] = [];
     const manager = employee.manager;
-    if (manager) email.push(manager.user?.email ?? '');
+    if (manager) {
+      const managerUser = await this.userService.findOneByMatricule(manager.matricule);
+      if (managerUser) email.push(managerUser.email);
+    }
 
     const emailAdress = this.configService.get<string>('EMAIL_ADRESS')
     const emailPassword = this.configService.get<string>('EMAIL_PASSWORD')
@@ -313,7 +316,14 @@ export class Permission2hService {
   }
 
   findOne(id: string) {
-    return this.permission2hRepository.findOne({ where: { id } });
+    return this.permission2hRepository.findOne({
+      where: { id },
+      relations: [
+        'employee',
+        'employee.manager',
+        'employee.manager.user'
+      ]
+    });
   }
 
   async getPermission2h(date: string, site: string) {

@@ -24,6 +24,8 @@ import { Leave } from 'src/leave/entities/leave.entity';
 import { LeaveService } from 'src/leave/leave.service';
 import { SmiaOstieService } from 'src/smia_ostie/smia_ostie.service';
 import { SmiaOstie } from 'src/smia_ostie/entities/smia_ostie.entity';
+import { CarriedForward } from 'src/carried-forward/entities/carried-forward.entity';
+import { CarriedForwardService } from 'src/carried-forward/carried-forward.service';
 
 @Module({
   imports: [
@@ -57,6 +59,7 @@ import { SmiaOstie } from 'src/smia_ostie/entities/smia_ostie.entity';
       History,
       User,
       SmiaOstie,
+      CarriedForward
     ]),
   ],
   controllers: [Permission2hController],
@@ -70,7 +73,22 @@ import { SmiaOstie } from 'src/smia_ostie/entities/smia_ostie.entity';
     CryptoService,
     HolidayService,
     LeaveService,
-    SmiaOstieService
+    SmiaOstieService,
+    CarriedForwardService
+    // MailService,
+  ],
+  exports: [
+    Permission2hService,
+    HistoryService,
+    UserService,
+    JwtService,
+    EmployeeService,
+    EmployeeHistoryService,
+    CryptoService,
+    HolidayService,
+    LeaveService,
+    SmiaOstieService,
+    CarriedForwardService
     // MailService,
   ],
 })

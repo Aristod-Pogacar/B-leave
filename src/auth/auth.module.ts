@@ -15,9 +15,10 @@ import { Holiday } from 'src/holiday/entities/holiday.entity';
 import { HistoryService } from 'src/history/history.service';
 import { History } from 'src/history/entities/history.entity';
 import { Leave } from 'src/leave/entities/leave.entity';
+import { CarriedForward } from 'src/carried-forward/entities/carried-forward.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Employee, EmployeeHistory, Holiday, History, Leave])],
+  imports: [TypeOrmModule.forFeature([User, Employee, EmployeeHistory, Holiday, History, Leave, CarriedForward])],
   providers: [AuthService, UserService, MailService, JwtService, EmployeeService, EmployeeHistoryService, CryptoService, HolidayService, HistoryService],
   exports: [AuthService, UserService, MailService, JwtService, TypeOrmModule, EmployeeService, EmployeeHistoryService, CryptoService, HolidayService, HistoryService],
 })

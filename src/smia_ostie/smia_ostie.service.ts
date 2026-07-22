@@ -97,8 +97,6 @@ export class SmiaOstieService {
 
     const data = await query.getMany();
 
-    console.log('DATA===>', data);
-
     return data;
   }
 
@@ -211,10 +209,8 @@ export class SmiaOstieService {
     if (manager) email.push(manager.user?.email ?? '');
     const emailAdress = this.configService.get<string>('EMAIL_ADRESS')
     const emailPassword = this.configService.get<string>('EMAIL_PASSWORD')
-    console.log(email)
     if (email.length > 0) {
       if (emailAdress && emailPassword) {
-        console.log('SEND EMAIL...')
         await this.mailerService.sendMail({
           to: email,
           subject: 'Consultation médicale',
@@ -257,7 +253,6 @@ export class SmiaOstieService {
       </div>
     `
         });
-        console.log('EMAIL SENDED')
       }
     }
 
@@ -306,11 +301,9 @@ export class SmiaOstieService {
   async findByDateDoingToday() {
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Set to the beginning of today
-    console.log('TODAY:', today);
 
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1); // Set to the beginning of tomorrow
-    console.log('TOMORROW:', tomorrow);
 
     return this.SmiaOstieRepo.find({
       where: {
@@ -371,11 +364,9 @@ export class SmiaOstieService {
   async findByDate(date: Date) {
     const startOfDay = new Date(date);
     startOfDay.setHours(0, 0, 0, 0);
-    console.log("startOfDay", startOfDay);
 
     const endOfDay = new Date(date);
     endOfDay.setHours(23, 59, 59, 999);
-    console.log("endOfDay", endOfDay);
 
     return this.SmiaOstieRepo.find({
       where: {

@@ -63,11 +63,8 @@ export class TaskService {
     const employee = await this.employeeService.findOneByMatricule(data.employee);
     if (!employee || leave.onehr_status == true) return;
     const sessionId = await this.manager.createSession();
-    console.log("SessionID:", sessionId);
     await delay(200);
     await this.bot.start(sessionId).then(async (startingResponse) => {
-      console.log("STATUS:", startingResponse.success);
-      // console.log("RESPONSE:", startingResponse);
       if (startingResponse.success) {
         await delay(5000);
         const password = await this.cryptoService.decrypt(employee.onehr_password);

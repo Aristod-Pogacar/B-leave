@@ -53,6 +53,12 @@ import { NotificationModule } from './notification/notification.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { Notification } from './notification/entities/notification.entity';
 import { NotificationService } from './notification/notification.service';
+import { NotificationMiddleware } from './notification/notification.middleware';
+import { WithdrawModule } from './withdraw/withdraw.module';
+import { Withdraw } from './withdraw/entities/withdraw.entity';
+import { CarriedForwardModule } from './carried-forward/carried-forward.module';
+import { CarriedForward } from './carried-forward/entities/carried-forward.entity';
+import { CarriedForwardService } from './carried-forward/carried-forward.service';
 
 @Module({
   imports: [
@@ -92,7 +98,9 @@ import { NotificationService } from './notification/notification.service';
         History,
         EmployeeHistory,
         Holiday,
-        Notification
+        Notification,
+        Withdraw,
+        CarriedForward
       ],
       synchronize: true,
     }),
@@ -118,14 +126,34 @@ import { NotificationService } from './notification/notification.service';
     EmployeeHistoryModule,
     HolidayModule,
     NotificationModule,
+    WithdrawModule,
+    CarriedForwardModule,
   ],
   controllers: [AppController, PuppeteerController],
-  providers: [AppService, MailService, AuthService, JwtService, EmployeeService, PuppeteerService, CryptoService, PuppeteerManagerService, TaskService, HistoryService, FingerprintGateway, FortestGateway, FingerprintService, Permission2hService, SmiaOstieService, EmployeeHistoryService],
+  providers: [
+    AppService,
+    MailService,
+    AuthService,
+    JwtService,
+    EmployeeService,
+    PuppeteerService,
+    CryptoService,
+    PuppeteerManagerService,
+    TaskService,
+    HistoryService,
+    FingerprintGateway,
+    FortestGateway,
+    FingerprintService,
+    Permission2hService,
+    SmiaOstieService,
+    EmployeeHistoryService,
+    CarriedForwardService
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
-      .apply(SessionLocalsMiddleware)
+      .apply(SessionLocalsMiddleware, NotificationMiddleware)
       .forRoutes('*');
   }
 }

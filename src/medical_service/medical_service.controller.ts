@@ -19,7 +19,6 @@ export class MedicalServiceController {
   async getMedicalService(@Req() req, @Query('search') search: string = '', @Query('page') page: number = 1) {
     const limit = 20;
     const { data, total, totalPages } = await this.medicalServiceService.paginateMedicalService(search, Number(page), limit);
-    // console.log("DATA:", data);
 
     const currentPage = Number(page);
     const maxButtons = 7;
@@ -72,7 +71,6 @@ export class MedicalServiceController {
         error: 'Medical service already exists',
       });
     }
-    console.log("Name:", body.name);
     await this.medicalServiceService.create({ name: body.name });
     await this.historyService.create({
       reason: HistoryReason.MEDICAL_SERVICE,
@@ -114,7 +112,6 @@ export class MedicalServiceController {
         error: 'Medical service already exists',
       });
     }
-    console.log("Name:", body.name);
     await this.medicalServiceService.update(id, { name: body.name });
     await this.historyService.create({
       reason: HistoryReason.MEDICAL_SERVICE,

@@ -9,6 +9,8 @@ export enum HistoryReason {
     EMPLOYEE = 'Employee',
     MANAGER = 'Manager',
     USER = 'User',
+    HOLIDAY = 'Holiday',
+    WITHDRAW = 'Withdraw',
 }
 
 @Entity('history')

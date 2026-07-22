@@ -60,7 +60,7 @@ export class UserController {
     if (!user) {
       return res.redirect('/');
     }
-    console.log("BODY", body);
+    // console.log("BODY", body);
     if (body.newPassword != body.confirmPassword) {
       const userSite = req.session.user.site;
       const sites = this.getAllowedSitesForNewUsers(userSite)
@@ -116,11 +116,11 @@ export class UserController {
 
   @Post('get-login-admin')
   async getLoginAdmin(@Res() res: any, @Body() body: any) {
-    console.log("BODY", body)
+    // console.log("BODY", body)
     const user = await this.authService.getEmailOrMatricule(
       body.login,
     );
-    console.log("USER", user)
+    // console.log("USER", user)
 
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' });
@@ -165,9 +165,9 @@ export class UserController {
       );
       return key;
     });
-    console.log("KEYS", KEYS)
-    console.log("SITES", Site)
-    console.log("AllValues", Object.values(Site))
+    // console.log("KEYS", KEYS)
+    // console.log("SITES", Site)
+    // console.log("AllValues", Object.values(Site))
     return {
       users: users,
       title: 'Users',
@@ -236,7 +236,7 @@ export class UserController {
         error: 'Employee is required'
       });
     }
-    console.log("BODY", body)
+    // console.log("BODY", body)
     const user = await this.userService.create(body);
 
     if (!user) {

@@ -22,12 +22,14 @@ import { EmployeeHistoryService } from 'src/employee-history/employee-history.se
 import { EmployeeHistory } from 'src/employee-history/entities/employee-history.entity';
 import { Holiday } from 'src/holiday/entities/holiday.entity';
 import { HolidayService } from 'src/holiday/holiday.service';
+import { CarriedForwardService } from 'src/carried-forward/carried-forward.service';
+import { CarriedForward } from 'src/carried-forward/entities/carried-forward.entity';
 
 
 @Module({
     imports: [
         ConfigModule.forRoot({ isGlobal: true }),
-        TypeOrmModule.forFeature([Employee, Leave, User, History, Permission2h, SmiaOstie, User, Leave, EmployeeHistory, Holiday]),
+        TypeOrmModule.forFeature([Employee, Leave, User, History, Permission2h, SmiaOstie, User, Leave, EmployeeHistory, Holiday, CarriedForward]),
     ],
     controllers: [PuppeteerController],
     providers: [
@@ -43,7 +45,8 @@ import { HolidayService } from 'src/holiday/holiday.service';
         JwtService,
         UserService,
         EmployeeHistoryService,
-        HolidayService
+        HolidayService,
+        CarriedForwardService
     ],
     exports: [
         PuppeteerService,
@@ -58,7 +61,8 @@ import { HolidayService } from 'src/holiday/holiday.service';
         JwtService,
         UserService,
         EmployeeHistoryService,
-        HolidayService
+        HolidayService,
+        CarriedForwardService
     ],
 })
 export class PuppeteerModule { }

@@ -26,6 +26,10 @@ import { EmployeeHistoryService } from 'src/employee-history/employee-history.se
 import { EmployeeHistory } from 'src/employee-history/entities/employee-history.entity';
 import { Holiday } from 'src/holiday/entities/holiday.entity';
 import { HolidayService } from 'src/holiday/holiday.service';
+import { Withdraw } from 'src/withdraw/entities/withdraw.entity';
+import { WithdrawService } from 'src/withdraw/withdraw.service';
+import { CarriedForwardService } from 'src/carried-forward/carried-forward.service';
+import { CarriedForward } from 'src/carried-forward/entities/carried-forward.entity';
 
 @Module({
   imports: [
@@ -51,10 +55,10 @@ import { HolidayService } from 'src/holiday/holiday.service';
       }),
     }),
 
-    TypeOrmModule.forFeature([Leave, Employee, ManagerAssignation, User, History, Task, SmiaOstie, Permission2h, EmployeeHistory, Holiday]),
+    TypeOrmModule.forFeature([Leave, Employee, ManagerAssignation, User, History, Task, SmiaOstie, Permission2h, EmployeeHistory, Holiday, Withdraw, CarriedForward]),
   ],
   controllers: [LeaveController],
-  providers: [LeaveService, EmployeeService, CryptoService, HistoryService, TaskService, PuppeteerManagerService, PuppeteerService, SmiaOstieService, Permission2hService, UserService, JwtService, EmployeeHistoryService, HolidayService],
-  exports: [LeaveService, TypeOrmModule, CryptoService, HistoryService, TaskService, PuppeteerManagerService, PuppeteerService, SmiaOstieService, Permission2hService, UserService, JwtService, EmployeeHistoryService, HolidayService],
+  providers: [LeaveService, EmployeeService, CryptoService, HistoryService, TaskService, PuppeteerManagerService, PuppeteerService, SmiaOstieService, Permission2hService, UserService, JwtService, EmployeeHistoryService, HolidayService, WithdrawService, CarriedForwardService],
+  exports: [LeaveService, TypeOrmModule, CryptoService, HistoryService, TaskService, PuppeteerManagerService, PuppeteerService, SmiaOstieService, Permission2hService, UserService, JwtService, EmployeeHistoryService, HolidayService, WithdrawService, CarriedForwardService],
 })
 export class LeaveModule { }
