@@ -480,13 +480,14 @@ export class EmployeeService {
 
       let soldeDebut = 0;
       if (year > doeDate.getFullYear() + 1) {
-        const dateDebutCompte = new Date(doeDate.getFullYear() + 1, doeDate.getMonth(), doeDate.getDate());
+        var dateDebutCompte = new Date(doeDate.getFullYear() + 1, doeDate.getMonth(), doeDate.getDate());
+        if (year - doeDate.getFullYear() > 3) dateDebutCompte = new Date(year - 3, 0, 1);
         for (let i = dateDebutCompte.getFullYear(); i <= year; i += 3) {
-          if (year - i < 3) {
-            for (let y = i; y < year; y++) {
-              soldeDebut += (await this.getEmployeeSolde(emp.matricule, new Date(y, 11, 31))).solde_restant;
-            }
+          // if (year - i < 3) {
+          for (let y = i; y < year; y++) {
+            soldeDebut += (await this.getEmployeeSolde(emp.matricule, new Date(y, 11, 31))).solde_restant;
           }
+          // }
         }
       }
 

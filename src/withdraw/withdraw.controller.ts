@@ -8,10 +8,15 @@ import { Roles } from 'src/user/role.decorator';
 import { UserRole } from 'src/user/entities/user.entity';
 import { ApproveWithDrawDto } from './dto/approve-withdraw.dto';
 import { WithdrawStatus } from './entities/withdraw.entity';
+import { HistoryService } from 'src/history/history.service';
+import { HistoryReason } from 'src/history/entities/history.entity';
 
 @Controller('withdraw')
 export class WithdrawController {
-  constructor(private readonly withdrawService: WithdrawService) { }
+  constructor(
+    private readonly withdrawService: WithdrawService,
+    private readonly historyService: HistoryService,
+  ) { }
 
   @UseGuards(AuthGuard)
   @UseGuards(RolesGuard)
@@ -39,6 +44,11 @@ export class WithdrawController {
   async approve(@Req() req: any, @Res() res: any, @Param('id') id: string) {
     await this.withdrawService.approve(id, req.session.user);
     const message = "Withdraw approved successfully. The payroll department needs to confirm it."
+    await this.historyService.create({
+      reason: HistoryReason.WITHDRAW,
+      message: "Withdraw request of " + req.session.user.employee.matricule + " approved by " + req.session.user.employee.matricule,
+      created_by: req.session.user.employee.matricule,
+    });
     res.redirect('/withdraw/request?message=' + message);
   }
 

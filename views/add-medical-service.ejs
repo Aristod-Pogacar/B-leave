@@ -203,7 +203,6 @@
                         // li.classList.add('autocomplete-list-item');
                         li.textContent = `${emp.matricule} - ${emp.name + " " + emp.firstname}`;
                         li.onclick = async () => {
-                            console.log("EMP:", emp);
                             input.value = li.textContent;
                             hiddenInput.value = emp.matricule;
                             results.innerHTML = '';

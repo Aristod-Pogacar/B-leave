@@ -43,7 +43,7 @@ export class NotificationService {
     return await this.repo.findAndCount({
       where: { recipient: { id: userId } },
       order: { createdAt: 'DESC' },
-      take: 10,
+      take: 5,
     });
   }
 

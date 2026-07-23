@@ -9,9 +9,11 @@ import { LeaveApproveEvent } from "../events/leave-approve.event";
 import { UserService } from "src/user/user.service";
 import { Permission2hCreatedEvent } from "../events/permission-created.event";
 import { Permission2hService } from "src/permission2h/permission2h.service";
-import { WithdrawRequestEvent } from "../events/withdraw-request.event";
+import { WithdrawApprovedEvent, WithdrawRequestEvent } from "../events/withdraw-request.event";
 import { WithdrawService } from "src/withdraw/withdraw.service";
 import { Site, UserRole } from "src/user/entities/user.entity";
+import { ConsultationCreatedEvent, MedicalServiceCreatedEvent } from "../events/medical-service.event";
+import { SmiaOstieService } from "src/smia_ostie/smia_ostie.service";
 
 @Injectable()
 export class LeaveListener {
@@ -23,6 +25,7 @@ export class LeaveListener {
         private readonly userService: UserService,
         private readonly permission2hService: Permission2hService,
         private readonly withdrawService: WithdrawService,
+        private readonly medicalService: SmiaOstieService,
     ) { }
 
     @OnEvent('leave.created')
@@ -54,7 +57,7 @@ export class LeaveListener {
             title: "New leave request",
 
             message:
-                `${leave.employee.name} ${leave.employee.firstname} has requested a leave.`,
+                `${leave.employee.name} ${leave.employee.firstname} requested leave.`,
 
             url: `/leave/approuve-leaves`,
 
@@ -91,12 +94,12 @@ export class LeaveListener {
 
             recipient: employeeAccount,
 
-            title: "Leave request has been approved",
+            title: "Leave request approved",
 
             message:
-                `${approver.employee?.name} ${approver.employee?.firstname} has approved leave request of ${leave.employee.matricule} from ${new Date(leave.start_date).toLocaleDateString('en-GB')} to ${new Date(leave.end_date).toLocaleDateString('en-GB')}.`,
+                `${leave.employee.matricule}'s leave approuved by ${approver.employee?.name} ${approver.employee?.firstname}`,
 
-            url: `/leave`,
+            url: `/leave/planning-view`,
 
         });
 
@@ -130,12 +133,12 @@ export class LeaveListener {
 
             recipient: employeeAccount,
 
-            title: "Leave request has been approved",
+            title: "Permission approved",
 
             message:
-                `${approver.employee?.name} ${approver.employee?.firstname} has approved leave request of ${leave.employee.matricule} from ${new Date(leave.start_date).toLocaleDateString('en-GB')} to ${new Date(leave.end_date).toLocaleDateString('en-GB')}.`,
+                `${leave.employee.matricule}'s permission approuved by ${approver.employee?.name} ${approver.employee?.firstname}`,
 
-            url: `/leave`,
+            url: `/leave/planning-view`,
 
         });
 
@@ -160,10 +163,40 @@ export class LeaveListener {
 
             recipient: employeeAccount,
 
-            title: "Leave request has been approved",
+            title: "2h permission request approved",
 
             message:
                 `${permission.employee?.name} ${permission.employee?.firstname} has requested a 2h permission from ${permission.expectedStartTime} to ${permission.expectedEndTime}.`,
+
+            url: `/permission2h/list`,
+
+        });
+
+    }
+
+    @OnEvent('permission2h.created')
+    async handlePermission2hCreated(event: Permission2hCreatedEvent) {
+
+        const permission = await this.permission2hService.findOne(event.permissionId);
+        if (!permission)
+            return;
+
+        const employeeManager = permission.employee.manager;
+        if (!employeeManager)
+            return;
+
+        const employeeAccount = await this.userService.findOneByMatricule(employeeManager.matricule);
+        if (!employeeAccount)
+            return;
+
+        await this.notificationService.create({
+
+            recipient: employeeAccount,
+
+            title: "New 2h permission request",
+
+            message:
+                `${permission.employee?.matricule} requested a 2h permission.`,
 
             url: `/permission2h/approuve-permission-2h`,
 
@@ -182,12 +215,109 @@ export class LeaveListener {
 
             recipient: hr_lead[0],
 
-            title: "Leave withdrawal request has been created",
+            title: "New withdraw request",
 
             message:
-                `${withdraw.leave?.employee?.name} ${withdraw.leave?.employee?.firstname} has requested to withdraw leave of ${withdraw.leave?.employee?.matricule} from ${new Date(withdraw.leave?.start_date).toLocaleDateString('en-GB')} to ${new Date(withdraw.leave?.end_date).toLocaleDateString('en-GB')}.`,
+                `${withdraw.leave?.employee?.matricule} requested to withdraw leave.`,
 
             url: `/withdraw/request/`,
+
+        });
+
+    }
+
+    @OnEvent('withdraw.approved')
+    async handleWithdrawApproved(event: WithdrawApprovedEvent) {
+
+        const withdraw = await this.withdrawService.findOne(event.withdrawId);
+        if (!withdraw) return;
+        const employeeManager = withdraw.leave?.employee?.manager;
+        if (!employeeManager) return;
+        const payrollAccount = await this.userService.findPayrollUser(UserRole.PAYROLL, withdraw?.leave?.employee?.site as Site);
+        if (!payrollAccount || payrollAccount.length == 0) return;
+        for (let i = 0; i < payrollAccount.length; i++) {
+            await this.notificationService.create({
+
+                recipient: payrollAccount[i],
+
+                title: "Withdraw request approved",
+
+                message:
+                    `${withdraw.approver?.employee?.matricule} approved the withdraw request of ${withdraw.leave?.employee?.matricule}.`,
+
+                url: `/withdraw/tasks`,
+
+            });
+        }
+    }
+
+    @OnEvent('withdraw.rejected')
+    async handleWithdrawRejected(event: WithdrawApprovedEvent) {
+
+        const withdraw = await this.withdrawService.findOne(event.withdrawId);
+        if (!withdraw) return;
+        const employeeManager = withdraw.leave?.employee?.manager;
+        if (!employeeManager) return;
+        const employeeManagerAccount = await this.userService.findOneByMatricule(employeeManager.matricule);
+        if (!employeeManagerAccount) return;
+        await this.notificationService.create({
+
+            recipient: employeeManagerAccount,
+
+            title: "Withdraw request rejected",
+
+            message:
+                `${withdraw.approver?.employee?.matricule} rejected the withdraw request of ${withdraw.leave?.employee?.matricule}.`,
+
+            url: `/leave/planning-view`,
+
+        });
+
+    }
+
+    @OnEvent('withdraw.sent.onehr')
+    async handleWithdrawSentOnehr(event: WithdrawRequestEvent) {
+
+        const withdraw = await this.withdrawService.findOne(event.withdrawId);
+        if (!withdraw) return;
+        const employeeManager = withdraw.leave?.employee?.manager;
+        if (!employeeManager) return;
+        const employeeManagerAccount = await this.userService.findOneByMatricule(employeeManager.matricule);
+        if (!employeeManagerAccount) return;
+        await this.notificationService.create({
+
+            recipient: employeeManagerAccount,
+
+            title: "Withdraw request sent to OneHR",
+
+            message:
+                `${withdraw.leave?.employee?.matricule} withdraw request sended to OneHR.`,
+
+            url: `/withdraw/request/`,
+
+        });
+
+    }
+
+    @OnEvent('consultation.created')
+    async handleConsultationCreated(event: ConsultationCreatedEvent) {
+
+        const consultation = await this.medicalService.findOne(event.consultationId);
+        if (!consultation) return;
+        const employeeManager = consultation.employee.manager;
+        if (!employeeManager) return;
+        const employeeManagerAccount = await this.userService.findOneByMatricule(employeeManager.matricule);
+        if (!employeeManagerAccount) return;
+        await this.notificationService.create({
+
+            recipient: employeeManagerAccount,
+
+            title: "New medical consultation",
+
+            message:
+                `${consultation.employee?.matricule} has requested a medical consultation.`,
+
+            url: `/smia-ostie/list`,
 
         });
 

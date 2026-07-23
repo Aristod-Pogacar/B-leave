@@ -207,15 +207,21 @@ export class UserService {
   }
 
   async findOneByMatricule(matricule: string) {
-    return this.userRepo.findOne({ where: { employee: { matricule } } });
+    return await this.userRepo.findOne({ where: { employee: { matricule } } });
+  }
+
+  async findPayrollUser(role: UserRole, site: string) {
+
+    return await this.userRepo.find({ where: { role, employee: { site } }, relations: ['employee'] });
+
   }
 
   async findUsersByRole(role: UserRole, site: Site) {
-    return this.userRepo.find({ where: { role, employee: { site } }, relations: ['employee'] });
+    return await this.userRepo.find({ where: { role, employee: { site } }, relations: ['employee'] });
   }
 
   async save(user: User) {
-    return this.userRepo.save(user);
+    return await this.userRepo.save(user);
   }
 
 }

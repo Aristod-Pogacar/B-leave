@@ -264,7 +264,7 @@ export class SmiaOstieService {
   }
 
   async findOne(id: string) {
-    return await this.SmiaOstieRepo.findOne({ relations: ['employee'], where: { id } });
+    return await this.SmiaOstieRepo.findOne({ relations: ['employee', 'employee.user'], where: { id } });
   }
 
   async update(id: string, updateSmiaOstieDto: UpdateSmiaOstieDto) {

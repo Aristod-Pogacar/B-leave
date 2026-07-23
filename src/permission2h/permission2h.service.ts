@@ -89,7 +89,7 @@ export class Permission2hService {
       .leftJoinAndSelect('p.employee', 'employee');
 
     if (user.role === UserRole.MANAGER) {
-      query.andWhere('employee.manager = :manager', { manager: user.id });
+      query.andWhere('employee.manager = :manager', { manager: user.employee.id });
     }
 
     if (search) {

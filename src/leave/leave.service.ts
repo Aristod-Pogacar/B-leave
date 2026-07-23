@@ -20,6 +20,7 @@ import { SmiaOstie } from 'src/smia_ostie/entities/smia_ostie.entity';
 import { WithdrawLeaveDto } from '../api/leave/dto/with-draw-leave.dto';
 import { CarriedForwardService } from 'src/carried-forward/carried-forward.service';
 import { CarriedForward } from 'src/carried-forward/entities/carried-forward.entity';
+import { HolidayService } from 'src/holiday/holiday.service';
 
 @Injectable()
 export class LeaveService {
@@ -40,6 +41,9 @@ export class LeaveService {
     private readonly mailerService: MailerService,
     private readonly historyService: HistoryService,
     private readonly carriedForwardService: CarriedForwardService,
+    @InjectRepository(CarriedForward)
+    private readonly carriedForwardRepository: Repository<CarriedForward>,
+    private readonly holidayService: HolidayService,
   ) { }
 
   async withdrawn(id: string) {
@@ -605,6 +609,43 @@ export class LeaveService {
     if (!employeeId) {
       return null;
     }
+    const year = date.getFullYear();
+
+    const carriedForwards = await this.carriedForwardRepository
+      .createQueryBuilder('cf')
+      .leftJoin('cf.employee', 'employee')
+      .select('employee.id', 'employeeId')
+      .addSelect('cf.days', 'days')
+      .addSelect('cf.daysTaken', 'daysTaken')
+      .addSelect('cf.date', 'date')
+      .where('employee.id = :employeeId', { employeeId })
+      .andWhere('YEAR(cf.date) = :year', { year })
+      .andWhere(qb => {
+        const subQuery = qb
+          .subQuery()
+          .select('MAX(cf2.date)')
+          .from(CarriedForward, 'cf2')
+          .leftJoin('cf2.employee', 'emp2')
+          .where('emp2.id = employee.id')
+          .andWhere('YEAR(cf2.date) = :year')
+          .getQuery();
+
+        return `cf.date = ${subQuery}`;
+      })
+      .setParameter('year', year)
+      .getRawOne();
+
+    const carriedForwardMap = new Map(
+      carriedForwards.map(cf => [
+        cf.employeeId,
+        {
+          days: Number(cf.days),
+          daysTaken: Number(cf.daysTaken || 0),
+          date: new Date(cf.date),
+        },
+      ]),
+    );
+
     const [data] = await this.employeeRepository
       .createQueryBuilder('e')
       .where(
@@ -645,7 +686,76 @@ export class LeaveService {
     });
 
     const promises = data.map(async (emp) => {
-      const sld = await this.getEmployeeSolde(emp.matricule, date);
+
+      var debut = 0;
+      var daysTaken = 0;
+      var dateFilter = Between(new Date(year, 0, 1), new Date(year, 11, 31));
+      if (carriedForwards) {
+        debut = carriedForwards.days;
+        daysTaken = carriedForwards.daysTaken;
+        // dateFilter = Between(new Date(carriedForward.date), new Date(year, 11, 31));
+      }
+
+      const localLeaves = await this.leaveRepository.find({
+        where: {
+          employee: { id: emp.id },
+          leave_type: 'Local_Leave_AMD',
+          status: LeaveStatus.APPROVED,
+          start_date: dateFilter,
+          // end_date: Between(new Date(year, 0, 1), new Date(year, 11, 31))
+        },
+        relations: ['employee']
+      });
+      const permissionQuery = this.leaveRepository
+        .createQueryBuilder('leave')
+        .leftJoin('leave.employee', 'employee')
+        .where('employee.id = :id', { id: emp.id })
+        .andWhere('leave.status = :status', { status: LeaveStatus.APPROVED })
+        .andWhere('leave.leave_type = :type', { type: 'Permission_AMD' })
+        .andWhere('YEAR(leave.start_date) = :year', { year })
+
+      if (carriedForwards) {
+        permissionQuery.andWhere('leave.start_date >= :cfDate', {
+          cfDate: carriedForwards.date,
+        });
+      }
+      const permissions = await permissionQuery.getMany();
+      var permissionTaken = 0;
+      let localLeaveTaken = 0;
+
+      for (const leave of localLeaves) {
+        const holidays = await this.getDaysTakenWithHoliday(
+          new Date(leave.start_date).toISOString().split('T')[0],
+          new Date(leave.end_date).toISOString().split('T')[0],
+        );
+
+        localLeaveTaken +=
+          this.calculateDaysBetween(new Date(leave.start_date), new Date(leave.end_date))
+          - holidays;
+      }
+      permissions.forEach(async l => {
+        permissionTaken += Number(this.calculateDaysBetween(new Date(l.start_date), new Date(l.end_date)));
+      });
+
+      let sld;
+
+      if (carriedForwards) {
+        // console.log('CARRIED FORWARD:', carriedForward)
+
+        sld = this.calculateSoldeCumulFromDate(
+          carriedForwards.date,
+          carriedForwards.days,
+          date,
+        );
+
+      } else {
+
+        sld =
+          (await this.getEmployeeSolde(emp.matricule, date))
+            .solde_cumul;
+
+      }
+
       const cumulSolde = sld.solde_cumul;
       const cumulSoldeMensuel = sld.solde_cumul_mensuel;
       const pris = takenMap.get(emp.id) || 0;
@@ -832,7 +942,7 @@ export class LeaveService {
           is_active: true,
           is_deleted: false
         },
-        start_date: Between(startDate, endDate),
+        start_date: Between(new Date(startDate), new Date(endDate)),
         status: In(this.getLeavesByStatus(status)),
         leave_type: Not("Permission_AMD")
       },
@@ -2239,6 +2349,71 @@ export class LeaveService {
       previousRate,
       variation,
     };
+  }
+
+  async getDaysTakenWithHoliday(startDate: string, endDate: string) {
+
+    const holidays = await this.holidayService.findBetweenDate(startDate, endDate);
+
+    const daysTakenWithHoliday = holidays.length;
+
+    return daysTakenWithHoliday;
+  }
+
+  private calculateDaysBetween(startDate: Date | string, endDate: Date | string): number {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    // On ignore les heures
+    start.setHours(0, 0, 0, 0);
+    end.setHours(0, 0, 0, 0);
+
+    const diff = end.getTime() - start.getTime();
+
+    // +1 car les deux dates sont incluses
+    return Math.floor(diff / (1000 * 60 * 60 * 24)) + 1;
+  }
+
+  private calculateSoldeCumulFromDate(
+    startDate: Date,
+    carriedDays: number,
+    targetDate: Date,
+  ): number {
+
+    let solde = carriedDays;
+
+    let current = new Date(startDate);
+
+    while (
+      current.getFullYear() < targetDate.getFullYear() ||
+      (
+        current.getFullYear() === targetDate.getFullYear() &&
+        current.getMonth() < targetDate.getMonth()
+      )
+    ) {
+      solde += 2.5;
+
+      current = new Date(
+        current.getFullYear(),
+        current.getMonth() + 1,
+        current.getDate(),
+      );
+    }
+
+    if (
+      current.getFullYear() === targetDate.getFullYear() &&
+      current.getMonth() === targetDate.getMonth()
+    ) {
+      const daysInMonth = new Date(
+        current.getFullYear(),
+        current.getMonth() + 1,
+        0,
+      ).getDate();
+
+      solde += (2.5 / daysInMonth) * targetDate.getDate();
+    }
+
+    return Number(solde.toFixed(2));
   }
 
 }
