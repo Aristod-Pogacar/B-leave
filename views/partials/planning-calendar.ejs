@@ -289,7 +289,7 @@
 
                     cell.classList.add("leave-" + typeKey);
 
-                    if (!leave.approved_date) {
+                    if (leave.status === 'pending') {
                         cell.classList.add("not-approved");
                     }
 

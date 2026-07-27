@@ -338,7 +338,7 @@ export class LeaveController {
   )
   async importLeavesPost(@UploadedFile() file: Express.Multer.File, @Res() res: express.Response, @Req() req: any) {
     try {
-      const result = await this.leaveService.importLeaves(file);
+      const result = await this.leaveService.importLeaves(file, req.session.user.id);
       if (result.result === 'error') {
         return res.redirect(`/leave/import-leaves?error=${result.message}`);
       }

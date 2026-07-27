@@ -40,6 +40,9 @@ export class Leave {
     @Column({ default: LeaveStatus.PENDING })
     status: LeaveStatus;
 
+    @Column({ default: false })
+    imported: boolean;
+
     @Column({ nullable: true, default: null })
     withdraw_status: WithdrawStatus;
 

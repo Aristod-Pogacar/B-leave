@@ -475,15 +475,15 @@ export class LeaveService {
     return res.status(200).redirect('/leave/planning-view?line=' + employee.line + '&departement=' + employee.departement);
   }
 
-  async importLeaves(file: Express.Multer.File) {
+  async importLeaves(file: Express.Multer.File, userId: string) {
     try {
       const workbook = new ExcelJS.Workbook();
       await workbook.xlsx.load(file.buffer as any);
 
-      const worksheet = workbook.getWorksheet("donne saisie");
+      const worksheet = workbook.getWorksheet("Leaves");
 
       if (!worksheet) {
-        const message = 'Aucune feuille trouvée dans le fichier Excel'
+        const message = 'No sheet found in the Excel file'
         throw new Error(message);
       }
       const headerRow = worksheet.getRow(1);
@@ -498,7 +498,7 @@ export class LeaveService {
 
 
       // 2️⃣ Vérifier que les colonnes obligatoires existent
-      const requiredColumns = ['mle', 'nom et prenom', 'fonction', 'codeabs', 'debutcongé', 'fincongé'];
+      const requiredColumns = ['matricule', 'fullname', 'type', 'start date', 'end date', 'reason'];
 
       for (const column of requiredColumns) {
         if (!headerMap[column]) {
@@ -509,28 +509,40 @@ export class LeaveService {
 
       for (let i = 2; i <= worksheet.rowCount; i++) {
         const row = worksheet.getRow(i);
-        const employee = await this.employeeRepository.findOne({ where: { matricule: row.getCell(headerMap['mle']).value?.toString() } });
-        let leave_type = row.getCell(headerMap['codeabs']).value?.toString();
-        if (leave_type === "Congé annuel") {
+        console.log(row.getCell(headerMap['matricule']).value?.toString());
+        const employee = await this.employeeRepository.findOne({ where: { matricule: row.getCell(headerMap['matricule']).value?.toString() } });
+        let leave_type = row.getCell(headerMap['type']).value?.toString();
+        if (leave_type === "Local Leave") {
           leave_type = "Local_Leave_AMD";
         } else if (leave_type === "Permission") {
           leave_type = "Permission_AMD";
-        } else if (leave_type === "Disponibilité") {
+        } else if (leave_type === "Indisponibilite") {
           leave_type = "Indisponibilite_AMD";
         }
         if (!employee) {
           continue;
         }
-        const startDate = row.getCell(headerMap['debutcongé']).value as Date;
-        const endDate = row.getCell(headerMap['fincongé']).value as Date;
+        const user = await this.userRepository.findOne({ where: { id: userId } });
+        if (!user) {
+          continue;
+        }
+        const startDate = row.getCell(headerMap['start date']).value as Date;
+        const endDate = row.getCell(headerMap['end date']).value as Date;
+        const reason = row.getCell(headerMap['reason']).value as string;
         const duration = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24) + 1;
-        leaves.push({
+        const data = {
           employee: employee,
           leave_type: leave_type,
           start_date: startDate,
           end_date: endDate,
           duration: duration,
-        });
+          status: LeaveStatus.APPROVED,
+          imported: true,
+          reason: reason,
+          approver: user,
+          approved_date: new Date(),
+        }
+        leaves.push(data);
       }
 
       await this.leaveRepository.save(leaves);

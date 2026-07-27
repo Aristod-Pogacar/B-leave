@@ -5,108 +5,263 @@
             <%- include('partials/header.ejs') %>
                 <main class="nxl-container">
                     <div class="nxl-content">
+
                         <div class="page-header">
                             <div class="page-header-left d-flex align-items-center">
                                 <div class="page-header-title">
                                     <h5 class="m-b-10">B-Leave</h5>
                                 </div>
                                 <ul class="breadcrumb">
-                                    <li class="breadcrumb-item">Leaves</li>
-                                    <li class="breadcrumb-item">Import leaves</li>
+                                    <li class="breadcrumb-item">Employees</li>
+                                    <li class="breadcrumb-item">Import Employees</li>
                                 </ul>
                             </div>
-                            <div class="page-header-right ms-auto">
-                                <div class="page-header-right-items">
-                                    <div class="d-flex d-md-none">
-                                        <a href="javascript:void(0)" class="page-header-right-close-toggle">
-                                            <i class="feather-arrow-left me-2"></i>
-                                            <span>Back</span>
-                                        </a>
-                                    </div>
-                                </div>
-                                <div class="d-md-none d-flex align-items-center">
-                                    <a href="javascript:void(0)" class="page-header-right-open-toggle">
-                                        <i class="feather-align-right fs-20"></i>
-                                    </a>
-                                </div>
-                            </div>
                         </div>
-                        <!-- [ page-header ] end -->
-                        <div class="bg-white py-3 border-bottom rounded-0 p-md-0 mb-0">
-                            <div class="d-md-none d-flex align-items-center justify-content-between">
-                                <a href="javascript:void(0)" class="page-content-left-open-toggle">
-                                    <i class="feather-align-left fs-20"></i>
-                                </a>
-                            </div>
-                        </div>
-                        <!-- [ Main Content ] start -->
+
                         <div class="main-content">
                             <div class="tab-content">
-                                <div class="tab-pane fade active show" id="overviewTab">
+                                <div class="tab-pane fade active show">
+
                                     <div class="row">
-                                        <div class="col-md-12">
-                                            <div class="card stretch stretch-full d-flex">
-                                                <div class="card-header">
-                                                    <h4 class="header">Import Leaves</h4>
-                                                </div>
-                                                <div class="card-body">
-                                                    <div class="row">
-                                                        <% if (locals.error) { %>
-                                                            <div class="alert alert-danger" role="alert" id="message">
-                                                                Error
-                                                                occured while importing the file: <%= error %>
+                                        <div class="col-lg-6 mx-auto">
+
+                                            <div class="card stretch stretch-full">
+
+                                                <!-- Header -->
+                                                <div class="card-header border-bottom">
+                                                    <div
+                                                        class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+
+                                                        <div class="d-flex align-items-center">
+
+                                                            <div class="avatar-text avatar-lg bg-soft-primary me-3">
+                                                                <i class="feather-upload"></i>
                                                             </div>
-                                                            <% } %>
-                                                                <form action="/leave/import-leaves" method="post"
-                                                                    enctype="multipart/form-data">
-                                                                    <div class="col-md-12 mb-2">
+
+                                                            <div>
+                                                                <h4 class="mb-1">
+                                                                    Import Leaves
+                                                                </h4>
+
+                                                                <p class="text-muted mb-0">
+                                                                    Upload an Excel file to add leave
+                                                                    records.
+                                                                </p>
+                                                            </div>
+
+                                                        </div>
+
+                                                        <a href="/template/Import leave.xlsx" class="btn btn-primary"
+                                                            download="import_leaves.xlsx">
+
+                                                            <i class="feather-download me-2"></i>
+                                                            Download Template
+
+                                                        </a>
+
+                                                    </div>
+                                                </div>
+
+                                                <!-- Body -->
+                                                <div class="card-body">
+
+                                                    <% if (locals.error) { %>
+                                                        <div class="alert alert-danger mb-4">
+
+                                                            <i class="feather-alert-circle me-2"></i>
+
+                                                            Error occurred while importing file:
+                                                            <strong>
+                                                                <%= error %>
+                                                            </strong>
+
+                                                        </div>
+                                                        <% } %>
+
+                                                            <form action="/leave/import-leaves" method="post"
+                                                                enctype="multipart/form-data">
+
+                                                                <div class="mb-4">
+
+                                                                    <label class="form-label fw-semibold">
+                                                                        Leaves File
+                                                                    </label>
+
+                                                                    <div class="border rounded p-4 bg-light">
+
                                                                         <input type="file" class="form-control"
-                                                                            id="file" name="file">
+                                                                            name="file" accept=".xlsx" required>
+
+                                                                        <small class="text-muted mt-2 d-block">
+                                                                            Supported formats:
+                                                                            .xlsx
+                                                                        </small>
+
                                                                     </div>
-                                                                    <div class="col-md-2">
-                                                                        <button class="btn btn-primary" id="importBtn"
-                                                                            type="submit">Import</button>
-                                                                    </div>
-                                                                </form>
+
+                                                                </div>
+
+                                                                <div class="d-flex justify-content-end gap-2">
+
+                                                                    <button type="submit" class="btn btn-success"
+                                                                        id="importBtn">
+
+                                                                        <i class="feather-upload me-2"></i>
+                                                                        Import Leaves
+
+                                                                    </button>
+
+                                                                </div>
+
+                                                            </form>
+
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+                                        <div class="col-lg-6 mx-auto">
+
+                                            <div class="card stretch stretch-full">
+
+                                                <!-- Header -->
+                                                <div class="card-header border-bottom">
+                                                    <div
+                                                        class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+
+                                                        <div class="d-flex align-items-center">
+
+                                                            <div class="avatar-text avatar-lg bg-soft-primary me-3">
+                                                                <i class="feather-upload"></i>
+                                                            </div>
+
+                                                            <div>
+                                                                <h4 class="mb-1">
+                                                                    Import leave balance
+                                                                </h4>
+
+                                                                <p class="text-muted mb-0">
+                                                                    Upload an Excel file to import leave balance.
+                                                                </p>
+                                                            </div>
+
+                                                        </div>
+
+                                                        <a href="/template/Import leave balance.xlsx"
+                                                            class="btn btn-primary"
+                                                            download="import_leave_balance.xlsx">
+
+                                                            <i class="feather-download me-2"></i>
+                                                            Download Template
+
+                                                        </a>
+
                                                     </div>
                                                 </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <div class="card stretch stretch-full d-flex">
-                                                <div class="card-header">
-                                                    <h4 class="header">Import Carried Forward</h4>
-                                                </div>
+
+                                                <!-- Body -->
                                                 <div class="card-body">
-                                                    <div class="row">
-                                                        <form action="/leave/import-carried-forward" method="post"
-                                                            enctype="multipart/form-data">
-                                                            <div class="col-md-12 mb-2">
-                                                                <label for="date">Date</label>
-                                                                <input type="date" class="form-control" name="date"
-                                                                    id="date" required />
-                                                            </div>
-                                                            <div class="col-md-12 mb-2">
-                                                                <label for="file2">File</label>
-                                                                <input type="file" class="form-control" id="file2"
-                                                                    name="file" required />
-                                                            </div>
-                                                            <div class="col-md-2">
-                                                                <button class="btn btn-primary" id="importBtn"
-                                                                    type="submit">Import</button>
-                                                            </div>
-                                                        </form>
-                                                    </div>
+
+                                                    <% if (locals.error) { %>
+                                                        <div class="alert alert-danger mb-4">
+
+                                                            <i class="feather-alert-circle me-2"></i>
+
+                                                            Error occurred while importing file:
+                                                            <strong>
+                                                                <%= error %>
+                                                            </strong>
+
+                                                        </div>
+                                                        <% } %>
+
+                                                            <form action="/leave/import-carried-forward" method="post"
+                                                                enctype="multipart/form-data">
+
+                                                                <div class="mb-4">
+
+                                                                    <label class="form-label fw-semibold">
+                                                                        Leave Balance File
+                                                                    </label>
+
+                                                                    <div class="border rounded p-4 bg-light">
+
+                                                                        <input type="file" class="form-control"
+                                                                            name="file" accept=".xlsx" required>
+
+                                                                        <small class="text-muted mt-2 d-block">
+                                                                            Supported formats:
+                                                                            .xlsx
+                                                                        </small>
+
+                                                                    </div>
+
+                                                                </div>
+
+                                                                <div class="d-flex justify-content-end gap-2">
+
+                                                                    <button type="submit" class="btn btn-success"
+                                                                        id="importBtn">
+
+                                                                        <i class="feather-upload me-2"></i>
+                                                                        Import balance
+
+                                                                    </button>
+
+                                                                </div>
+
+                                                            </form>
+
                                                 </div>
+
                                             </div>
+
+                                        </div>
+                                        <div class="col-lg-12 mx-auto">
+
+                                            <div class="card stretch stretch-full">
+
+                                                <div class="card-body border-top">
+
+                                                    <h6 class="fw-bold mb-3">
+                                                        Import Instructions
+                                                    </h6>
+
+                                                    <ul class="mb-0 text-muted">
+
+                                                        <li>
+                                                            Download the template before importing.
+                                                        </li>
+
+                                                        <li>
+                                                            Do not modify column names.
+                                                        </li>
+
+                                                        <li>
+                                                            Complete all mandatory fields.
+                                                        </li>
+
+                                                        <li>
+                                                            Save the file in Excel format (.xlsx).
+                                                        </li>
+
+                                                    </ul>
+
+                                                </div>
+
+                                            </div>
+
                                         </div>
                                     </div>
+
                                 </div>
                             </div>
                         </div>
-                        <%- include('partials/footer.ejs') %>
+
+                    </div>
+
+                    <!-- </main> -->
+                    <%- include('partials/footer.ejs') %>
     </body>
 
     </html>
