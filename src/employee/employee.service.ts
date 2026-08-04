@@ -883,6 +883,8 @@ export class EmployeeService {
               'firstname',
               'job_level',
               'designation',
+              'app_password',
+              'onehr_password',
             ],
             ['matricule']
           )
