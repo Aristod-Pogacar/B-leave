@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { Employee } from '../../employee/entities/employee.entity';
 
 @Entity('employee_history')
@@ -48,10 +48,10 @@ export class EmployeeHistory {
     @Column({ type: 'date', nullable: true })
     DOR?: Date;
 
-    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+    @CreateDateColumn({ type: 'timestamp' })
     createdAt!: Date;
 
-    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
+    @UpdateDateColumn({ type: 'timestamp' })
     updatedAt?: Date;
 
     @ManyToOne(() => Employee, employee => employee.histories, { nullable: false, onDelete: 'CASCADE', onUpdate: 'CASCADE' })

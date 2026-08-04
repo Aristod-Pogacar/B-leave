@@ -2,7 +2,7 @@ import { Employee } from 'src/employee/entities/employee.entity';
 import { Leave } from 'src/leave/entities/leave.entity';
 import { ManagerAssignation } from 'src/manager_assignation/entities/manager_assignation.entity';
 import { Withdraw } from 'src/withdraw/entities/withdraw.entity';
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, OneToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, OneToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 export enum UserRole {
     // USER = 'USER',
@@ -60,10 +60,10 @@ export class User {
     @Column({ type: 'enum', enum: Site, default: Site.ABE1 })
     site: Site;
 
-    @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP(6)" })
+    @CreateDateColumn({ type: 'timestamp' })
     createdAt: Date;
 
-    @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP(6)", onUpdate: "CURRENT_TIMESTAMP(6)" })
+    @UpdateDateColumn({ type: 'timestamp' })
     updatedAt: Date;
 
     // @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP(6)", nullable: true })
