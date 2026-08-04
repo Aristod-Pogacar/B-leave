@@ -837,6 +837,7 @@ export class EmployeeService {
   }
 
   async processExcelBuffer(file: Express.Multer.File) {
+    const salt = bcrypt.genSaltSync(10);
     const workbook = new ExcelJS.Workbook();
     if (file.originalname.endsWith('.xls')) {
       const workbook = XLSX.read(file.buffer, { type: 'buffer', cellDates: true });
@@ -857,8 +858,8 @@ export class EmployeeService {
         job_level: row['Job Level'],
         designation: row['Designation'],
         site: row['Sit'],
-        app_password: row['App password'],
-        onehr_password: row['Onehr password'],
+        app_password: bcrypt.hashSync(row['App password'], salt),
+        onehr_password: this.cryptoService.encrypt(String(row['Onehr password'])),
       }));
 
       const cleanData = filtered.filter(x => x.matricule);
