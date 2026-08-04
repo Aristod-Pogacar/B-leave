@@ -858,6 +858,7 @@ export class EmployeeService {
         designation: row['Designation'],
         site: row['Sit'],
       }));
+      console.log("filtered", filtered);
 
       const cleanData = filtered.filter(x => x.matricule);
 
