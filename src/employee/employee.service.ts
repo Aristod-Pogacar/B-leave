@@ -58,7 +58,7 @@ export class EmployeeService {
       DOE: employee.DOE,
       division: employee.division,
       type: employee.type,
-      job_post: employee.job_post,
+      // job_post: employee.job_post,
     });
     employee.is_deleted = true;
     employee.is_active = false;
@@ -937,7 +937,7 @@ export class EmployeeService {
         name: row.getCell(headerMap['name']).value?.toString(),
         firstname: row.getCell(headerMap['firstname']).value?.toString(),
         job_level: row.getCell(headerMap['job level']).value?.toString(),
-        job_post: row.getCell(headerMap['job post']).value?.toString(),
+        // job_post: row.getCell(headerMap['job post']).value?.toString(),
         designation: row.getCell(headerMap['designation']).value?.toString(),
         site: row.getCell(headerMap['sit']).value?.toString(),
       });
