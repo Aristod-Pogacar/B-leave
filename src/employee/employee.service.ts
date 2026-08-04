@@ -860,7 +860,6 @@ export class EmployeeService {
         app_password: row['App password'],
         onehr_password: row['Onehr password'],
       }));
-      console.log("filtered", filtered);
 
       const cleanData = filtered.filter(x => x.matricule);
 
