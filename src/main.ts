@@ -41,12 +41,13 @@ async function bootstrap() {
     next();
   });
   app.enableCors({
-    origin: [
-      "http://localhost:8081",
-      "http://localhost:19006",
-      "tauri://localhost",
-      "http://tauri.localhost"
-    ],
+    // origin: [
+    //   "http://localhost:8081",
+    //   "http://localhost:19006",
+    //   "tauri://localhost",
+    //   "http://tauri.localhost"
+    // ],
+    origin: '*',
     methods: [
       "GET",
       "POST",
@@ -57,7 +58,7 @@ async function bootstrap() {
     ],
     credentials: true,
   });
-  await app.listen(process.env.PORT ?? 4000);
+  await app.listen(process.env.PORT ?? 4000, '0.0.0.0');
 }
 bootstrap();
 
