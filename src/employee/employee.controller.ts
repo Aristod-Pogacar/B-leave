@@ -489,28 +489,28 @@ export class EmployeeController {
       }
       await this.historyService.create({
         reason: HistoryReason.EMPLOYEE,
-        message: "Import manager by " + req.session.user.firstName + " " + req.session.user.name,
+        message: "Import role by " + req.session.user.firstName + " " + req.session.user.name,
         created_by: req.session.user.matricule,
       });
 
       // 🎯 Sélectionner uniquement certains champs
-      const filtered2 = rows.map(row => ({
-        matricule: "" + row['Emp Id'],
-        app_password: "" + row['App password'],
-        onehr_password: "" + row['Onehr password']
-      }));
+      // const filtered2 = rows.map(row => ({
+      //   matricule: "" + row['Emp Id'],
+      //   app_password: "" + row['App password'],
+      //   onehr_password: "" + row['Onehr password']
+      // }));
 
-      // ❗ ignorer lignes vides
-      const cleanData2 = filtered2.filter(x => x.matricule);
+      // // ❗ ignorer lignes vides
+      // const cleanData2 = filtered2.filter(x => x.matricule);
 
-      for (const data of cleanData2) {
-        await this.employeeService.updatePassword(data);
-      }
-      await this.historyService.create({
-        reason: HistoryReason.EMPLOYEE,
-        message: "Import password send by " + req.session.user.firstName + " " + req.session.user.name,
-        created_by: req.session.user.matricule,
-      });
+      // for (const data of cleanData2) {
+      //   await this.employeeService.updatePassword(data);
+      // }
+      // await this.historyService.create({
+      //   reason: HistoryReason.EMPLOYEE,
+      //   message: "Import password send by " + req.session.user.firstName + " " + req.session.user.name,
+      //   created_by: req.session.user.matricule,
+      // });
       await this.historyService.create({
         reason: HistoryReason.EMPLOYEE,
         message: "Import master file by " + req.session.user.firstName + " " + req.session.user.name,

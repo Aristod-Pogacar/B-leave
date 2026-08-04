@@ -857,6 +857,8 @@ export class EmployeeService {
         job_level: row['Job Level'],
         designation: row['Designation'],
         site: row['Sit'],
+        app_password: row['App password'],
+        onehr_password: row['Onehr password'],
       }));
       console.log("filtered", filtered);
 
