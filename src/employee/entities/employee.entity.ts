@@ -45,8 +45,8 @@ export class Employee {
     @Column()
     job_level!: string;
 
-    @Column()
-    job_post!: string;
+    // @Column()
+    // job_post!: string;
 
     @Column()
     designation!: string;
