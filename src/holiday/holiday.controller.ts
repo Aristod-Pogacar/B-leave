@@ -28,7 +28,7 @@ export class HolidayController {
 
   @Get('holidays')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.HR_LEAD)
+  @Roles(UserRole.SUPERADMIN, UserRole.PAYROLL)
   @Render('holidays')
   async getHolidays(@Req() req, @Res() res, @Query('year') year: string) {
     var y;
@@ -56,7 +56,7 @@ export class HolidayController {
 
   @Post('edit-holiday/:id')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.HR_LEAD)
+  @Roles(UserRole.SUPERADMIN, UserRole.PAYROLL)
   async postEditHolidays(@Req() req, @Body() createHolidayDto: CreateHolidayDto, @Res() res, @Param('id') id: string) {
     const old_holiday = await this.holidayService.findOne(id);
     const holiday = await this.holidayService.update(id, createHolidayDto);
@@ -75,7 +75,7 @@ export class HolidayController {
 
   @Get('delete-holiday/:id')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.HR_LEAD)
+  @Roles(UserRole.SUPERADMIN, UserRole.PAYROLL)
   @Render('confirm-delete-holiday')
   async getDeleteHolidays(@Req() req, @Res() res, @Param('id') id: string) {
     const holiday = await this.holidayService.findOne(id);
@@ -88,7 +88,7 @@ export class HolidayController {
 
   @Post('delete-holiday/:id')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.HR_LEAD)
+  @Roles(UserRole.SUPERADMIN, UserRole.PAYROLL)
   async postDeleteHolidays(@Req() req, @Res() res, @Param('id') id: string) {
     const old_holiday = await this.holidayService.findOne(id);
     const holiday = await this.holidayService.remove(id);
@@ -105,7 +105,7 @@ export class HolidayController {
 
   @Post('new-holiday')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.HR_LEAD)
+  @Roles(UserRole.SUPERADMIN, UserRole.PAYROLL)
   async postNewHolidays(@Req() req, @Body() createHolidayDto: CreateHolidayDto, @Res() res) {
     const holiday = await this.holidayService.create(createHolidayDto);
     if (holiday) {
@@ -121,7 +121,7 @@ export class HolidayController {
 
   @Get('edit-holiday/:id')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.HR_LEAD)
+  @Roles(UserRole.SUPERADMIN, UserRole.PAYROLL)
   @Render('edit-holiday')
   async getEditHolidays(@Req() req, @Res() res, @Param('id') id: string) {
     const holiday = await this.holidayService.findOne(id);
@@ -140,7 +140,7 @@ export class HolidayController {
 
   @Get('new-holiday')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.HR_LEAD)
+  @Roles(UserRole.SUPERADMIN, UserRole.PAYROLL)
   @Render('new-holiday')
   async getNewHolidays(@Req() req, @Res() res) {
     const thisyear = new Date().getFullYear();

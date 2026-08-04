@@ -529,6 +529,12 @@ export class EmployeeController {
   //   return this.employeeService.create(createEmployeeDto);
   // }
 
+  @Post('employee-with-balances')
+  find(@Body() body: any) {
+    console.log('body', body);
+    return this.employeeService.getEmployee(body.matricule, new Date(body.date));
+  }
+
   @Get()
   findAll() {
     return this.employeeService.findAll();

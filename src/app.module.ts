@@ -4,7 +4,7 @@ import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EmployeeModule } from './employee/employee.module';
 import { LeaveModule } from './leave/leave.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Leave } from './leave/entities/leave.entity';
 import { Employee } from './employee/entities/employee.entity';
 import { UserModule } from './user/user.module';
@@ -79,30 +79,28 @@ import { CarriedForwardService } from './carried-forward/carried-forward.service
       isGlobal: true,
     }),
     EventEmitterModule.forRoot(),
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: 'localhost',
-      port: 3306,
-      username: 'root',
-      password: '',
-      // database: 'leave_planner_test',
-      database: 'b_leave',
-      entities: [
-        Leave,
-        Employee,
-        User,
-        ManagerAssignation,
-        Permission2h,
-        MedicalService,
-        SmiaOstie,
-        History,
-        EmployeeHistory,
-        Holiday,
-        Notification,
-        Withdraw,
-        CarriedForward
-      ],
-      synchronize: true,
+    TypeOrmModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        type: 'mysql',
+        url: config.get<string>('MYSQL_URL'),
+        entities: [
+          Leave,
+          Employee,
+          User,
+          ManagerAssignation,
+          Permission2h,
+          MedicalService,
+          SmiaOstie,
+          History,
+          EmployeeHistory,
+          Holiday,
+          Notification,
+          Withdraw,
+          CarriedForward
+        ],
+        synchronize: true,
+      }),
     }),
     // TypeOrmModule.forRoot({
     //   type: 'sqlite',

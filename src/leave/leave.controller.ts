@@ -69,7 +69,7 @@ export class LeaveController {
 
   @Get('permissions')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.HR_LEAD, UserRole.ADMIN)
+  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.HR_LEAD, UserRole.ADMIN, UserRole.PAYROLL)
   @Render('permission-list')
   async getPermissions(
     @Req() req: any,

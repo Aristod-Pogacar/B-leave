@@ -647,16 +647,21 @@ export class LeaveService {
       .setParameter('year', year)
       .getRawOne();
 
-    const carriedForwardMap = new Map(
-      carriedForwards.map(cf => [
-        cf.employeeId,
-        {
-          days: Number(cf.days),
-          daysTaken: Number(cf.daysTaken || 0),
-          date: new Date(cf.date),
-        },
-      ]),
-    );
+    console.log("CARRIED FORWARD:", carriedForwards)
+
+    if (carriedForwards) {
+
+      const carriedForwardMap = new Map(
+        [carriedForwards].map(cf => [
+          cf.employeeId,
+          {
+            days: Number(cf.days),
+            daysTaken: Number(cf.daysTaken || 0),
+            date: new Date(cf.date),
+          },
+        ]),
+      );
+    }
 
     const [data] = await this.employeeRepository
       .createQueryBuilder('e')
@@ -749,7 +754,7 @@ export class LeaveService {
         permissionTaken += Number(this.calculateDaysBetween(new Date(l.start_date), new Date(l.end_date)));
       });
 
-      let sld;
+      let sld = 0;
 
       if (carriedForwards) {
         // console.log('CARRIED FORWARD:', carriedForward)
@@ -768,8 +773,8 @@ export class LeaveService {
 
       }
 
-      const cumulSolde = sld.solde_cumul;
-      const cumulSoldeMensuel = sld.solde_cumul_mensuel;
+      const cumulSolde = sld;
+      const cumulSoldeMensuel = sld;
       const pris = takenMap.get(emp.id) || 0;
       const restant = cumulSolde - pris;
 
@@ -787,6 +792,10 @@ export class LeaveService {
           }
         }
       }
+
+      console.log('soldeDebut', soldeDebut);
+      console.log('restant', restant);
+      console.log('cumulSolde', cumulSolde);
 
       return {
         ...emp,
