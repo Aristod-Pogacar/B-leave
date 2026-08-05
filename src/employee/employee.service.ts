@@ -3,7 +3,7 @@ import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Employee } from './entities/employee.entity';
-import { Between, In, IsNull, Like, Not, Repository } from 'typeorm';
+import { Between, In, IsNull, LessThanOrEqual, Like, Not, Repository } from 'typeorm';
 import * as ExcelJS from 'exceljs';
 import * as XLSX from 'xlsx';
 import { Leave, LeaveStatus } from 'src/leave/entities/leave.entity';
@@ -654,7 +654,7 @@ export class EmployeeService {
           this.calculateDaysBetween(new Date(leave.start_date), new Date(leave.end_date))
           - holidays;
       }
-      permissions.forEach(async l => {
+      permissions.forEach(l => {
         permissionTaken += Number(this.calculateDaysBetween(new Date(l.start_date), new Date(l.end_date)));
       });
       // console.log('EMP:', emp.matricule, 'localLeaveTaken', localLeaveTaken);
@@ -982,34 +982,24 @@ export class EmployeeService {
     const employee = await this.employeeRepository.findOne({ where: { matricule } });
     if (!employee) return { solde_cumul: 0, solde_pris: 0, solde_restant: 0 };
 
-    const takenLeaves = await this.leaveRepository
-      .createQueryBuilder('leave')
-      .leftJoin('leave.employee', 'employee')
-      .select('employee.id', 'employeeId')
-      .addSelect('leave.start_date', 'start_date')
-      .addSelect('leave.end_date', 'end_date')
-      .addSelect(
-        'SUM(DATEDIFF(leave.end_date, leave.start_date) + 1)',
-        'daysTaken'
-      )
-      .where('employee.id = :employeeId', { employeeId: employee.id })
-      .andWhere('employee.is_active = true AND employee.is_deleted = false')
-      .andWhere('leave.status = :status', { status: LeaveStatus.APPROVED })
-      .andWhere('leave.leave_type = :type', { type: 'Local_Leave_AMD' })
-      .andWhere('YEAR(leave.start_date) = :year', { year })
-      .andWhere('leave.start_date <= :at', { at })
-      .groupBy('employee.id')
-      .getRawMany();
-
-
-    const takenLeavesMap = new Map<string, number>();
-
-    takenLeaves.forEach(async l => {
-      const holidays = await this.getDaysTakenWithHoliday(l.start_date, l.end_date);
-      const daysTaken = Number(l.daysTaken) - holidays;
-      takenLeavesMap.set(l.employeeId, Number(daysTaken.toFixed(2)));
-      // takenLeavesMap.set(l.employeeId, Number(l.daysTaken));
+    const takenLeaves = await this.leaveRepository.find({
+      where: {
+        employee: { id: employee.id },
+        status: LeaveStatus.APPROVED,
+        leave_type: 'Local_Leave_AMD',
+        start_date: LessThanOrEqual(at),
+      },
     });
+
+
+    // const takenLeavesMap = new Map<string, number>();
+
+    // takenLeaves.forEach(async l => {
+    //   const holidays = await this.getDaysTakenWithHoliday(l.start_date, l.end_date);
+    //   const daysTaken = Number(l.daysTaken) - holidays;
+    //   takenLeavesMap.set(l.employeeId, Number(daysTaken.toFixed(2)));
+    //   // takenLeavesMap.set(l.employeeId, Number(l.daysTaken));
+    // });
     // 3️⃣ Calcul solde cumulatif dynamique
     let soldeCumul = 0;
 
@@ -1046,7 +1036,21 @@ export class EmployeeService {
       soldeCumul = 0;
     }
 
-    const pris = takenLeavesMap.get(employee.id) || 0;
+    // const pris = takenLeavesMap.get(employee.id) || 0;
+    let pris = 0;
+
+    for (const leave of takenLeaves) {
+      const holidays = await this.getDaysTakenWithHoliday(
+        new Date(leave.start_date).toISOString().split('T')[0],
+        new Date(leave.end_date).toISOString().split('T')[0],
+      );
+
+      pris +=
+        this.calculateDaysBetween(
+          new Date(leave.start_date),
+          new Date(leave.end_date),
+        ) - holidays;
+    }
     const restant = soldeCumul - pris;
 
     const result = {
