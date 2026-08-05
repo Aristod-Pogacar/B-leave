@@ -530,9 +530,12 @@ export class EmployeeController {
   // }
 
   @Post('employee-with-balances')
-  find(@Body() body: any) {
+  async find(@Body() body: any) {
     console.log('body', body);
-    return this.employeeService.getEmployee(body.matricule, new Date(body.date));
+    const result = await this.employeeService.getEmployeeWithBalances(body.matricule, body.date);
+    const employee = result.data[0]
+    return employee;
+    // return this.employeeService.getEmployeeBalanceAtDate(body.matricule, new Date(body.date));
   }
 
   @Get()

@@ -264,6 +264,19 @@ export class LeaveController {
     return leaves;
   }
 
+  @Get('overlap-leaves/:matricule/:startDate/:endDate')
+  async getLeavesOverlap(
+    @Param('matricule') matricule: string,
+    @Param('startDate') startDate: string,
+    @Param('endDate') endDate: string,
+  ) {
+    console.log(matricule, startDate, endDate);
+    const st = new Date(startDate);
+    const et = new Date(endDate);
+    const leaves = await this.leaveService.getLeavesOverlap(matricule, st, et);
+    return leaves;
+  }
+
   @Get('month-line-departement')
   async getLeavesByMonthAndLineAndDepartement(
     @Query('year') year: number,

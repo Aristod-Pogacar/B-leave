@@ -3,7 +3,7 @@ import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Employee } from './entities/employee.entity';
-import { Between, In, IsNull, LessThanOrEqual, Like, Not, Repository } from 'typeorm';
+import { Between, In, IsNull, LessThanOrEqual, Like, MoreThanOrEqual, Not, Repository } from 'typeorm';
 import * as ExcelJS from 'exceljs';
 import * as XLSX from 'xlsx';
 import { Leave, LeaveStatus } from 'src/leave/entities/leave.entity';
@@ -255,21 +255,246 @@ export class EmployeeService {
     }
   }
 
-  async getEmployee(
-    matricule: string, date: Date) {
+  async getEmployeeBalanceAtDate(
+    matricule: string,
+    atDate: Date,
+  ) {
+    const emp = await this.employeeRepository.findOne({
+      where: {
+        matricule,
+        is_active: true,
+        is_deleted: false,
+      },
+    });
+
+    if (!emp) {
+      return null;
+    }
+
+    const year = atDate.getFullYear();
+
+    const carriedForward = await this.carriedForwardRepository
+      .createQueryBuilder('cf')
+      .leftJoin('cf.employee', 'employee')
+      .select('employee.id', 'employeeId')
+      .addSelect('cf.days', 'days')
+      .addSelect('cf.daysTaken', 'daysTaken')
+      .addSelect('cf.date', 'date')
+      .where('employee.id = :employeeId', {
+        employeeId: emp.id,
+      })
+      .andWhere('YEAR(cf.date) = :year', {
+        year,
+      })
+      .andWhere('employee.site = :site', {
+        site: emp.site,
+      })
+      .andWhere(qb => {
+        const subQuery = qb
+          .subQuery()
+          .select('MAX(cf2.date)')
+          .from(CarriedForward, 'cf2')
+          .leftJoin('cf2.employee', 'emp2')
+          .where('emp2.id = employee.id')
+          .andWhere('YEAR(cf2.date) = :year')
+          .getQuery();
+
+        return `cf.date = ${subQuery}`;
+      })
+      .setParameter('year', year)
+      .getRawOne();
+
+
+    let debut = 0;
+    let daysTaken = 0;
+
+
+    if (carriedForward) {
+      debut = Number(carriedForward.days);
+      daysTaken = Number(carriedForward.daysTaken || 0);
+    }
+
+
+    let dateFilter = Between(
+      new Date(year, 0, 1),
+      atDate
+    );
+
+
+    const localLeaves = await this.leaveRepository.find({
+      where: {
+        employee: {
+          id: emp.id,
+        },
+        leave_type: 'Local_Leave_AMD',
+        status: LeaveStatus.APPROVED,
+        start_date: dateFilter,
+      },
+      relations: [
+        'employee'
+      ],
+    });
+
+
+    const permissionQuery = this.leaveRepository
+      .createQueryBuilder('leave')
+      .leftJoin('leave.employee', 'employee')
+      .where('employee.id = :id', {
+        id: emp.id,
+      })
+      .andWhere('leave.status = :status', {
+        status: LeaveStatus.APPROVED,
+      })
+      .andWhere('leave.leave_type = :type', {
+        type: 'Permission_AMD',
+      })
+      .andWhere('YEAR(leave.start_date) = :year', {
+        year,
+      })
+      .andWhere('leave.start_date <= :date', {
+        date: atDate,
+      })
+      .andWhere('employee.site = :site', {
+        site: emp.site,
+      });
+
+
+    if (carriedForward) {
+      permissionQuery.andWhere(
+        'leave.start_date >= :cfDate',
+        {
+          cfDate: carriedForward.date,
+        }
+      );
+    }
+
+
+    const permissions = await permissionQuery.getMany();
+
+
+    let permissionTaken = 0;
+    let localLeaveTaken = 0;
+
+
+    for (const leave of localLeaves) {
+
+      const holidays =
+        await this.getDaysTakenWithHoliday(
+          new Date(leave.start_date)
+            .toISOString()
+            .split('T')[0],
+
+          new Date(leave.end_date)
+            .toISOString()
+            .split('T')[0],
+        );
+
+
+      localLeaveTaken +=
+        this.calculateDaysBetween(
+          new Date(leave.start_date),
+          new Date(leave.end_date),
+        )
+        - holidays;
+    }
+
+
+    permissions.forEach(l => {
+
+      permissionTaken += Number(
+        this.calculateDaysBetween(
+          new Date(l.start_date),
+          new Date(l.end_date),
+        )
+      );
+
+    });
+
+
+
+    let cumulSolde: number;
+
+
+    if (carriedForward) {
+
+      cumulSolde =
+        this.calculateSoldeCumulFromDate(
+          new Date(carriedForward.date),
+          Number(carriedForward.days),
+          atDate,
+        );
+
+    } else {
+
+      cumulSolde =
+        (
+          await this.getEmployeeSolde(
+            emp.matricule,
+            atDate,
+          )
+        ).solde_cumul;
+
+    }
+
+
+    const pris =
+      Number(localLeaveTaken.toFixed(2))
+      + daysTaken;
+
+
+    const prisPermission =
+      Number(permissionTaken.toFixed(2));
+
+
+    const restant =
+      cumulSolde - pris;
+
+
+
+    return {
+      ...emp,
+
+      solde_cumul:
+        Number(cumulSolde.toFixed(2)),
+
+      solde_debut:
+        Number(debut),
+
+      solde_pris:
+        Number(pris.toFixed(2)),
+
+      solde_pris_permission:
+        Number(prisPermission.toFixed(2)),
+
+      solde_restant:
+        Number((restant + debut).toFixed(2)),
+    };
+  }
+
+  async getEmployeeWithBalances(search: string, atDate: Date = new Date()) {
 
     let employees: Employee[];
     let total: number;
-    const year = date.getFullYear();
+    let year = new Date(atDate).getFullYear();
 
-    [employees, total] = await this.employeeRepository.findAndCount({
-      where: [
-        { matricule: Like(`%${matricule}%`), is_active: true, is_deleted: false },
-      ],
-      order: { matricule: 'ASC' },
-    });
-
-    console.log(employees);
+    if (search && search.trim() !== "") {
+      [employees, total] = await this.employeeRepository.findAndCount({
+        where: [
+          { matricule: Like(`%${search}%`), is_active: true, is_deleted: false },
+          { name: Like(`%${search}%`), is_active: true, is_deleted: false },
+          { firstname: Like(`%${search}%`), is_active: true, is_deleted: false },
+          { division: Like(`%${search}%`), is_active: true, is_deleted: false },
+          { section: Like(`%${search}%`), is_active: true, is_deleted: false },
+        ],
+        order: { matricule: 'ASC' },
+      });
+    } else {
+      // 1️⃣ Récupérer les employés
+      [employees, total] = await this.employeeRepository.findAndCount({
+        where: { is_active: true, is_deleted: false },
+        order: { matricule: 'ASC' },
+      });
+    }
 
     if (employees.length === 0) {
       return { data: [], total };
@@ -312,7 +537,7 @@ export class EmployeeService {
       ]),
     );
 
-    const today = new Date(date);
+    const today = new Date(atDate);
 
     // takenLeaves.forEach(async l => {
     //   const holidays = await this.getDaysTakenWithHoliday(l.start_date, l.end_date);
@@ -401,7 +626,7 @@ export class EmployeeService {
           this.calculateDaysBetween(new Date(leave.start_date), new Date(leave.end_date))
           - holidays;
       }
-      permissions.forEach(async l => {
+      permissions.forEach(l => {
         permissionTaken += Number(this.calculateDaysBetween(new Date(l.start_date), new Date(l.end_date)));
       });
       // console.log('EMP:', emp.matricule, 'localLeaveTaken', localLeaveTaken);
@@ -464,8 +689,7 @@ export class EmployeeService {
     // 2. Attends que TOUTES les promesses soient résolues
     const results = await Promise.all(promises);
 
-    return results;
-    // return { data: results, total };
+    return { data: results, total };
   }
 
   async getEmployeesWithBalances(

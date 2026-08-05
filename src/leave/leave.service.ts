@@ -46,6 +46,23 @@ export class LeaveService {
     private readonly holidayService: HolidayService,
   ) { }
 
+  async getLeavesOverlap(matricule: string, startDate: Date, endDate: Date) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999);
+    start.setHours(0, 0, 0, 0);
+    const leaves = await this.leaveRepository.find({
+      where: {
+        employee: { matricule: matricule },
+        start_date: LessThanOrEqual(end),
+        end_date: MoreThanOrEqual(start),
+        status: In([LeaveStatus.APPROVED, LeaveStatus.PENDING])
+      },
+      relations: ['employee']
+    });
+    return leaves;
+  }
+
   async withdrawn(id: string) {
     const leave = await this.leaveRepository.findOne({ where: { id } });
     if (!leave) {
