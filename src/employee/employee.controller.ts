@@ -474,12 +474,13 @@ export class EmployeeController {
           const u = await this.userService.findOneByMatricule(data.matricule);
           const employee = await this.employeeService.findOneByMatricule(data.matricule);
           if (!u && employee) {
+            const salt = await bcrypt.genSalt(10);
             const user = new User();
             user.email = data.email;
             user.role = data.role as UserRole;
             user.employee = employee;
             user.site = employee.site as Site;
-            const hashedPassword = await bcrypt.hash(data.matricule, 10);
+            const hashedPassword = await bcrypt.hash(data.matricule, salt);
             user.password = hashedPassword;
             await this.userService.save(user);
           }
@@ -518,6 +519,7 @@ export class EmployeeController {
       });
       res.redirect(`/`);
     } catch (error) {
+      console.log(error);
       res.redirect(`/employee/import-master-file?error=${encodeURIComponent(error.message)}`);
     }
   }

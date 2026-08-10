@@ -1082,7 +1082,7 @@ export class EmployeeService {
         job_level: row['Job Level'],
         designation: row['Designation'],
         site: row['Sit'],
-        app_password: bcrypt.hashSync(row['App password'], salt),
+        app_password: bcrypt.hashSync("" + row['App password'], salt),
         onehr_password: this.cryptoService.encrypt(String(row['Onehr password'])),
       }));
 

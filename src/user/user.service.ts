@@ -19,7 +19,8 @@ export class UserService {
     private readonly employeeService: EmployeeService,
   ) { }
   async create(createUserDto: CreateUserDto) {
-    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(createUserDto.password, salt);
     const employee = await this.employeeService.findOne(createUserDto.employee);
     if (!employee) {
       throw new BadRequestException("Employee not found");
@@ -124,7 +125,8 @@ export class UserService {
 
   async updatePassword(id: any, body: any) {
     const user = await this.userRepo.findOne({ where: { id } });
-    const hashedPassword = await bcrypt.hash(body.newPassword, 10);
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(body.newPassword, salt);
 
     if (!user) {
       throw new BadRequestException("User not found");
