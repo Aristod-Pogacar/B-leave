@@ -21,6 +21,10 @@ export class FingerprintGateway implements OnGatewayConnection, OnGatewayDisconn
   }
 
   handleDisconnect(socket: WebSocket) {
+    const disconnectedClient = this.clients.get(socket);
+    if (disconnectedClient) {
+      console.log(`[WS] Déconnecté: ${disconnectedClient.type}`);
+    }
     this.clients.delete(socket);
     console.log(`[WS] Déconnecté (total: ${this.clients.size})`);
   }
