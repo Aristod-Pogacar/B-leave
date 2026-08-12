@@ -8,7 +8,7 @@ import { FingerprintService } from './fingerprint.service';
 type ClientType = 'esp32' | 'expo' | 'unknown';
 interface AppClient { socket: WebSocket; type: ClientType; }
 
-@WebSocketGateway(5000, { path: '/' })
+@WebSocketGateway({ path: '/' })
 export class FingerprintGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
   private clients = new Map<WebSocket, AppClient>();
