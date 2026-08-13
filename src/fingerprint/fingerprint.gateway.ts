@@ -84,8 +84,11 @@ export class FingerprintGateway implements OnGatewayConnection, OnGatewayDisconn
 
     console.log(`[GW] Enrol: ${data.matricule} → slot ${slot}`);
     this.sendToESP32({
-      event: 'start_enroll',
-      data: { matricule: data.matricule, slot },
+      event: 'enroll_fingerprint',
+      data: {
+        slot,
+        employeeId: employee.id,
+      },
     });
   }
 
