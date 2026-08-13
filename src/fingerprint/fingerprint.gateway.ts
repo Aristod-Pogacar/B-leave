@@ -43,17 +43,20 @@ export class FingerprintGateway implements OnGatewayConnection, OnGatewayDisconn
   // ── Expo → start/stop listening ───────────────────────────────────────────
   @SubscribeMessage('start_listening')
   handleStartListening() {
+    console.log(`[GW] Start listening`);
     this.sendToESP32({ event: 'listen_fingerprint', data: {} });
   }
 
   @SubscribeMessage('stop_listening')
   handleStopListening() {
+    console.log(`[GW] Stop listening`);
     this.sendToESP32({ event: 'stop_listening', data: {} });
   }
 
   // ── Expo → start enroll ───────────────────────────────────────────────────
   @SubscribeMessage('start_enroll')
   async handleStartEnroll(@MessageBody() data: { matricule: string }) {
+    console.log(`[GW] Start enroll: ${data.matricule}`);
     // Vérifie que l'employé existe
     const employee = await this.fingerprintService.findByMatricule(data.matricule);
     if (!employee) {
@@ -97,6 +100,7 @@ export class FingerprintGateway implements OnGatewayConnection, OnGatewayDisconn
   async handleEnrollSuccess(
     @MessageBody() data: { fingerprintId: number; matricule: string },
   ) {
+    console.log(`[GW] Enrol success: ${data.matricule} → slot ${data.fingerprintId}`);
     const employee = await this.fingerprintService.saveFingerprintId(
       data.matricule,
       data.fingerprintId,
@@ -114,6 +118,7 @@ export class FingerprintGateway implements OnGatewayConnection, OnGatewayDisconn
   // ── ESP32 → enrol échoué ──────────────────────────────────────────────────
   @SubscribeMessage('enroll_failed')
   handleEnrollFailed(@MessageBody() data: { message: string }) {
+    console.log(`[GW] Enrol failed: ${data.message}`);
     this.sendToExpo({ event: 'enroll_error', data });
   }
 
@@ -122,6 +127,7 @@ export class FingerprintGateway implements OnGatewayConnection, OnGatewayDisconn
   async handleFingerprintMatch(
     @MessageBody() data: { fingerprintId: number; score: number },
   ) {
+    console.log(`[GW] Fingerprint match: ${data.fingerprintId} (score=${data.score})`);
     const employee = await this.fingerprintService.findByFingerprintId(data.fingerprintId);
 
     this.sendToESP32({ event: 'stop_listening', data: {} });
@@ -142,12 +148,14 @@ export class FingerprintGateway implements OnGatewayConnection, OnGatewayDisconn
   // ── ESP32 → pas de match ──────────────────────────────────────────────────
   @SubscribeMessage('fingerprint_unknown')
   handleFingerprintUnknown() {
+    console.log(`[GW] Fingerprint unknown`);
     this.sendToExpo({ event: 'login_failed', data: { message: 'Empreinte non reconnue' } });
   }
 
   // ── Expo → suppression ────────────────────────────────────────────────────
   @SubscribeMessage('delete_fingerprint')
   async handleDeleteFingerprint(@MessageBody() data: { matricule: string }) {
+    console.log(`[GW] Delete fingerprint: ${data.matricule}`);
     const employee = await this.fingerprintService.findByMatricule(data.matricule);
 
     if (!employee) {
