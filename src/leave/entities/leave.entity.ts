@@ -1,6 +1,6 @@
-import { Employee } from 'src/employee/entities/employee.entity';
-import { User } from 'src/user/entities/user.entity';
-import { Withdraw } from 'src/withdraw/entities/withdraw.entity';
+import { Employee } from '../../employee/entities/employee.entity';
+import { User } from '../../user/entities/user.entity';
+import { Withdraw } from '../../withdraw/entities/withdraw.entity';
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 
 export enum LeaveStatus {

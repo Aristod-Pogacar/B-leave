@@ -2,11 +2,11 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Render, Req, Query, 
 import { MedicalServiceService } from './medical_service.service';
 import { CreateMedicalServiceDto } from './dto/create-medical_service.dto';
 import { UpdateMedicalServiceDto } from './dto/update-medical_service.dto';
-import { Roles } from 'src/user/role.decorator';
-import { RolesGuard } from 'src/user/role.guard';
-import { UserRole } from 'src/user/entities/user.entity';
-import { HistoryReason } from 'src/history/entities/history.entity';
-import { HistoryService } from 'src/history/history.service';
+import { Roles } from '../user/role.decorator';
+import { RolesGuard } from '../user/role.guard';
+import { UserRole } from '../user/entities/user.entity';
+import { HistoryReason } from '../history/entities/history.entity';
+import { HistoryService } from '../history/history.service';
 
 @Controller('medical-service')
 export class MedicalServiceController {

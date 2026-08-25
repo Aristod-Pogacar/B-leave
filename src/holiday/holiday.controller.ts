@@ -2,11 +2,11 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Render, Req, Res, Us
 import { HolidayService } from './holiday.service';
 import { CreateHolidayDto } from './dto/create-holiday.dto';
 import { UpdateHolidayDto } from './dto/update-holiday.dto';
-import { RolesGuard } from 'src/user/role.guard';
-import { Roles } from 'src/user/role.decorator';
-import { UserRole } from 'src/user/entities/user.entity';
-import { HistoryService } from 'src/history/history.service';
-import { HistoryReason } from 'src/history/entities/history.entity';
+import { RolesGuard } from '../user/role.guard';
+import { Roles } from '../user/role.decorator';
+import { UserRole } from '../user/entities/user.entity';
+import { HistoryService } from '../history/history.service';
+import { HistoryReason } from '../history/entities/history.entity';
 
 @Controller('holiday')
 export class HolidayController {

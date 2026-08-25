@@ -1,16 +1,16 @@
 import { Injectable } from "@nestjs/common";
-import { PuppeteerManagerService } from "src/puppeteer-manager/puppeteer-manager.service";
-import { PuppeteerService } from "src/puppeteer/puppeteer.service";
-import { EmployeeService } from "src/employee/employee.service";
-import { LeaveService } from "src/leave/leave.service";
-import { CryptoService } from "src/crypto/crypto.service";
-import { CreateLeaveDto } from "src/leave/dto/create-leave.dto";
+import { PuppeteerManagerService } from "../puppeteer-manager/puppeteer-manager.service";
+import { PuppeteerService } from "../puppeteer/puppeteer.service";
+import { EmployeeService } from "../employee/employee.service";
+import { LeaveService } from "../leave/leave.service";
+import { CryptoService } from "../crypto/crypto.service";
+import { CreateLeaveDto } from "../leave/dto/create-leave.dto";
 import { Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Employee } from "src/employee/entities/employee.entity";
-import { Leave } from "src/leave/entities/leave.entity";
-import { HistoryService } from "src/history/history.service";
-import { HistoryReason } from "src/history/entities/history.entity";
+import { Employee } from "../employee/entities/employee.entity";
+import { Leave } from "../leave/entities/leave.entity";
+import { HistoryService } from "../history/history.service";
+import { HistoryReason } from "../history/entities/history.entity";
 
 @Injectable()
 export class TaskService {

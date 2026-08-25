@@ -2,9 +2,9 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Render, R
 import { EmployeeHistoryService } from './employee-history.service';
 import { CreateEmployeeHistoryDto } from './dto/create-employee-history.dto';
 import { UpdateEmployeeHistoryDto } from './dto/update-employee-history.dto';
-import { RolesGuard } from 'src/user/role.guard';
-import { Roles } from 'src/user/role.decorator';
-import { UserRole } from 'src/user/entities/user.entity';
+import { RolesGuard } from '../user/role.guard';
+import { Roles } from '../user/role.decorator';
+import { UserRole } from '../user/entities/user.entity';
 
 @Controller('employee-history')
 export class EmployeeHistoryController {

@@ -1,10 +1,10 @@
 import { BadRequestException, Body, Controller, Delete, Param, Post, Res } from '@nestjs/common';
 import type { Response } from 'express';
-import { CryptoService } from 'src/crypto/crypto.service';
-import { EmployeeService } from 'src/employee/employee.service';
-import { CreateLeaveDto } from 'src/leave/dto/create-leave.dto';
-import { LeaveService } from 'src/leave/leave.service';
-import { PuppeteerManagerService } from 'src/puppeteer-manager/puppeteer-manager.service';
+import { CryptoService } from '../crypto/crypto.service';
+import { EmployeeService } from '../employee/employee.service';
+import { CreateLeaveDto } from '../leave/dto/create-leave.dto';
+import { LeaveService } from '../leave/leave.service';
+import { PuppeteerManagerService } from '../puppeteer-manager/puppeteer-manager.service';
 import { PuppeteerService } from './puppeteer.service';
 import * as path from 'path';
 

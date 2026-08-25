@@ -4,7 +4,7 @@ import {
   ExecutionContext,
   NotFoundException,
 } from '@nestjs/common';
-import { UserRole } from 'src/user/entities/user.entity';
+import { UserRole } from '../user/entities/user.entity';
 
 @Injectable()
 export class SuperAdminGuard implements CanActivate {

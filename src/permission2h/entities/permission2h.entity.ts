@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Employee } from "../../employee/entities/employee.entity";
-import { User } from "src/user/entities/user.entity";
-import { LeaveStatus } from "src/leave/entities/leave.entity";
+import { User } from "../../user/entities/user.entity";
+import { LeaveStatus } from "../../leave/entities/leave.entity";
 
 @Entity()
 export class Permission2h {

@@ -2,13 +2,13 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Render, UseGuards, R
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { AuthGuard } from 'src/auth/auth.guard';
+import { AuthGuard } from '../auth/auth.guard';
 import { UserRole, Site, User } from './entities/user.entity';
 import { RolesGuard } from './role.guard';
 import { Roles } from './role.decorator';
-import { AuthService } from 'src/auth/auth.service';
-import { HistoryService } from 'src/history/history.service';
-import { HistoryReason } from 'src/history/entities/history.entity';
+import { AuthService } from '../auth/auth.service';
+import { HistoryService } from '../history/history.service';
+import { HistoryReason } from '../history/entities/history.entity';
 import * as bcrypt from 'bcrypt';
 
 @Controller('user')

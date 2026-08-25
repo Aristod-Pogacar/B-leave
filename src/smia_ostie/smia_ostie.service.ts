@@ -1,16 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Employee } from 'src/employee/entities/employee.entity';
+import { Employee } from '../employee/entities/employee.entity';
 import { Between, Repository } from 'typeorm';
 import { CreateSmiaOstieDto } from './dto/create-smia_ostie.dto';
 import { UpdateSmiaOstieDto } from './dto/update-smia_ostie.dto';
 import { SmiaOstie } from './entities/smia_ostie.entity';
 import { Response } from 'express';
-import { Site, UserRole } from 'src/user/entities/user.entity';
+import { Site, UserRole } from '../user/entities/user.entity';
 import { MailerService } from '@nestjs-modules/mailer';
-import { HistoryReason } from 'src/history/entities/history.entity';
-import { HistoryService } from 'src/history/history.service';
+import { HistoryReason } from '../history/entities/history.entity';
+import { HistoryService } from '../history/history.service';
 const ExcelJS = require('exceljs');
 
 @Injectable()

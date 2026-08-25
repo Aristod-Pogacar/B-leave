@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, IsNull, Not } from 'typeorm';
-import { Employee } from 'src/employee/entities/employee.entity';
+import { Employee } from '../employee/entities/employee.entity';
 
 @Injectable()
 export class FingerprintService {

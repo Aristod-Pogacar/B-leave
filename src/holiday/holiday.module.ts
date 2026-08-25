@@ -3,8 +3,8 @@ import { HolidayService } from './holiday.service';
 import { HolidayController } from './holiday.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Holiday } from './entities/holiday.entity';
-import { HistoryService } from 'src/history/history.service';
-import { History } from 'src/history/entities/history.entity';
+import { HistoryService } from '../history/history.service';
+import { History } from '../history/entities/history.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Holiday, History])],

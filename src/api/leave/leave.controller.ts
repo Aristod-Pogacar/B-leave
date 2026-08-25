@@ -1,10 +1,10 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Res } from '@nestjs/common';
-import { LeaveService } from './leave.service';
-import { CreateLeaveDto } from './dto/create-leave.dto';
-import { UpdateLeaveDto } from './dto/update-leave.dto';
 import type { Response } from 'express';
-import { HistoryService } from 'src/history/history.service';
-import { HistoryReason } from 'src/history/entities/history.entity';
+import { LeaveService } from '../leave/leave.service';
+import { CreateLeaveDto } from '../leave/dto/create-leave.dto';
+import { UpdateLeaveDto } from '../leave/dto/update-leave.dto';
+import { HistoryService } from '../../history/history.service';
+import { HistoryReason } from '../../history/entities/history.entity';
 import { WithdrawLeaveDto } from './dto/with-draw-leave.dto';
 
 @Controller('api/leave')

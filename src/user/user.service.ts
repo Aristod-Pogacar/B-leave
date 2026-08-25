@@ -6,8 +6,8 @@ import { Site, User, UserRole } from './entities/user.entity';
 import { In, Like, Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { Employee } from 'src/employee/entities/employee.entity';
-import { EmployeeService } from 'src/employee/employee.service';
+import { Employee } from '../employee/entities/employee.entity';
+import { EmployeeService } from '../employee/employee.service';
 
 @Injectable()
 export class UserService {

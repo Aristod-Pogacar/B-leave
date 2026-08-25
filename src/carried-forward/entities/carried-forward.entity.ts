@@ -1,5 +1,5 @@
 import { Column, CreateDateColumn, DeleteDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
-import { Employee } from "src/employee/entities/employee.entity";
+import { Employee } from "../../employee/entities/employee.entity";
 
 @Entity()
 export class CarriedForward {

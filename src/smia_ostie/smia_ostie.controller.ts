@@ -3,9 +3,9 @@ import { SmiaOstieService } from './smia_ostie.service';
 import { CreateSmiaOstieDto } from './dto/create-smia_ostie.dto';
 import { UpdateSmiaOstieDto } from './dto/update-smia_ostie.dto';
 import { Response } from 'express';
-import { RolesGuard } from 'src/user/role.guard';
-import { UserRole } from 'src/user/entities/user.entity';
-import { Roles } from 'src/user/role.decorator';
+import { RolesGuard } from '../user/role.guard';
+import { UserRole } from '../user/entities/user.entity';
+import { Roles } from '../user/role.decorator';
 
 @Controller('smia-ostie')
 export class SmiaOstieController {

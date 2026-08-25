@@ -5,13 +5,13 @@ import { EmployeeService } from './employee.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { memoryStorage } from 'multer';
-import { RolesGuard } from 'src/user/role.guard';
-import { Roles } from 'src/user/role.decorator';
-import { Site, User, UserRole } from 'src/user/entities/user.entity';
+import { RolesGuard } from '../user/role.guard';
+import { Roles } from '../user/role.decorator';
+import { Site, User, UserRole } from '../user/entities/user.entity';
 import * as XLSX from 'xlsx';
-import { UserService } from 'src/user/user.service';
-import { HistoryService } from 'src/history/history.service';
-import { HistoryReason } from 'src/history/entities/history.entity';
+import { UserService } from '../user/user.service';
+import { HistoryService } from '../history/history.service';
+import { HistoryReason } from '../history/entities/history.entity';
 import * as bcrypt from 'bcrypt';
 
 @Controller('employee')
@@ -88,7 +88,8 @@ export class EmployeeController {
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   async postEmployeeEdit(@Param('id') id: string, @Body() body: any, @Res() res: any) {
     const managerId = body.managerId;
-    delete body.managerId;
+    console.log("BODY: ", body);
+    // delete body.managerId;
     return await this.employeeService.updateEmployee(id, body, res, managerId);
   }
 

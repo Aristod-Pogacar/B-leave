@@ -320,17 +320,18 @@
                     }
 
                     const data = await res.json();
+                    console.log("DATA:", data);
 
 
                     results.innerHTML = '';
                     data.forEach(manager => {
                         const li = document.createElement('li');
                         li.classList.add('list-group-item');
-                        li.textContent = `${manager.matricule} - ${manager.firstName} ${manager.name}`;
+                        li.textContent = `${manager.employee?.matricule} - ${manager.employee?.firstname} ${manager.employee?.name}`;
                         li.onclick = async () => {
                             input.value = li.textContent;
                             console.log("MANAGER ID:", manager.id);
-                            hiddenInput.value = manager.id;
+                            hiddenInput.value = manager.employee?.id;
                             results.innerHTML = '';
                             skip = 0;
                             hasMore = true;

@@ -4,12 +4,12 @@ import { UpdateWithdrawDto } from './dto/update-withdraw.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Withdraw, WithdrawStatus } from './entities/withdraw.entity';
 import { Repository } from 'typeorm';
-import { LeaveService } from 'src/leave/leave.service';
+import { LeaveService } from '../leave/leave.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { WithdrawRequestEvent } from 'src/notification/events/withdraw-request.event';
-import { Site } from 'src/user/entities/user.entity';
+import { WithdrawRequestEvent } from '../notification/events/withdraw-request.event';
+import { Site } from '../user/entities/user.entity';
 import { ApproveWithDrawDto } from './dto/approve-withdraw.dto';
-import { LeaveStatus } from 'src/leave/entities/leave.entity';
+import { LeaveStatus } from '../leave/entities/leave.entity';
 
 @Injectable()
 export class WithdrawService {

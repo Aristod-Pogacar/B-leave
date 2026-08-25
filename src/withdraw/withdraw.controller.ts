@@ -2,14 +2,14 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Render, R
 import { WithdrawService } from './withdraw.service';
 import { CreateWithdrawDto } from './dto/create-withdraw.dto';
 import { UpdateWithdrawDto } from './dto/update-withdraw.dto';
-import { AuthGuard } from 'src/auth/auth.guard';
-import { RolesGuard } from 'src/user/role.guard';
-import { Roles } from 'src/user/role.decorator';
-import { UserRole } from 'src/user/entities/user.entity';
+import { AuthGuard } from '../auth/auth.guard';
+import { RolesGuard } from '../user/role.guard';
+import { Roles } from '../user/role.decorator';
+import { UserRole } from '../user/entities/user.entity';
 import { ApproveWithDrawDto } from './dto/approve-withdraw.dto';
 import { WithdrawStatus } from './entities/withdraw.entity';
-import { HistoryService } from 'src/history/history.service';
-import { HistoryReason } from 'src/history/entities/history.entity';
+import { HistoryService } from '../history/history.service';
+import { HistoryReason } from '../history/entities/history.entity';
 
 @Controller('withdraw')
 export class WithdrawController {

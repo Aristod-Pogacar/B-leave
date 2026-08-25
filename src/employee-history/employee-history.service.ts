@@ -4,7 +4,7 @@ import { UpdateEmployeeHistoryDto } from './dto/update-employee-history.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EmployeeHistory } from './entities/employee-history.entity';
 import { Repository } from 'typeorm';
-import { Employee } from 'src/employee/entities/employee.entity';
+import { Employee } from '../employee/entities/employee.entity';
 
 @Injectable()
 export class EmployeeHistoryService {

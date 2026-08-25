@@ -3,8 +3,8 @@ import { ManagerAssignationService } from './manager_assignation.service';
 import { ManagerAssignationController } from './manager_assignation.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ManagerAssignation } from './entities/manager_assignation.entity';
-import { Employee } from 'src/employee/entities/employee.entity';
-import { User } from 'src/user/entities/user.entity';
+import { Employee } from '../employee/entities/employee.entity';
+import { User } from '../user/entities/user.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([ManagerAssignation, Employee, User])],

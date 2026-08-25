@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
 import { SmiaOstieService } from './smia_ostie.service';
 import { SmiaOstieController } from './smia_ostie.controller';
-import { Employee } from 'src/employee/entities/employee.entity';
+import { Employee } from '../employee/entities/employee.entity';
 import { SmiaOstie } from './entities/smia_ostie.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { History } from 'src/history/entities/history.entity';
-import { HistoryService } from 'src/history/history.service';
+import { History } from '../history/entities/history.entity';
+import { HistoryService } from '../history/history.service';
 
 @Module({
   imports: [

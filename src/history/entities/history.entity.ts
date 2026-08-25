@@ -1,5 +1,4 @@
-import { Employee } from "src/employee/entities/employee.entity";
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 export enum HistoryReason {
     LEAVE = 'Leave',

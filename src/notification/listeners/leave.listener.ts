@@ -1,19 +1,19 @@
 import { Injectable } from "@nestjs/common";
-import { Leave } from "src/leave/entities/leave.entity";
+import { Leave } from "../../leave/entities/leave.entity";
 import { Repository } from "typeorm";
 import { NotificationService } from "../notification.service";
 import { LeaveCreatedEvent } from "../events/leave-created.event";
 import { OnEvent } from "@nestjs/event-emitter";
 import { InjectRepository } from "@nestjs/typeorm";
 import { LeaveApproveEvent } from "../events/leave-approve.event";
-import { UserService } from "src/user/user.service";
+import { UserService } from "../../user/user.service";
 import { Permission2hCreatedEvent } from "../events/permission-created.event";
-import { Permission2hService } from "src/permission2h/permission2h.service";
+import { Permission2hService } from "../../permission2h/permission2h.service";
 import { WithdrawApprovedEvent, WithdrawRequestEvent } from "../events/withdraw-request.event";
-import { WithdrawService } from "src/withdraw/withdraw.service";
-import { Site, UserRole } from "src/user/entities/user.entity";
+import { WithdrawService } from "../../withdraw/withdraw.service";
+import { Site, UserRole } from "../../user/entities/user.entity";
 import { ConsultationCreatedEvent, MedicalServiceCreatedEvent } from "../events/medical-service.event";
-import { SmiaOstieService } from "src/smia_ostie/smia_ostie.service";
+import { SmiaOstieService } from "../../smia_ostie/smia_ostie.service";
 
 @Injectable()
 export class LeaveListener {

@@ -2,22 +2,22 @@ import { Module } from '@nestjs/common';
 import { LeaveService } from './leave.service';
 import { LeaveController } from './leave.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Leave } from 'src/leave/entities/leave.entity';
-import { Employee } from 'src/employee/entities/employee.entity';
-import { CryptoService } from 'src/crypto/crypto.service';
+import { Leave } from '../../leave/entities/leave.entity';
+import { Employee } from '../../employee/entities/employee.entity';
+import { CryptoService } from '../../crypto/crypto.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MailerModule } from '@nestjs-modules/mailer';
-import { History } from 'src/history/entities/history.entity';
-import { HistoryService } from 'src/history/history.service';
-import { EmployeeService } from 'src/employee/employee.service';
-import { UserService } from 'src/user/user.service';
-import { User } from 'src/user/entities/user.entity';
+import { History } from '../../history/entities/history.entity';
+import { HistoryService } from '../../history/history.service';
+import { EmployeeService } from '../../employee/employee.service';
+import { UserService } from '../../user/user.service';
+import { User } from '../../user/entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
-import { EmployeeHistory } from 'src/employee-history/entities/employee-history.entity';
-import { EmployeeHistoryService } from 'src/employee-history/employee-history.service';
-import { Holiday } from 'src/holiday/entities/holiday.entity';
-import { HolidayService } from 'src/holiday/holiday.service';
-import { CarriedForward } from 'src/carried-forward/entities/carried-forward.entity';
+import { EmployeeHistory } from '../../employee-history/entities/employee-history.entity';
+import { EmployeeHistoryService } from '../../employee-history/employee-history.service';
+import { Holiday } from '../../holiday/entities/holiday.entity';
+import { HolidayService } from '../../holiday/holiday.service';
+import { CarriedForward } from '../../carried-forward/entities/carried-forward.entity';
 
 @Module({
   imports: [

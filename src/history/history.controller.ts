@@ -2,9 +2,9 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Render, Req, UseGuar
 import { HistoryService } from './history.service';
 import { CreateHistoryDto } from './dto/create-history.dto';
 import { UpdateHistoryDto } from './dto/update-history.dto';
-import { RolesGuard } from 'src/user/role.guard';
-import { Roles } from 'src/user/role.decorator';
-import { UserRole } from 'src/user/entities/user.entity';
+import { RolesGuard } from '../user/role.guard';
+import { Roles } from '../user/role.decorator';
+import { UserRole } from '../user/entities/user.entity';
 
 @Controller('history')
 export class HistoryController {

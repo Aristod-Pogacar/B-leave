@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Site, User, UserRole } from 'src/user/entities/user.entity';
+import { Site, User, UserRole } from '../user/entities/user.entity';
 import { Not, Repository } from 'typeorm';
-import { MailService } from 'src/mail/mail.service';
+import { MailService } from '../mail/mail.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 

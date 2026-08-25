@@ -3,20 +3,18 @@ import { LeaveService } from './leave.service';
 import { CreateLeaveDto } from './dto/create-leave.dto';
 import { UpdateLeaveDto } from './dto/update-leave.dto';
 import * as express from 'express';
-import { EmployeeService } from 'src/employee/employee.service';
-import { SuperAdminGuard } from 'src/superadmin/superadmin.guard';
-import { RolesGuard } from 'src/user/role.guard';
-import { Roles } from 'src/user/role.decorator';
-import { UserRole, Site } from 'src/user/entities/user.entity';
+import { EmployeeService } from '../employee/employee.service';
+import { RolesGuard } from '../user/role.guard';
+import { Roles } from '../user/role.decorator';
+import { UserRole, Site } from '../user/entities/user.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
-import { HistoryService } from 'src/history/history.service';
-import { HistoryReason } from 'src/history/entities/history.entity';
-import { TaskService } from 'src/task/task.service';
+import { HistoryService } from '../history/history.service';
+import { HistoryReason } from '../history/entities/history.entity';
+import { TaskService } from '../task/task.service';
 import { LeaveStatus } from './entities/leave.entity';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { LeaveApproveEvent } from 'src/notification/events/leave-approve.event';
-import { WithdrawLeaveDto } from '../api/leave/dto/with-draw-leave.dto';
+import { LeaveApproveEvent } from '../notification/events/leave-approve.event';
 
 @Controller('leave')
 export class LeaveController {

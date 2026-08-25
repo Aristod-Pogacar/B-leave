@@ -6,16 +6,16 @@ import { Employee } from './entities/employee.entity';
 import { Between, In, IsNull, LessThanOrEqual, Like, MoreThanOrEqual, Not, Repository } from 'typeorm';
 import * as ExcelJS from 'exceljs';
 import * as XLSX from 'xlsx';
-import { Leave, LeaveStatus } from 'src/leave/entities/leave.entity';
-import { Site, User, UserRole } from 'src/user/entities/user.entity';
+import { Leave, LeaveStatus } from '../leave/entities/leave.entity';
+import { Site, User, UserRole } from '../user/entities/user.entity';
 import * as bcrypt from 'bcrypt';
-import { CryptoService } from 'src/crypto/crypto.service';
+import { CryptoService } from '../crypto/crypto.service';
 import { CompareAdminDto } from './dto/compare-admin.dto';
-import { HistoryService } from 'src/history/history.service';
-import { HistoryReason } from 'src/history/entities/history.entity';
-import { EmployeeHistory } from 'src/employee-history/entities/employee-history.entity';
-import { HolidayService } from 'src/holiday/holiday.service';
-import { CarriedForward } from 'src/carried-forward/entities/carried-forward.entity';
+import { HistoryService } from '../history/history.service';
+import { HistoryReason } from '../history/entities/history.entity';
+import { EmployeeHistory } from '../employee-history/entities/employee-history.entity';
+import { HolidayService } from '../holiday/holiday.service';
+import { CarriedForward } from '../carried-forward/entities/carried-forward.entity';
 
 @Injectable()
 export class EmployeeService {
@@ -1035,22 +1035,24 @@ export class EmployeeService {
   }
 
   async updateEmployee(id: string, updateEmployeeDto: UpdateEmployeeDto, res: any, managerId: string) {
+    delete updateEmployeeDto.managerId;
+    console.log(updateEmployeeDto);
     try {
-
       const employee = await this.employeeRepository.findOne({ where: { id } });
       if (!employee) {
         return res.status(404).redirect('/employee/edit/' + id + '?error=Employee not found');
       }
-      const manager = await this.userRepository.findOne({ where: { id: managerId } });
-      if (!manager && managerId !== '') {
-        return res.status(404).redirect('/employee/edit/' + id + '?error=Manager not found');
-      } else if (managerId === '' || manager == null) {
+      const manager = await this.userRepository.findOne({ where: { employee: { id: managerId } } });
+      if (!manager && managerId !== '') return res.status(404).redirect('/employee/edit/' + id + '?error=Manager not found');
+      if (managerId === '' || manager == null) {
         await this.employeeRepository.update(id, { ...updateEmployeeDto });
       } else {
-        await this.employeeRepository.update(id, { ...updateEmployeeDto, manager: manager });
+        const m = await this.employeeRepository.findOne({ where: { id: managerId } });
+        await this.employeeRepository.update(id, { ...updateEmployeeDto, manager: m });
       }
       return res.redirect('/employee/details/' + id);
     } catch (error) {
+      console.log(error)
       return res.status(500).redirect('/employee/edit/' + id + '?error=' + error.message);
     }
     // return res.status(200).redirect('/employee/list?message=Employee updated successfully');

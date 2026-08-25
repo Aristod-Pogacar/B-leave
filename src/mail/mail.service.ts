@@ -10,7 +10,7 @@ export class MailService {
             service: 'gmail',
             auth: {
                 user: 'stagedp@aquarabe.mg',
-                pass: 'Pass1234$'
+                pass: 'Pass$1234'
             }
         });
     }

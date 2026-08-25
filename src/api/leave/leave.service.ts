@@ -4,14 +4,13 @@ import { UpdateLeaveDto } from './dto/update-leave.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Response } from 'express';
 import { Between, In, Repository } from 'typeorm';
-import { Employee } from 'src/employee/entities/employee.entity';
-import { Leave, LeaveStatus, WithdrawStatus } from 'src/leave/entities/leave.entity';
+import { Employee } from '../../employee/entities/employee.entity';
+import { Leave, LeaveStatus, WithdrawStatus } from '../../leave/entities/leave.entity';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
-import { EmployeeService } from 'src/employee/employee.service';
+import { EmployeeService } from '../../employee/employee.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { LeaveCreatedEvent } from 'src/notification/events/leave-created.event';
-import { WithdrawLeaveDto } from './dto/with-draw-leave.dto';
+import { LeaveCreatedEvent } from '../../notification/events/leave-created.event';
 
 @Injectable()
 export class LeaveService {

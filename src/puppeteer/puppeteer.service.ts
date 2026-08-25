@@ -2,13 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Page } from "puppeteer";
-import { Employee } from 'src/employee/entities/employee.entity';
-import { setDate } from 'src/function/function';
-import { CreateLeaveDto } from 'src/leave/dto/create-leave.dto';
-import { Leave } from 'src/leave/entities/leave.entity';
-// import * as puppeteer from 'puppeteer';
-import { Response } from 'express';
-import { PuppeteerManagerService } from 'src/puppeteer-manager/puppeteer-manager.service';
+import { Employee } from '../employee/entities/employee.entity';
+import { setDate } from '../function/function';
+import { CreateLeaveDto } from '../leave/dto/create-leave.dto';
+import { Leave } from '../leave/entities/leave.entity';
+import { PuppeteerManagerService } from '../puppeteer-manager/puppeteer-manager.service';
 import { Repository } from 'typeorm';
 import * as path from 'path';
 

@@ -3,13 +3,13 @@ import { Permission2hService } from './permission2h.service';
 import { CreatePermission2hDto } from './dto/create-permission2h.dto';
 import { UpdatePermission2hDto } from './dto/update-permission2h.dto';
 import type { Response } from 'express';
-import { Roles } from 'src/user/role.decorator';
-import { Site, UserRole } from 'src/user/entities/user.entity';
-import { RolesGuard } from 'src/user/role.guard';
-import { HistoryReason } from 'src/history/entities/history.entity';
-import { HistoryService } from 'src/history/history.service';
+import { Roles } from '../user/role.decorator';
+import { Site, UserRole } from '../user/entities/user.entity';
+import { RolesGuard } from '../user/role.guard';
+import { HistoryReason } from '../history/entities/history.entity';
+import { HistoryService } from '../history/history.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Permission2hCreatedEvent } from 'src/notification/events/permission-created.event';
+import { Permission2hCreatedEvent } from '../notification/events/permission-created.event';
 
 @Controller('permission2h')
 export class Permission2hController {

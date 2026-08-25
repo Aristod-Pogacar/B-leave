@@ -1,7 +1,7 @@
-import { Employee } from 'src/employee/entities/employee.entity';
-import { Leave } from 'src/leave/entities/leave.entity';
-import { ManagerAssignation } from 'src/manager_assignation/entities/manager_assignation.entity';
-import { Withdraw } from 'src/withdraw/entities/withdraw.entity';
+import { Employee } from '../../employee/entities/employee.entity';
+import { Leave } from '../../leave/entities/leave.entity';
+import { ManagerAssignation } from '../../manager_assignation/entities/manager_assignation.entity';
+import { Withdraw } from '../../withdraw/entities/withdraw.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, OneToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 export enum UserRole {

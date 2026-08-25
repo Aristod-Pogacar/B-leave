@@ -3,22 +3,22 @@ import { EmployeeHistoryService } from './employee-history.service';
 import { EmployeeHistoryController } from './employee-history.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EmployeeHistory } from './entities/employee-history.entity';
-import { Employee } from 'src/employee/entities/employee.entity';
-import { EmployeeService } from 'src/employee/employee.service';
-import { Leave } from 'src/leave/entities/leave.entity';
-import { ManagerAssignation } from 'src/manager_assignation/entities/manager_assignation.entity';
-import { User } from 'src/user/entities/user.entity';
-import { History } from 'src/history/entities/history.entity';
-import { Permission2h } from 'src/permission2h/entities/permission2h.entity';
-import { SmiaOstie } from 'src/smia_ostie/entities/smia_ostie.entity';
-import { HistoryService } from 'src/history/history.service';
-import { CryptoService } from 'src/crypto/crypto.service';
+import { Employee } from '../employee/entities/employee.entity';
+import { EmployeeService } from '../employee/employee.service';
+import { Leave } from '../leave/entities/leave.entity';
+import { ManagerAssignation } from '../manager_assignation/entities/manager_assignation.entity';
+import { User } from '../user/entities/user.entity';
+import { History } from '../history/entities/history.entity';
+import { Permission2h } from '../permission2h/entities/permission2h.entity';
+import { SmiaOstie } from '../smia_ostie/entities/smia_ostie.entity';
+import { HistoryService } from '../history/history.service';
+import { CryptoService } from '../crypto/crypto.service';
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from 'src/user/user.service';
-import { Holiday } from 'src/holiday/entities/holiday.entity';
-import { HolidayService } from 'src/holiday/holiday.service';
-import { CarriedForward } from 'src/carried-forward/entities/carried-forward.entity';
-import { CarriedForwardService } from 'src/carried-forward/carried-forward.service';
+import { UserService } from '../user/user.service';
+import { Holiday } from '../holiday/entities/holiday.entity';
+import { HolidayService } from '../holiday/holiday.service';
+import { CarriedForward } from '../carried-forward/entities/carried-forward.entity';
+import { CarriedForwardService } from '../carried-forward/carried-forward.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Leave, Employee, ManagerAssignation, User, History, Permission2h, SmiaOstie, EmployeeHistory, Holiday, CarriedForward])],

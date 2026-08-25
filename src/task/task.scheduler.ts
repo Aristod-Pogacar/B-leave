@@ -2,10 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { Cron, CronExpression, Interval } from '@nestjs/schedule';
 import { TaskService } from './task.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Employee } from 'src/employee/entities/employee.entity';
+import { Employee } from '../employee/entities/employee.entity';
 import { Repository } from 'typeorm';
-import { Leave } from 'src/leave/entities/leave.entity';
-import { LeaveService } from 'src/leave/leave.service';
+import { Leave } from '../leave/entities/leave.entity';
+import { LeaveService } from '../leave/leave.service';
 
 @Injectable()
 export class TaskScheduler {

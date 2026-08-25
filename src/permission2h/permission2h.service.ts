@@ -4,18 +4,18 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Like, Repository } from 'typeorm';
 import { CreatePermission2hDto } from './dto/create-permission2h.dto';
 import { UpdatePermission2hDto } from './dto/update-permission2h.dto';
-import { Employee } from 'src/employee/entities/employee.entity';
+import { Employee } from '../employee/entities/employee.entity';
 import { Between } from 'typeorm';
 import { Response } from 'express';
 
 import * as nodemailer from 'nodemailer';
-import { UserService } from 'src/user/user.service';
+import { UserService } from '../user/user.service';
 import { ConfigService } from '@nestjs/config';
-import { UserRole } from 'src/user/entities/user.entity';
-import { LeaveStatus } from 'src/leave/entities/leave.entity';
+import { UserRole } from '../user/entities/user.entity';
+import { LeaveStatus } from '../leave/entities/leave.entity';
 import { MailerService } from '@nestjs-modules/mailer';
-import { HistoryService } from 'src/history/history.service';
-import { HistoryReason } from 'src/history/entities/history.entity';
+import { HistoryService } from '../history/history.service';
+import { HistoryReason } from '../history/entities/history.entity';
 
 const ExcelJS = require('exceljs');
 

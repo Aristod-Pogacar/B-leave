@@ -4,23 +4,23 @@ import { UpdateLeaveDto } from './dto/update-leave.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Leave, LeaveStatus, WithdrawStatus } from './entities/leave.entity';
 import { Between, In, IsNull, LessThanOrEqual, Like, MoreThanOrEqual, Not, Repository } from 'typeorm';
-import { Employee } from 'src/employee/entities/employee.entity';
+import { Employee } from '../employee/entities/employee.entity';
 import * as express from 'express';
 import * as ExcelJS from 'exceljs';
 import * as XLSX from 'xlsx';
-import { Site, User, UserRole } from 'src/user/entities/user.entity';
-import { EmployeeService } from 'src/employee/employee.service';
+import { Site, User, UserRole } from '../user/entities/user.entity';
+import { EmployeeService } from '../employee/employee.service';
 import * as nodemailer from 'nodemailer';
 import { ConfigService } from '@nestjs/config';
 import { MailerService } from '@nestjs-modules/mailer';
-import { HistoryReason } from 'src/history/entities/history.entity';
-import { HistoryService } from 'src/history/history.service';
-import { Permission2h } from 'src/permission2h/entities/permission2h.entity';
-import { SmiaOstie } from 'src/smia_ostie/entities/smia_ostie.entity';
+import { HistoryReason } from '../history/entities/history.entity';
+import { HistoryService } from '../history/history.service';
+import { Permission2h } from '../permission2h/entities/permission2h.entity';
+import { SmiaOstie } from '../smia_ostie/entities/smia_ostie.entity';
 import { WithdrawLeaveDto } from '../api/leave/dto/with-draw-leave.dto';
-import { CarriedForwardService } from 'src/carried-forward/carried-forward.service';
-import { CarriedForward } from 'src/carried-forward/entities/carried-forward.entity';
-import { HolidayService } from 'src/holiday/holiday.service';
+import { CarriedForwardService } from '../carried-forward/carried-forward.service';
+import { CarriedForward } from '../carried-forward/entities/carried-forward.entity';
+import { HolidayService } from '../holiday/holiday.service';
 
 @Injectable()
 export class LeaveService {
