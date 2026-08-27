@@ -84,7 +84,7 @@ exports.AppModule = AppModule = __decorate([
                 loader: nestjs_i18n_1.I18nJsonLoader,
                 loaderOptions: {
                     path: path_1.default.join(__dirname, '/i18n/'),
-                    watch: true,
+                    watch: false,
                 },
                 resolvers: [
                     { use: nestjs_i18n_1.QueryResolver, options: ['lang'] },

@@ -11,22 +11,28 @@ const platform_ws_1 = require("@nestjs/platform-ws");
 const express_session_1 = __importDefault(require("express-session"));
 const not_found_filter_1 = require("./not-found.filter");
 exports.default = async (req, res) => {
-    const app = await core_1.NestFactory.create(app_module_1.AppModule);
-    app.setBaseViewsDir((0, path_1.join)(process.cwd(), 'views'));
-    app.setViewEngine('ejs');
-    app.useStaticAssets((0, path_1.join)(process.cwd(), 'public'));
-    app.useGlobalPipes(new common_1.ValidationPipe({ transform: true }));
-    app.use((0, express_session_1.default)({ secret: 'ajdgreyfgcgajycbjeugyfghktehnfugbqkclqhfgyekfsfvbqjbxkqgefrkbgk', resave: false, saveUninitialized: false }));
-    app.useGlobalFilters(new not_found_filter_1.NotFoundFilter());
-    app.useWebSocketAdapter(new platform_ws_1.WsAdapter(app));
-    app.use((req, res, next) => {
-        if (res.locals.user)
-            res.locals.user = req.session.user;
-        next();
-    });
-    app.enableCors({ origin: '*', methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], credentials: true });
-    await app.init();
-    const expressApp = app.getHttpAdapter().getInstance();
-    return expressApp(req, res);
+    try {
+        const app = await core_1.NestFactory.create(app_module_1.AppModule);
+        app.setBaseViewsDir((0, path_1.join)(__dirname, '..', 'views'));
+        app.setViewEngine('ejs');
+        app.useStaticAssets((0, path_1.join)(__dirname, '..', 'public'));
+        app.useGlobalPipes(new common_1.ValidationPipe({ transform: true }));
+        app.use((0, express_session_1.default)({ secret: 'ajdgreyfgcgajycbjeugyfghktehnfugbqkclqhfgyekfsfvbqjbxkqgefrkbgk', resave: false, saveUninitialized: false }));
+        app.useGlobalFilters(new not_found_filter_1.NotFoundFilter());
+        app.useWebSocketAdapter(new platform_ws_1.WsAdapter(app));
+        app.use((req, res, next) => {
+            if (res.locals.user)
+                res.locals.user = req.session.user;
+            next();
+        });
+        app.enableCors({ origin: '*', methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], credentials: true });
+        await app.init();
+        const expressApp = app.getHttpAdapter().getInstance();
+        return expressApp(req, res);
+    }
+    catch (err) {
+        console.error('VERCEL_ENTRY_ERROR', err);
+        res.status(500).json({ statusCode: 500, message: 'Internal server error', error: err.message });
+    }
 };
 //# sourceMappingURL=vercel-entry.js.map
