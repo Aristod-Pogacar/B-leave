@@ -10,9 +10,9 @@ import { WsAdapter } from '@nestjs/platform-ws';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  app.setBaseViewsDir(join(__dirname, '..', 'views'));
+  app.setBaseViewsDir(join(process.cwd(), 'views'));
   app.setViewEngine('ejs');
-  app.useStaticAssets(join(__dirname, '..', 'public'));
+  app.useStaticAssets(join(process.cwd(), 'public'));
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -60,9 +60,13 @@ async function bootstrap() {
   });
   const port = process.env.PORT ?? 4000;
 
-  await app.listen(port, '0.0.0.0');
-
-  console.log(`Server running at ${await app.getUrl()}`);
+  if (!process.env.VERCEL) {
+    await app.listen(port, '0.0.0.0');
+    console.log(`Server running at ${await app.getUrl()}`);
+  } else {
+    await app.init();
+  }
 }
+
 bootstrap();
 
