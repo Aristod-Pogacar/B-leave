@@ -1,0 +1,31 @@
+import { Leave } from "../../leave/entities/leave.entity";
+import { Repository } from "typeorm";
+import { NotificationService } from "../notification.service";
+import { LeaveCreatedEvent } from "../events/leave-created.event";
+import { LeaveApproveEvent } from "../events/leave-approve.event";
+import { UserService } from "../../user/user.service";
+import { Permission2hCreatedEvent } from "../events/permission-created.event";
+import { Permission2hService } from "../../permission2h/permission2h.service";
+import { WithdrawApprovedEvent, WithdrawRequestEvent } from "../events/withdraw-request.event";
+import { WithdrawService } from "../../withdraw/withdraw.service";
+import { ConsultationCreatedEvent } from "../events/medical-service.event";
+import { SmiaOstieService } from "../../smia_ostie/smia_ostie.service";
+export declare class LeaveListener {
+    private readonly leaveRepository;
+    private readonly notificationService;
+    private readonly userService;
+    private readonly permission2hService;
+    private readonly withdrawService;
+    private readonly medicalService;
+    constructor(leaveRepository: Repository<Leave>, notificationService: NotificationService, userService: UserService, permission2hService: Permission2hService, withdrawService: WithdrawService, medicalService: SmiaOstieService);
+    handleLeaveCreated(event: LeaveCreatedEvent): Promise<void>;
+    handleLeaveApprove(event: LeaveApproveEvent): Promise<void>;
+    handlePermissionApproved(event: LeaveApproveEvent): Promise<void>;
+    handlePermission2hApproved(event: Permission2hCreatedEvent): Promise<void>;
+    handlePermission2hCreated(event: Permission2hCreatedEvent): Promise<void>;
+    handleWithdrawRequestCreated(event: WithdrawRequestEvent): Promise<void>;
+    handleWithdrawApproved(event: WithdrawApprovedEvent): Promise<void>;
+    handleWithdrawRejected(event: WithdrawApprovedEvent): Promise<void>;
+    handleWithdrawSentOnehr(event: WithdrawRequestEvent): Promise<void>;
+    handleConsultationCreated(event: ConsultationCreatedEvent): Promise<void>;
+}
