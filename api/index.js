@@ -38,7 +38,9 @@ exports.default = async (req, res) => {
     }
     catch (err) {
         console.error('VERCEL_ENTRY_ERROR', err);
-        res.status(500).json({ statusCode: 500, message: 'Internal server error', error: err.message });
+        const message = err instanceof Error ? err.message : String(err);
+        const stack = err instanceof Error ? err.stack : undefined;
+        res.status(500).json({ statusCode: 500, message: 'Internal server error', error: message, stack });
     }
 };
 //# sourceMappingURL=vercel-entry.js.map
