@@ -9,9 +9,9 @@ import { NotFoundFilter } from './not-found.filter';
 
 export default async (req, res) => {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  app.setBaseViewsDir(join(process.cwd(), 'views'));
+  app.setBaseViewsDir(join(__dirname, '..', 'views'));
   app.setViewEngine('ejs');
-  app.useStaticAssets(join(process.cwd(), 'public'));
+  app.useStaticAssets(join(__dirname, '..', 'public'));
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.use(session({ secret: 'ajdgreyfgcgajycbjeugyfghktehnfugbqkclqhfgyekfsfvbqjbxkqgefrkbgk', resave: false, saveUninitialized: false }));
   app.useGlobalFilters(new NotFoundFilter());

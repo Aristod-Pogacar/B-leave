@@ -19,7 +19,6 @@ let content = fs.readFileSync(srcFile, 'utf8');
 const replacements = [
   { from: /require\("\.\/app\.module"\)/g, to: 'require("../dist/app.module")' },
   { from: /require\("\.\/not-found\.filter"\)/g, to: 'require("../dist/not-found.filter")' },
-  { from: /process\.cwd\(\)/g, to: JSON.stringify(__dirname) },
 ];
 
 for (const { from, to } of replacements) {
