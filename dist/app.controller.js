@@ -61,6 +61,7 @@ let AppController = class AppController {
         return [userSite];
     }
     async getHello(i18n, req) {
+        console.error('GET_HELLO: session=', !!req.session, 'user=', JSON.stringify(req.session?.user));
         const date = new Date();
         const activeEmployees = await this.employeeService.getActiveEmployeesNotOnLeave(date);
         const onLeaveEmployees = await this.employeeService.getEmployeesOnLeave(date);
@@ -103,6 +104,7 @@ let AppController = class AppController {
         return { t: (key) => i18n.t(key), title: 'Dashboard', activeEmployees, onLeaveEmployees, totalEmployees, diff, status, currentRate, lastRate, variation, ongoingLeaves, approvedLeaves, totalLeaves, approvalRate, pendingLeaves, totalLeaves2, pendingRate, monthlyStats, leaveTypes, leaveStatus, managerStats, sectionStats, medicalStats, medicalByManagerStats, userStats, departementList, divisionList, sectionList, lineList, KEYS, allowedSites, employeesBySection, absenceRateBySection, monthlyGlobalAbsenceRate, ongoingLeavesBySection, pendingLeavesBySection };
     }
     async getLogin(i18n, req, res) {
+        console.error('GET_LOGIN: session=', !!req.session, 'user=', JSON.stringify(req.session?.user));
         if (req.session.user) {
             return res.redirect('/');
         }

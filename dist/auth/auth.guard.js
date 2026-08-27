@@ -13,6 +13,7 @@ let AuthGuard = class AuthGuard {
         const request = context.switchToHttp().getRequest();
         const response = context.switchToHttp().getResponse();
         const user = request.session?.user;
+        console.error('AUTH_GUARD: session exists=', !!request.session, 'user exists=', !!user, 'user=', JSON.stringify(user));
         if (!user) {
             return response.redirect('/login');
         }
