@@ -67,8 +67,7 @@ import { CarriedForwardService } from './carried-forward/carried-forward.service
       loader: I18nJsonLoader,
       loaderOptions: {
         path: path.join(__dirname, '/i18n/'),
-        // path: path.join(__dirname, '/i18n/'),
-        watch: true,
+        watch: false,
       },
       resolvers: [
         { use: QueryResolver, options: ['lang'] },
