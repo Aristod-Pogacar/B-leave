@@ -1,0 +1,1 @@
+{"version":3,"file":"fortest.gateway.js","sourceRoot":"","sources":["../../src/fortest/fortest.gateway.ts"],"names":[],"mappings":";;;;;;;;;;;;AAAA,mDAAwE;AAGjE,IAAM,cAAc,GAApB,MAAM,cAAc;IAEzB,aAAa,CAAC,MAAW,EAAE,OAAY;QACrC,OAAO,cAAc,CAAC;IACxB,CAAC;CACF,CAAA;AALY,wCAAc;AAEzB;IADC,IAAA,6BAAgB,EAAC,SAAS,CAAC;;;;mDAG3B;yBAJU,cAAc;IAD1B,IAAA,6BAAgB,GAAE;GACN,cAAc,CAK1B"}

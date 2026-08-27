@@ -1,0 +1,37 @@
+import { EmployeeHistory } from '../../employee-history/entities/employee-history.entity';
+import { Leave } from '../../leave/entities/leave.entity';
+import { Permission2h } from '../../permission2h/entities/permission2h.entity';
+import { SmiaOstie } from '../../smia_ostie/entities/smia_ostie.entity';
+import { User } from '../../user/entities/user.entity';
+import { CarriedForward } from '../../carried-forward/entities/carried-forward.entity';
+export declare class Employee {
+    id: string;
+    departement: string;
+    section: string;
+    line: string;
+    matricule: string;
+    gender: string;
+    DOE: Date;
+    DOR?: Date | null;
+    division: string;
+    name: string;
+    firstname?: string;
+    job_level: string;
+    designation: string;
+    site: string;
+    type: string;
+    is_deleted: boolean;
+    is_active: boolean;
+    leaves: Leave[];
+    permission2h: Permission2h[];
+    smia_ostie: SmiaOstie[];
+    manager?: Employee | null;
+    app_password: string;
+    onehr_password: string;
+    histories: EmployeeHistory[];
+    fingerprintId?: number | null;
+    deviceId?: string | null;
+    user?: User;
+    subordinates: Employee[];
+    carriedForwards: CarriedForward[];
+}
