@@ -4,7 +4,11 @@
   "framework": null,
   "functions": {
     "api/index.js": {
-      "includeFiles": "../dist/**/*"
+      "includeFiles": [
+        "../dist/**/*",
+        "../views/**/*",
+        "../public/**/*"
+      ]
     }
   },
   "rewrites": [
