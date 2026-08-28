@@ -1,4 +1,4 @@
-import { PartialType } from '@nestjs/mapped-types';
+import { PartialType } from '../../common/partial-type';
 import { CreateLeaveDto } from './create-leave.dto';
 import { IsDate, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 

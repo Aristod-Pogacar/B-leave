@@ -1,4 +1,4 @@
-import { PartialType } from '@nestjs/mapped-types';
+import { PartialType } from '../../common/partial-type';
 import { CreateSmiaOstieDto } from './create-smia_ostie.dto';
 import { IsOptional, IsString, IsDateString } from 'class-validator';
 

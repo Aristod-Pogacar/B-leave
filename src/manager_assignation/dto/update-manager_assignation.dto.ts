@@ -1,4 +1,4 @@
-import { PartialType } from '@nestjs/mapped-types';
+import { PartialType } from '../../common/partial-type';
 import { CreateManagerAssignationDto } from './create-manager_assignation.dto';
 import { IsString } from 'class-validator';
 

@@ -1,4 +1,4 @@
-import { PartialType } from '@nestjs/mapped-types';
+import { PartialType } from '../../common/partial-type';
 import { CreateMedicalServiceDto } from './create-medical_service.dto';
 import { IsString } from 'class-validator';
 

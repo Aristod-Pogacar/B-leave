@@ -1,4 +1,4 @@
-import { PartialType } from '@nestjs/mapped-types';
+import { PartialType } from '../../common/partial-type';
 import { CreatePermission2hDto } from './create-permission2h.dto';
 import { IsOptional, IsString } from 'class-validator';
 

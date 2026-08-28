@@ -1,4 +1,4 @@
-import { PartialType } from '@nestjs/mapped-types';
+import { PartialType } from '../../common/partial-type';
 import { CreateEmployeeDto } from './create-employee.dto';
 import { IsDate, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
