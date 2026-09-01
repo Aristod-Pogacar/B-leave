@@ -177,31 +177,54 @@ export class LeaveListener {
     @OnEvent('permission2h.created')
     async handlePermission2hCreated(event: Permission2hCreatedEvent) {
 
+        console.log("PERMISSION 2H EVENT:", event);
+
         const permission = await this.permission2hService.findOne(event.permissionId);
-        if (!permission)
-            return;
 
-        const employeeManager = permission.employee.manager;
-        if (!employeeManager)
-            return;
+        console.log("PERMISSION 2H CREATED:", permission);
 
-        const employeeAccount = await this.userService.findOneByMatricule(employeeManager.matricule);
-        if (!employeeAccount)
-            return;
+        const employeeManager = permission?.employee?.manager;
+        if (employeeManager) {
+            const employeeAccount = await this.userService.findOneByMatricule(employeeManager.matricule);
+            if (employeeAccount) {
+                await this.notificationService.create({
+                    recipient: employeeAccount,
+                    title: "New 2h permission request",
+                    message: `${permission?.employee?.matricule} requested a 2h permission.`,
+                    url: `/permission2h/approuve-permission-2h`,
+                });
+            }
+        }
 
-        await this.notificationService.create({
+        const hr_leadUsers = await this.userService.findUsersByRole(UserRole.HR_LEAD, permission?.employee?.site as Site);
+        for (const manager of hr_leadUsers) {
+            await this.notificationService.create({
+                recipient: manager,
+                title: "New 2h permission request",
+                message: `${permission?.employee?.matricule} requested a 2h permission.`,
+                url: `/permission2h/approuve-permission-2h`,
+            });
+        }
 
-            recipient: employeeAccount,
+        const adminUsers = await this.userService.findUsersByRole(UserRole.ADMIN, permission?.employee?.site as Site);
+        for (const manager of adminUsers) {
+            await this.notificationService.create({
+                recipient: manager,
+                title: "New 2h permission request",
+                message: `${permission?.employee?.matricule} requested a 2h permission.`,
+                url: `/permission2h/approuve-permission-2h`,
+            });
+        }
 
-            title: "New 2h permission request",
-
-            message:
-                `${permission.employee?.matricule} requested a 2h permission.`,
-
-            url: `/permission2h/approuve-permission-2h`,
-
-        });
-
+        const productionManager = await this.userService.findUsersByRole(UserRole.PRODUCTION_MANAGER, permission?.employee?.site as Site);
+        for (const manager of productionManager) {
+            await this.notificationService.create({
+                recipient: manager,
+                title: "New 2h permission request",
+                message: `${permission?.employee?.matricule} requested a 2h permission.`,
+                url: `/permission2h/approuve-permission-2h`,
+            });
+        }
     }
 
     @OnEvent('withdraw.request.created')

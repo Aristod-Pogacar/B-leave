@@ -12,7 +12,7 @@ export class EmployeeHistoryController {
 
   @Get('get-employee-history/:employeeId')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.HR_LEAD)
+  @Roles(UserRole.SUPERADMIN, UserRole.HR_LEAD, UserRole.PRODUCTION_MANAGER)
   @Render('history')
   async getEmployeeHistory(@Req() req, @Param('employeeId') employeeId: string, @Res() res) {
     const data = await this.employeeHistoryService.employeeHistory(employeeId);
@@ -51,7 +51,7 @@ export class EmployeeHistoryController {
 
   @Get('archives')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.HR_LEAD)
+  @Roles(UserRole.SUPERADMIN, UserRole.HR_LEAD, UserRole.PRODUCTION_MANAGER)
   @Render('archive')
   async archives(
     @Req() req,

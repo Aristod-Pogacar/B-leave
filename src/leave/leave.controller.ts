@@ -57,7 +57,7 @@ export class LeaveController {
 
   @Get('leave-history')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER, UserRole.HR_LEAD)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER, UserRole.HR_LEAD, UserRole.PRODUCTION_MANAGER)
   @Render('leave-history')
   async leaveHistory(@Query() query: any, @Req() req: any) {
     const error = req.query.error;
@@ -67,7 +67,7 @@ export class LeaveController {
 
   @Get('permissions')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.HR_LEAD, UserRole.ADMIN, UserRole.PAYROLL)
+  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.HR_LEAD, UserRole.ADMIN, UserRole.PAYROLL, UserRole.PRODUCTION_MANAGER)
   @Render('permission-list')
   async getPermissions(
     @Req() req: any,
@@ -87,7 +87,7 @@ export class LeaveController {
 
   @Post('reject-permission/:leaveId')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.HR_LEAD)
+  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.HR_LEAD, UserRole.PRODUCTION_MANAGER, UserRole.ADMIN)
   async rejectPermission(@Param('leaveId') leaveId: string, @Res() res: express.Response, @Req() req: any) {
     await this.leaveService.rejectLeave(leaveId, req.session.user.id);
     const message = "Permission rejected successfully."
@@ -101,7 +101,7 @@ export class LeaveController {
 
   @Get('approuve-permissions')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.HR_LEAD)
+  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.HR_LEAD, UserRole.PRODUCTION_MANAGER, UserRole.ADMIN)
   @Render('approuve-leaves')
   async approuvePermissions(@Req() req: any) {
     const leaves = await this.leaveService.getNonApprouvedLeaves(req.session.user, ["Permission_AMD"]);
@@ -110,7 +110,7 @@ export class LeaveController {
 
   @Post('approve-permission/:leaveId')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.HR_LEAD)
+  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.HR_LEAD, UserRole.PRODUCTION_MANAGER, UserRole.ADMIN)
   async approvePermission(@Param('leaveId') leaveId: string, @Res() res: express.Response, @Req() req: any) {
     const message = "Permission approved successfully. You are pleased to validate also on OneHR platfrom."
     const leave = await this.leaveService.findOne(leaveId);
@@ -141,7 +141,7 @@ export class LeaveController {
 
   @Get('approuve-leaves')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.HR_LEAD)
+  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.HR_LEAD, UserRole.PRODUCTION_MANAGER, UserRole.ADMIN)
   @Render('approuve-leaves')
   async approuveLeaves(@Req() req: any) {
     const leaves = await this.leaveService.getNonApprouvedLeaves(req.session.user);
@@ -150,7 +150,7 @@ export class LeaveController {
 
   @Post('approve-leave/:leaveId')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.HR_LEAD)
+  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.HR_LEAD, UserRole.PRODUCTION_MANAGER, UserRole.ADMIN)
   async approveLeave(@Param('leaveId') leaveId: string, @Res() res: express.Response, @Req() req: any) {
     await this.leaveService.approveLeave(leaveId, req.session.user.id);
     const message = "Leave approved successfully. You are pleased to validate also on OneHR platfrom."
@@ -180,7 +180,7 @@ export class LeaveController {
 
   @Post('reject-leave/:leaveId')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.HR_LEAD)
+  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.HR_LEAD, UserRole.PRODUCTION_MANAGER, UserRole.ADMIN)
   async rejectLeave(@Param('leaveId') leaveId: string, @Res() res: express.Response, @Req() req: any) {
     await this.leaveService.rejectLeave(leaveId, req.session.user.id);
     const message = "Leave rejected successfully."
@@ -194,7 +194,7 @@ export class LeaveController {
 
   @Get('employee-leaves/paginate/:employeeId')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER, UserRole.HR_LEAD)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER, UserRole.HR_LEAD, UserRole.PRODUCTION_MANAGER)
   async getEmployeeLeaves(@Param('employeeId') employeeId: string, @Query('skip') skip: number, @Query('take') take: number, @Query('startDate') startDate: string, @Query('endDate') endDate: string, @Query('status') status: string) {
     const st = new Date(startDate);
     const et = new Date(endDate);
@@ -203,14 +203,14 @@ export class LeaveController {
 
   @Get('employee-leaves/:employeeId/:month/:year')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER, UserRole.PRODUCTION_MANAGER)
   async getEmployeeLeavesByMonth(@Param('employeeId') employeeId: string, @Param('month') month: number, @Param('year') year: number) {
     return this.leaveService.getEmployeeLeavesByMonth(employeeId, month, year);
   }
 
   @Get('employee-leaves/:employeeId/:year')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER, UserRole.PRODUCTION_MANAGER)
   async getEmployeeLeavesByYear(@Param('employeeId') employeeId: string, @Param('year') year: number) {
     return this.leaveService.getEmployeeLeavesByYear(employeeId, year);
   }
@@ -365,7 +365,7 @@ export class LeaveController {
   }
 
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER, UserRole.ADMIN, UserRole.HR_LEAD)
+  @Roles(UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER, UserRole.ADMIN, UserRole.HR_LEAD, UserRole.PRODUCTION_MANAGER)
   @Get('export')
   @Render('export')
   async exportView(@Req() req: any) {
@@ -384,7 +384,7 @@ export class LeaveController {
   }
 
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER, UserRole.ADMIN, UserRole.HR_LEAD)
+  @Roles(UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER, UserRole.ADMIN, UserRole.HR_LEAD, UserRole.PRODUCTION_MANAGER)
   @Post('export-planning')
   async exportPlanningPost(
     @Body('startDate') startDate: Date,
@@ -422,7 +422,7 @@ export class LeaveController {
   }
 
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER, UserRole.ADMIN, UserRole.HR_LEAD)
+  @Roles(UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER, UserRole.ADMIN, UserRole.HR_LEAD, UserRole.PRODUCTION_MANAGER)
   @Get('export-employee-leaves')
   async exportEmployeeLeaves(
     @Query('employeeId') employeeId: string,
@@ -460,7 +460,7 @@ export class LeaveController {
   }
 
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER, UserRole.ADMIN, UserRole.HR_LEAD)
+  @Roles(UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER, UserRole.ADMIN, UserRole.HR_LEAD, UserRole.PRODUCTION_MANAGER)
   @Get('planning-view')
   @Render('leave-planning')
   async planningView(@Req() req: any) {
@@ -487,7 +487,7 @@ export class LeaveController {
   }
 
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER, UserRole.ADMIN, UserRole.HR_LEAD)
+  @Roles(UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER, UserRole.ADMIN, UserRole.HR_LEAD, UserRole.PRODUCTION_MANAGER)
   @Get('simulate-leave')
   @Render('simulate-leave')
   async simulateLeave() {

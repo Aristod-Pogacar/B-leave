@@ -11,6 +11,7 @@ import { ConfigService } from '@nestjs/config';
 import { EmployeeService } from '../../employee/employee.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { LeaveCreatedEvent } from '../../notification/events/leave-created.event';
+import { UserService } from '../../user/user.service';
 
 @Injectable()
 export class LeaveService {
@@ -23,6 +24,7 @@ export class LeaveService {
     private readonly configService: ConfigService,
     private readonly employeeService: EmployeeService,
     private readonly eventEmitter: EventEmitter2,
+    private readonly userService: UserService,
   ) { }
 
   async findAllHistory(matricule: string) {
@@ -50,6 +52,7 @@ export class LeaveService {
 
     const employee = await this.employeeRepository.findOne({
       where: { matricule: createLeaveDto.employee, is_active: true },
+      relations: ['manager']
     });
 
     if (!employee) {
@@ -123,51 +126,49 @@ export class LeaveService {
     const leaveSaved = await this.leaveRepository.save(leave);
     var email: string[] = [];
     const manager = employee.manager;
-    if (manager) email.push(manager.user?.email ?? '');
+    if (manager) {
+      const managerUser = await this.userService.findOneByMatricule(manager.matricule);
+      if (managerUser) email.push(managerUser.email);
+    }
     const emailAdress = this.configService.get<string>('EMAIL_ADRESS')
     const emailPassword = this.configService.get<string>('EMAIL_PASSWORD')
+    console.log("EMAIL:", email);
     if (email.length > 0) {
       if (emailAdress && emailPassword) {
         await this.mailerService.sendMail({
           to: email,
-          subject: 'Demande de congé / Leave request',
-          text: 'Demande de congé / Leave request',
+          subject: 'Leave request',
+          text: 'Leave request',
           html: `
       <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333; line-height: 1.6;">
         <p>
-          Bonjour Monsieur/Madame,
+          Dear <strong>${manager?.name + " " + manager?.firstname}</strong>,
         </p>
         <p>
-          Un membre de votre équipe ayant la matricule <strong>${employee.matricule} (${employee.name + " " + employee.firstname})</strong> a envoyé une demande de congé et a besoin de votre approbation sur <a href="http://localhost:3000/leave/approuve-leaves" target="_blank">B-Leave</a>.
+          <strong>${employee.name + " " + employee.firstname + " (Emp Code - " + employee.matricule + ")"}</strong> has submitted a leave request.
         </p>
         <p>
-          <strong>
-            Date de debut: ${leaveSaved.start_date}<br>
-            Date de fin: ${leaveSaved.end_date}<br>
-            Raison: ${leaveSaved.reason}<br>
-            Type de conge: ${leaveSaved.leave_type}<br>
-            Durée: ${leaveSaved.duration}<br>
-          </strong>
+          <strong>Leave details are:</strong>
         </p>
         <p>
-          Cordialement,<br>
-          L'équipe RH
-        </p>
-        <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
-        <p>
-          Hello Mister/Misses,
-        </p>
-        <p>
-          A member of your team with matricule <strong>${employee.matricule} (${employee.name + " " + employee.firstname})</strong> has taken a leave and need your approval on <a href="http://localhost:3000/leave/approuve-leaves" target="_blank">B-Leave</a>.
-        </p>
-        <p>
-          <strong>
-            Starting date: ${leaveSaved.start_date}<br>
-            Ending date: ${leaveSaved.end_date}<br>
-            Reason: ${leaveSaved.reason}<br>
-            Leave type: ${leaveSaved.leave_type}<br>
-            Duration: ${leaveSaved.duration}<br>
-          </strong>
+        <table>
+          <tr>
+            <td>Leave type</td>
+            <td>${leaveSaved.leave_type}</td>
+          </tr>
+          <tr>
+            <td>No. of days taken</td>
+            <td>${leaveSaved.duration}</td>
+          </tr>
+          <tr>
+            <td>Leave duration</td>
+            <td>${new Date(leaveSaved.start_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) + " to " + new Date(leaveSaved.end_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</td>
+          </tr>
+          <tr>
+            <td>Leave reason</td>
+            <td>${leaveSaved.reason}</td>
+          </tr>
+        </table>
         </p>
         <p>
           Best regards,<br>

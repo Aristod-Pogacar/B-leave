@@ -59,7 +59,7 @@ export class EmployeeController {
 
   @Get('details/:id')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.PAYROLL, UserRole.HR_LEAD)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.PAYROLL, UserRole.HR_LEAD, UserRole.PRODUCTION_MANAGER)
   @Render('employee')
   async getEmployee(@Param('id') id: string, @Req() req: any) {
     const employee = await this.employeeService.findOne(id);
@@ -95,7 +95,7 @@ export class EmployeeController {
 
   @Get('list')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HR_LEAD, UserRole.MANAGER, UserRole.PAYROLL)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.HR_LEAD, UserRole.MANAGER, UserRole.PAYROLL, UserRole.PRODUCTION_MANAGER)
   @Render('employee-list')
   async getMedicalService(
     @Req() req,
@@ -547,9 +547,9 @@ export class EmployeeController {
   }
 
   @Get(':matricule')
-  findOne(@Param('matricule') matricule: string) {
-
-    return this.employeeService.findOneByMatricule(matricule);
+  async findOne(@Param('matricule') matricule: string) {
+    const employee = await this.employeeService.getEmployeeWithBalances(matricule, new Date());
+    return employee.data[0];
   }
 
   @UseGuards(RolesGuard)

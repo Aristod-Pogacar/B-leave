@@ -109,7 +109,34 @@ export class LeaveService {
 
     const today = new Date();
 
-    if (user.role === UserRole.HR_LEAD) {
+    if (user.role === UserRole.HR_LEAD || user.role === UserRole.ADMIN) {
+      leaves = await this.leaveRepository.find({
+        where: {
+          employee: {
+            is_active: true,
+            is_deleted: false
+          },
+          status: LeaveStatus.PENDING,
+          leave_type: In(typeLeaves)
+        },
+        relations: [
+          'employee',
+          'employee.manager',
+          'employee.manager.manager'
+        ],
+        order: { created_at: 'ASC' }
+      });
+
+      return leaves.filter(leave => {
+        const start = new Date(leave.start_date);
+
+        const daysBefore = Math.ceil(
+          (start.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+        );
+
+        return daysBefore <= 1;
+      });
+    } else if (user.role === UserRole.PRODUCTION_MANAGER) {
       leaves = await this.leaveRepository.find({
         where: {
           employee: {

@@ -28,7 +28,7 @@ export class HolidayController {
 
   @Get('holidays')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.PAYROLL)
+  @Roles(UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.PRODUCTION_MANAGER, UserRole.HR_LEAD, UserRole.MANAGER, UserRole.ADMIN)
   @Render('holidays')
   async getHolidays(@Req() req, @Res() res, @Query('year') year: string) {
     var y;

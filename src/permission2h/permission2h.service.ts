@@ -11,7 +11,7 @@ import { Response } from 'express';
 import * as nodemailer from 'nodemailer';
 import { UserService } from '../user/user.service';
 import { ConfigService } from '@nestjs/config';
-import { UserRole } from '../user/entities/user.entity';
+import { User, UserRole } from '../user/entities/user.entity';
 import { LeaveStatus } from '../leave/entities/leave.entity';
 import { MailerService } from '@nestjs-modules/mailer';
 import { HistoryService } from '../history/history.service';
@@ -253,13 +253,16 @@ export class Permission2hService {
 
     var email: string[] = [];
     const manager = employee.manager;
+    var managerUser: User | null = null;
     if (manager) {
-      const managerUser = await this.userService.findOneByMatricule(manager.matricule);
-      if (managerUser) email.push(managerUser.email);
+      managerUser = await this.userService.findOneByMatricule(manager.matricule);
+      console.log("MANAGER USER:", managerUser?.email);
+      if (managerUser && managerUser.email !== undefined && managerUser.email !== null && managerUser.email !== "" && managerUser.email !== "undefined") email.push(managerUser.email);
     }
 
     const emailAdress = this.configService.get<string>('EMAIL_ADRESS')
     const emailPassword = this.configService.get<string>('EMAIL_PASSWORD')
+    console.log(email)
     if (email.length > 0) {
       if (emailAdress && emailPassword) {
         await this.mailerService.sendMail({
@@ -315,8 +318,8 @@ export class Permission2hService {
     return this.permission2hRepository.find();
   }
 
-  findOne(id: string) {
-    return this.permission2hRepository.findOne({
+  async findOne(id: string) {
+    const permission = await this.permission2hRepository.findOne({
       where: { id },
       relations: [
         'employee',
@@ -324,6 +327,8 @@ export class Permission2hService {
         'employee.manager.user'
       ]
     });
+
+    return permission;
   }
 
   async getPermission2h(date: string, site: string) {

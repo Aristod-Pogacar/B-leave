@@ -12,7 +12,9 @@ export enum UserRole {
     // HEAD_HR = 'HEAD_HR',
     MANAGER = 'MANAGER',
     PAYROLL = 'PAYROLL',
-    SUPERADMIN = 'SUPERADMIN'
+    SUPERADMIN = 'SUPERADMIN',
+    PRODUCTION_MANAGER = 'PRODUCTION_MANAGER',
+    // IT_MANAGER = 'IT_MANAGER'
 }
 
 export enum Site {
@@ -41,7 +43,7 @@ export class User {
     @Column({ nullable: true })
     phone: string;
 
-    @Column({ unique: true })
+    @Column({ nullable: true })
     email: string;
 
     @Column()

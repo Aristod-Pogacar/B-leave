@@ -21,7 +21,7 @@ export class Permission2hController {
 
   @Get('approuve-permission-2h')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER)
+  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.PRODUCTION_MANAGER, UserRole.HR_LEAD, UserRole.ADMIN)
   @Render('approuve-permission-2h')
   async approuveLeaves(@Req() req: any, @Query() error?: string) {
     const permissions = await this.permission2hService.getNonApprouvedLeaves(req.session.user.employee.id);
@@ -30,7 +30,7 @@ export class Permission2hController {
 
   @Post('approve-permission-2h/:permissionId')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER)
+  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.PRODUCTION_MANAGER, UserRole.HR_LEAD, UserRole.ADMIN)
   async approveLeave(@Param('permissionId') permissionId: string, @Res() res: Response, @Req() req: any) {
     const permission = await this.permission2hService.findOne(permissionId);
     if (!permission) {
@@ -47,7 +47,7 @@ export class Permission2hController {
 
   @Post('reject-permission-2h/:permissionId')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER)
+  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.PRODUCTION_MANAGER, UserRole.HR_LEAD, UserRole.ADMIN)
   async rejectLeave(@Param('permissionId') permissionId: string, @Res() res: Response, @Req() req: any) {
     const permission = await this.permission2hService.findOne(permissionId);
     if (!permission) {
@@ -64,7 +64,7 @@ export class Permission2hController {
 
   @Get('export')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER, UserRole.HR_LEAD)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER, UserRole.HR_LEAD, UserRole.PRODUCTION_MANAGER)
   async export(
     @Res() res: Response,
     @Req() req,
@@ -99,7 +99,7 @@ export class Permission2hController {
 
   @Get('list')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER, UserRole.HR_LEAD)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER, UserRole.HR_LEAD, UserRole.PRODUCTION_MANAGER)
   @Render('permission-2h')
   async permission2h(
     @Req() req,
