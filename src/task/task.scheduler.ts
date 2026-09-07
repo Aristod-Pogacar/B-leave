@@ -46,7 +46,7 @@ export class TaskScheduler {
         await this.taskService.executePendingTasks();
     }
 
-    @Cron(CronExpression.EVERY_10_SECONDS)
+    @Cron(CronExpression.EVERY_DAY_AT_9AM)
     // @Cron('0 0 16 * * *') // tous les jours à 16h
     async dailyReminder() {
         console.log("====================DAILY REMINDER=================");
