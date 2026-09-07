@@ -27,11 +27,13 @@ import { Holiday } from '../holiday/entities/holiday.entity';
 import { HolidayService } from '../holiday/holiday.service';
 import { CarriedForward } from '../carried-forward/entities/carried-forward.entity';
 import { CarriedForwardService } from '../carried-forward/carried-forward.service';
+import { NotificationService } from '../notification/notification.service';
+import { Notification } from '../notification/entities/notification.entity';
 
 @Module({
   imports: [
     ScheduleModule.forRoot(),
-    TypeOrmModule.forFeature([Task, Employee, Leave, User, History, Permission2h, SmiaOstie, EmployeeHistory, Holiday, CarriedForward])
+    TypeOrmModule.forFeature([Task, Employee, Leave, User, History, Permission2h, SmiaOstie, EmployeeHistory, Holiday, CarriedForward, Notification])
   ],
   controllers: [TaskController],
   providers: [
@@ -49,7 +51,8 @@ import { CarriedForwardService } from '../carried-forward/carried-forward.servic
     SmiaOstieService,
     EmployeeHistoryService,
     HolidayService,
-    CarriedForwardService
+    CarriedForwardService,
+    NotificationService
   ],
   exports: [
     TaskService,
@@ -66,7 +69,8 @@ import { CarriedForwardService } from '../carried-forward/carried-forward.servic
     SmiaOstieService,
     EmployeeHistoryService,
     HolidayService,
-    CarriedForwardService
+    CarriedForwardService,
+    NotificationService
   ],
 })
 export class TaskModule { }
