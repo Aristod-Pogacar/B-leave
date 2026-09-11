@@ -265,50 +265,50 @@ export class Permission2hService {
     console.log(email)
     if (email.length > 0) {
       if (emailAdress && emailPassword) {
-        await this.mailerService.sendMail({
-          to: email,
-          subject: 'Permission 2h',
-          text: 'Permission 2h',
-          html: `
-      <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333; line-height: 1.6;">
-        <p>
-          Bonjour Monsieur/Madame,
-        </p>
-        <p>
-          Nous souhaitons vous informer que l'employé(e) avec la matricule <strong>${employee.matricule} (${employee.name} ${employee.firstname})</strong> a pris une permission de deux heures.
-        </p>
-        <p>
-          <strong>
-            Raison: ${permission.reason}<br>
-            Heure de départ: ${permission.expectedStartTime}<br>
-            Heure d'arrivé: ${permission.expectedEndTime}<br>
-          </strong>
-        </p>
-        <p>
-          Cordialement,<br>
-          L'équipe RH
-        </p>
-        <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
-        <p>
-          Hello Mister/Misses,
-        </p>
-        <p>
-          We would like to inform you that the employee with matricule <strong>${employee.matricule} (${employee.name} ${employee.firstname})</strong> has taken a two-hour leave.
-        </p>
-        <p>
-          <strong>
-            Reason: ${permission.reason}<br>
-            Start time: ${permission.expectedStartTime}<br>
-            End time: ${permission.expectedEndTime}<br>
-          </strong>
-        </p>
-        <p>
-          Best regards,<br>
-          HR Team
-        </p>
-      </div>
-    `
-        });
+        //     await this.mailerService.sendMail({
+        //       to: email,
+        //       subject: 'Permission 2h',
+        //       text: 'Permission 2h',
+        //       html: `
+        //   <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333; line-height: 1.6;">
+        //     <p>
+        //       Bonjour Monsieur/Madame,
+        //     </p>
+        //     <p>
+        //       Nous souhaitons vous informer que l'employé(e) avec la matricule <strong>${employee.matricule} (${employee.name} ${employee.firstname})</strong> a pris une permission de deux heures.
+        //     </p>
+        //     <p>
+        //       <strong>
+        //         Raison: ${permission.reason}<br>
+        //         Heure de départ: ${permission.expectedStartTime}<br>
+        //         Heure d'arrivé: ${permission.expectedEndTime}<br>
+        //       </strong>
+        //     </p>
+        //     <p>
+        //       Cordialement,<br>
+        //       L'équipe RH
+        //     </p>
+        //     <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+        //     <p>
+        //       Hello Mister/Misses,
+        //     </p>
+        //     <p>
+        //       We would like to inform you that the employee with matricule <strong>${employee.matricule} (${employee.name} ${employee.firstname})</strong> has taken a two-hour leave.
+        //     </p>
+        //     <p>
+        //       <strong>
+        //         Reason: ${permission.reason}<br>
+        //         Start time: ${permission.expectedStartTime}<br>
+        //         End time: ${permission.expectedEndTime}<br>
+        //       </strong>
+        //     </p>
+        //     <p>
+        //       Best regards,<br>
+        //       HR Team
+        //     </p>
+        //   </div>
+        // `
+        //     });
       }
     }
     return permission;

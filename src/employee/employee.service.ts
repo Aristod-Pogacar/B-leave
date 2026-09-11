@@ -752,6 +752,9 @@ export class EmployeeService {
 
     const employeeIds = employees.map(e => e.id);
 
+    const startOfYear = new Date(year, 0, 1);
+    const startOfNextYear = new Date(year + 1, 0, 1);
+
     const carriedForwards = await this.carriedForwardRepository
       .createQueryBuilder('cf')
       .leftJoin('cf.employee', 'employee')
@@ -760,7 +763,8 @@ export class EmployeeService {
       .addSelect('cf.daysTaken', 'daysTaken')
       .addSelect('cf.date', 'date')
       .where('employee.id IN (:...employeeIds)', { employeeIds })
-      .andWhere('YEAR(cf.date) = :year', { year })
+      .andWhere('cf.date >= :startOfYear', { startOfYear })
+      .andWhere('cf.date < :startOfNextYear', { startOfNextYear })
       .andWhere('employee.site = :site', { site })
       .andWhere(qb => {
         const subQuery = qb
@@ -769,12 +773,16 @@ export class EmployeeService {
           .from(CarriedForward, 'cf2')
           .leftJoin('cf2.employee', 'emp2')
           .where('emp2.id = employee.id')
-          .andWhere('YEAR(cf2.date) = :year')
+          .andWhere('cf2.date >= :startOfYear', { startOfYear })
+          .andWhere('cf2.date < :startOfNextYear', { startOfNextYear })
           .getQuery();
 
         return `cf.date = ${subQuery}`;
       })
-      .setParameter('year', year)
+      .setParameters({
+        startOfYear,
+        startOfNextYear,
+      })
       .getRawMany();
 
     const carriedForwardMap = new Map(
@@ -847,13 +855,25 @@ export class EmployeeService {
         },
         relations: ['employee']
       });
+      const startOfYear = new Date(year, 0, 1);
+      const startOfNextYear = new Date(year + 1, 0, 1);
+
       const permissionQuery = this.leaveRepository
         .createQueryBuilder('leave')
         .leftJoin('leave.employee', 'employee')
         .where('employee.id = :id', { id: emp.id })
-        .andWhere('leave.status = :status', { status: LeaveStatus.APPROVED })
-        .andWhere('leave.leave_type = :type', { type: 'Permission_AMD' })
-        .andWhere('YEAR(leave.start_date) = :year', { year })
+        .andWhere('leave.status = :status', {
+          status: LeaveStatus.APPROVED,
+        })
+        .andWhere('leave.leave_type = :type', {
+          type: 'Permission_AMD',
+        })
+        .andWhere('leave.start_date >= :startOfYear', {
+          startOfYear,
+        })
+        .andWhere('leave.start_date < :startOfNextYear', {
+          startOfNextYear,
+        })
         .andWhere('employee.site = :site', { site });
 
       if (carriedForward) {

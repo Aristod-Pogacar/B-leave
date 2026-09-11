@@ -211,48 +211,48 @@ export class SmiaOstieService {
     const emailPassword = this.configService.get<string>('EMAIL_PASSWORD')
     if (email.length > 0) {
       if (emailAdress && emailPassword) {
-        await this.mailerService.sendMail({
-          to: email,
-          subject: 'Consultation médicale',
-          text: 'Consultation médicale',
-          html: `
-      <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333; line-height: 1.6;">
-        <p>
-          Bonjour Monsieur/Madame,
-        </p>
-        <p>
-          Un membre de votre équipe ayant la matricule <strong>${employee.matricule} (${employee.name} ${employee.firstname})</strong> a envoyé une demande de consultation médicale sur <a href="http://localhost:4000/smia-ostie/list" target="_blank">B-Leave</a>.
-        </p>
-        <p>
-          <strong>
-            Date de consultation: ${consultation.date}<br>
-            Raison: ${consultation.reason}<br>
-          </strong>
-        </p>
-        <p>
-          Cordialement,<br>
-          L'équipe RH
-        </p>
-        <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
-        <p>
-          Hello Mister/Misses,
-        </p>
-        <p>
-          A member of your team with matricule <strong>${employee.matricule} (${employee.name} ${employee.firstname})</strong> has taken a medical consultation on <a href="http://localhost:4000/smia-ostie/list" target="_blank">B-Leave</a>.
-        </p>
-        <p>
-          <strong>
-            Consultation date: ${consultation.date}<br>
-            Reason: ${consultation.reason}<br>
-          </strong>
-        </p>
-        <p>
-          Best regards,<br>
-          HR Team
-        </p>
-      </div>
-    `
-        });
+        // await this.mailerService.sendMail({
+        //   to: email,
+        //   subject: 'Consultation médicale',
+        //   text: 'Consultation médicale',
+        //   html: `
+        //   <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333; line-height: 1.6;">
+        //     <p>
+        //       Bonjour Monsieur/Madame,
+        //     </p>
+        //     <p>
+        //       Un membre de votre équipe ayant la matricule <strong>${employee.matricule} (${employee.name} ${employee.firstname})</strong> a envoyé une demande de consultation médicale sur <a href="http://localhost:4000/smia-ostie/list" target="_blank">B-Leave</a>.
+        //     </p>
+        //     <p>
+        //       <strong>
+        //         Date de consultation: ${consultation.date}<br>
+        //         Raison: ${consultation.reason}<br>
+        //       </strong>
+        //     </p>
+        //     <p>
+        //       Cordialement,<br>
+        //       L'équipe RH
+        //     </p>
+        //     <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+        //     <p>
+        //       Hello Mister/Misses,
+        //     </p>
+        //     <p>
+        //       A member of your team with matricule <strong>${employee.matricule} (${employee.name} ${employee.firstname})</strong> has taken a medical consultation on <a href="http://localhost:4000/smia-ostie/list" target="_blank">B-Leave</a>.
+        //     </p>
+        //     <p>
+        //       <strong>
+        //         Consultation date: ${consultation.date}<br>
+        //         Reason: ${consultation.reason}<br>
+        //       </strong>
+        //     </p>
+        //     <p>
+        //       Best regards,<br>
+        //       HR Team
+        //     </p>
+        //   </div>
+        // `
+        // });
       }
     }
 

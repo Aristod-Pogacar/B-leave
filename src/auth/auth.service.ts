@@ -49,7 +49,7 @@ export class AuthService {
             login === process.env.SUPERADMIN_EMAIL
         ) {
             return {
-                id: 'superadmin',
+                id: '00000000-0000-0000-0000-000000000001',
                 matricule: 'SUPERADMIN',
                 firstName: 'Super',
                 name: 'Admin',
@@ -74,7 +74,7 @@ export class AuthService {
             isSuperAdmin
         ) {
             return {
-                id: 'superadmin',
+                id: '00000000-0000-0000-0000-000000000001',
                 matricule: 'SUPERADMIN',
                 firstName: 'Super',
                 name: 'Admin',

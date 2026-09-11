@@ -109,7 +109,35 @@ export class LeaveService {
 
     const today = new Date();
 
-    if (user.role === UserRole.HR_LEAD || user.role === UserRole.ADMIN) {
+    if (user.role === UserRole.PAYROLL || user.role === UserRole.ADMIN) {
+      leaves = await this.leaveRepository.find({
+        where: {
+          employee: {
+            is_active: true,
+            is_deleted: false
+          },
+          status: LeaveStatus.APPROVED_BY_MANAGER,
+          approver1: IsNull(),
+          leave_type: In(typeLeaves)
+        },
+        relations: [
+          'employee',
+          'employee.manager',
+          'employee.manager.manager'
+        ],
+        order: { created_at: 'ASC' }
+      });
+
+      return leaves.filter(leave => {
+        const start = new Date(leave.start_date);
+
+        const daysBefore = Math.ceil(
+          (start.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+        );
+
+        return daysBefore <= 1;
+      });
+    } else if (user.role === UserRole.HR_LEAD || user.role === UserRole.ADMIN) {
       leaves = await this.leaveRepository.find({
         where: {
           employee: {
@@ -293,9 +321,10 @@ export class LeaveService {
     if (!leave) {
       throw new NotFoundException('Leave not found');
     }
-    leave.approver = user;
+    if (user.role == UserRole.MANAGER || user.role == UserRole.PRODUCTION_MANAGER) { leave.approver = user; leave.status = LeaveStatus.APPROVED_BY_MANAGER; }
+    if (user.role == UserRole.ADMIN || user.role == UserRole.PAYROLL) { leave.approver1 = user; leave.status = LeaveStatus.APPROVED; }
+
     leave.approved_date = new Date();
-    leave.status = LeaveStatus.APPROVED;
     return this.leaveRepository.save(leave);
   }
 
@@ -465,54 +494,54 @@ export class LeaveService {
     const emailPassword = this.configService.get<string>('EMAIL_PASSWORD')
     if (email.length > 0) {
       if (emailAdress && emailPassword) {
-        await this.mailerService.sendMail({
-          to: email,
-          subject: 'Consultation médicale',
-          text: 'Consultation médicale',
-          html: `
-      <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333; line-height: 1.6;">
-        <p>
-          Bonjour Monsieur/Madame,
-        </p>
-        <p>
-          Un membre de votre équipe ayant la matricule <strong>${employee.matricule} (${employee.name} ${employee.firstname})</strong> a envoyé une demande de congé et a besoin de votre approbation sur <a href="http://localhost:3000/leave/approuve-leaves" target="_blank">B-Leave</a>.
-        </p>
-        <p>
-          <strong>
-            Date de debut: ${leaveSaved.start_date}<br>
-            Date de fin: ${leaveSaved.end_date}<br>
-            Raison: ${leaveSaved.reason}<br>
-            Type de conge: ${leaveSaved.leave_type}<br>
-            Durée: ${leaveSaved.duration}<br>
-          </strong>
-        </p>
-        <p>
-          Cordialement,<br>
-          L'équipe RH
-        </p>
-        <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
-        <p>
-          Hello Mister/Misses,
-        </p>
-        <p>
-          A member of your team with matricule <strong>${employee.matricule} (${employee.name} ${employee.firstname})</strong> has taken a leave and need your approval on <a href="http://localhost:3000/leave/approuve-leaves" target="_blank">B-Leave</a>.
-        </p>
-        <p>
-          <strong>
-            Starting date: ${leaveSaved.start_date}<br>
-            Ending date: ${leaveSaved.end_date}<br>
-            Reason: ${leaveSaved.reason}<br>
-            Leave type: ${leaveSaved.leave_type}<br>
-            Duration: ${leaveSaved.duration}<br>
-          </strong>
-        </p>
-        <p>
-          Best regards,<br>
-          HR Team
-        </p>
-      </div>
-    `
-        });
+        //     await this.mailerService.sendMail({
+        //       to: email,
+        //       subject: 'Consultation médicale',
+        //       text: 'Consultation médicale',
+        //       html: `
+        //   <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333; line-height: 1.6;">
+        //     <p>
+        //       Bonjour Monsieur/Madame,
+        //     </p>
+        //     <p>
+        //       Un membre de votre équipe ayant la matricule <strong>${employee.matricule} (${employee.name} ${employee.firstname})</strong> a envoyé une demande de congé et a besoin de votre approbation sur <a href="http://localhost:3000/leave/approuve-leaves" target="_blank">B-Leave</a>.
+        //     </p>
+        //     <p>
+        //       <strong>
+        //         Date de debut: ${leaveSaved.start_date}<br>
+        //         Date de fin: ${leaveSaved.end_date}<br>
+        //         Raison: ${leaveSaved.reason}<br>
+        //         Type de conge: ${leaveSaved.leave_type}<br>
+        //         Durée: ${leaveSaved.duration}<br>
+        //       </strong>
+        //     </p>
+        //     <p>
+        //       Cordialement,<br>
+        //       L'équipe RH
+        //     </p>
+        //     <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+        //     <p>
+        //       Hello Mister/Misses,
+        //     </p>
+        //     <p>
+        //       A member of your team with matricule <strong>${employee.matricule} (${employee.name} ${employee.firstname})</strong> has taken a leave and need your approval on <a href="http://localhost:3000/leave/approuve-leaves" target="_blank">B-Leave</a>.
+        //     </p>
+        //     <p>
+        //       <strong>
+        //         Starting date: ${leaveSaved.start_date}<br>
+        //         Ending date: ${leaveSaved.end_date}<br>
+        //         Reason: ${leaveSaved.reason}<br>
+        //         Leave type: ${leaveSaved.leave_type}<br>
+        //         Duration: ${leaveSaved.duration}<br>
+        //       </strong>
+        //     </p>
+        //     <p>
+        //       Best regards,<br>
+        //       HR Team
+        //     </p>
+        //   </div>
+        // `
+        //     });
       }
     }
 

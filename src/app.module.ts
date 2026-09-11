@@ -82,7 +82,7 @@ import { CarriedForwardService } from './carried-forward/carried-forward.service
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        type: 'mysql',
+        type: config.get<'mysql' | 'postgres'>('DATABASE_TYPE'),
         url: config.get<string>('MYSQL_URL'),
         entities: [
           Leave,

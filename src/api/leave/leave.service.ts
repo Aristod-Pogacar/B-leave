@@ -3,7 +3,7 @@ import { CreateLeaveDto } from './dto/create-leave.dto';
 import { UpdateLeaveDto } from './dto/update-leave.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Response } from 'express';
-import { Between, In, Repository } from 'typeorm';
+import { Between, In, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { Employee } from '../../employee/entities/employee.entity';
 import { Leave, LeaveStatus, WithdrawStatus } from '../../leave/entities/leave.entity';
 import { MailerService } from '@nestjs-modules/mailer';
@@ -83,19 +83,19 @@ export class LeaveService {
 
     const date1 = createLeaveDto.start_date.toISOString().split('T')[0];
     const date2 = createLeaveDto.end_date.toISOString().split('T')[0];
-    const overlappingLeave = await this.leaveRepository
-      .createQueryBuilder('leave')
-      .where(
-        'DATE(leave.start_date) <= :date2 AND DATE(leave.end_date) >= :date1',
-        { date1, date2 }
-      )
-      .andWhere('leave.employee = :employeeId', {
-        employeeId: employee.id,
-      })
-      .andWhere('leave.status IN (:...status)', {
-        status: [LeaveStatus.APPROVED, LeaveStatus.PENDING],
-      })
-      .getMany();
+    const overlappingLeave = await this.leaveRepository.find({
+      where: {
+        employee: {
+          id: employee.id,
+        },
+        start_date: LessThanOrEqual(new Date(date2)),
+        end_date: MoreThanOrEqual(new Date(date1)),
+        status: In([
+          LeaveStatus.APPROVED,
+          LeaveStatus.PENDING,
+        ]),
+      },
+    });
     if (overlappingLeave.length > 0) {
       return res.status(400).json({ message: 'Leave dates overlap with existing leave' });
     }
@@ -135,48 +135,48 @@ export class LeaveService {
     console.log("EMAIL:", email);
     if (email.length > 0) {
       if (emailAdress && emailPassword) {
-        await this.mailerService.sendMail({
-          to: email,
-          subject: 'Leave request',
-          text: 'Leave request',
-          html: `
-      <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333; line-height: 1.6;">
-        <p>
-          Dear <strong>${manager?.name + " " + manager?.firstname}</strong>,
-        </p>
-        <p>
-          <strong>${employee.name + " " + employee.firstname + " (Emp Code - " + employee.matricule + ")"}</strong> has submitted a leave request.
-        </p>
-        <p>
-          <strong>Leave details are:</strong>
-        </p>
-        <p>
-        <table>
-          <tr>
-            <td>Leave type</td>
-            <td>${leaveSaved.leave_type}</td>
-          </tr>
-          <tr>
-            <td>No. of days taken</td>
-            <td>${leaveSaved.duration}</td>
-          </tr>
-          <tr>
-            <td>Leave duration</td>
-            <td>${new Date(leaveSaved.start_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) + " to " + new Date(leaveSaved.end_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</td>
-          </tr>
-          <tr>
-            <td>Leave reason</td>
-            <td>${leaveSaved.reason}</td>
-          </tr>
-        </table>
-        </p>
-        <p>
-          Best regards,<br>
-          HR Team
-        </p>
-      </div>
-    `
-        });
+        //     await this.mailerService.sendMail({
+        //       to: email,
+        //       subject: 'Leave request',
+        //       text: 'Leave request',
+        //       html: `
+        //   <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333; line-height: 1.6;">
+        //     <p>
+        //       Dear <strong>${manager?.name + " " + manager?.firstname}</strong>,
+        //     </p>
+        //     <p>
+        //       <strong>${employee.name + " " + employee.firstname + " (Emp Code - " + employee.matricule + ")"}</strong> has submitted a leave request.
+        //     </p>
+        //     <p>
+        //       <strong>Leave details are:</strong>
+        //     </p>
+        //     <p>
+        //     <table>
+        //       <tr>
+        //         <td>Leave type</td>
+        //         <td>${leaveSaved.leave_type}</td>
+        //       </tr>
+        //       <tr>
+        //         <td>No. of days taken</td>
+        //         <td>${leaveSaved.duration}</td>
+        //       </tr>
+        //       <tr>
+        //         <td>Leave duration</td>
+        //         <td>${new Date(leaveSaved.start_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) + " to " + new Date(leaveSaved.end_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</td>
+        //       </tr>
+        //       <tr>
+        //         <td>Leave reason</td>
+        //         <td>${leaveSaved.reason}</td>
+        //       </tr>
+        //     </table>
+        //     </p>
+        //     <p>
+        //       Best regards,<br>
+        //       HR Team
+        //     </p>
+        //   </div>
+        // `
+        //     });
       }
     }
     this.eventEmitter.emit(

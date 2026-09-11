@@ -18,7 +18,7 @@ export class History {
     id: string;
 
     @Column({
-        type: 'datetime',
+        type: 'timestamp',
         nullable: false,
         default: () => 'CURRENT_TIMESTAMP',
     })

@@ -7,14 +7,14 @@ export class SmiaOstie {
     id: string;
 
     @Column({
-        type: 'datetime',
+        type: 'timestamp',
         nullable: false,
         default: () => 'CURRENT_TIMESTAMP',
     })
     date_at: Date;
 
     @Column({
-        type: 'datetime',
+        type: 'timestamp',
         nullable: false,
         default: () => 'CURRENT_TIMESTAMP',
     })

@@ -6,6 +6,7 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMan
 export enum LeaveStatus {
     PENDING = 'pending',
     APPROVED = 'approved',
+    APPROVED_BY_MANAGER = 'approved_by_manager',
     REJECTED = 'rejected',
     WITHDRAWN = 'withdrawn',
 }
@@ -54,6 +55,10 @@ export class Leave {
 
     @Column({ type: 'timestamp', nullable: true })
     approved_date?: Date;
+
+    @ManyToOne(() => User, user => user.leaves)
+    @JoinColumn({ name: 'approver1_id' })
+    approver1?: User;
 
     @ManyToOne(() => User, user => user.leaves)
     @JoinColumn({ name: 'approver_id' })

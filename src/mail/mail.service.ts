@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 
 @Injectable()
@@ -9,8 +10,8 @@ export class MailService {
         this.transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
-                user: 'stagedp@aquarabe.mg',
-                pass: 'Pass$1234'
+                user: process.env.EMAIL_ADRESS,
+                pass: process.env.EMAIL_PASSWORD
             }
         });
     }

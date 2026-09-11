@@ -82,7 +82,7 @@ export class UserService {
     employee.site = Site.MADA;
 
     const user = new User();
-    user.id = "superadmin";
+    user.id = "00000000-0000-0000-0000-000000000001";
     user.phone = "-";
     user.email = process.env.SUPERADMIN_EMAIL!;
     user.role = UserRole.SUPERADMIN;
