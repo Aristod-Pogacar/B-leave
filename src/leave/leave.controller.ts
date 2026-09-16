@@ -87,7 +87,7 @@ export class LeaveController {
 
   @Post('reject-permission/:leaveId')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.HR_LEAD, UserRole.PRODUCTION_MANAGER, UserRole.ADMIN)
+  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.HR_LEAD, UserRole.PRODUCTION_MANAGER, UserRole.ADMIN, UserRole.PAYROLL)
   async rejectPermission(@Param('leaveId') leaveId: string, @Res() res: express.Response, @Req() req: any) {
     await this.leaveService.rejectLeave(leaveId, req.session.user.id);
     const message = "Permission rejected successfully."
@@ -101,7 +101,7 @@ export class LeaveController {
 
   @Get('approuve-permissions')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.HR_LEAD, UserRole.PRODUCTION_MANAGER, UserRole.ADMIN)
+  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.HR_LEAD, UserRole.PRODUCTION_MANAGER, UserRole.ADMIN, UserRole.PAYROLL)
   @Render('approuve-leaves')
   async approuvePermissions(@Req() req: any) {
     const leaves = await this.leaveService.getNonApprouvedLeaves(req.session.user, ["Permission_AMD"]);
@@ -110,7 +110,7 @@ export class LeaveController {
 
   @Post('approve-permission/:leaveId')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.HR_LEAD, UserRole.PRODUCTION_MANAGER, UserRole.ADMIN)
+  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.HR_LEAD, UserRole.PRODUCTION_MANAGER, UserRole.ADMIN, UserRole.PAYROLL)
   async approvePermission(@Param('leaveId') leaveId: string, @Res() res: express.Response, @Req() req: any) {
     const message = "Permission approved successfully. You are pleased to validate also on OneHR platfrom."
     const leave = await this.leaveService.findOne(leaveId);
@@ -141,7 +141,7 @@ export class LeaveController {
 
   @Get('approuve-leaves')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.HR_LEAD, UserRole.PRODUCTION_MANAGER, UserRole.ADMIN)
+  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.HR_LEAD, UserRole.PRODUCTION_MANAGER, UserRole.ADMIN, UserRole.PAYROLL)
   @Render('approuve-leaves')
   async approuveLeaves(@Req() req: any) {
     const leaves = await this.leaveService.getNonApprouvedLeaves(req.session.user);
@@ -150,7 +150,7 @@ export class LeaveController {
 
   @Post('approve-leave/:leaveId')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.HR_LEAD, UserRole.PRODUCTION_MANAGER, UserRole.ADMIN)
+  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.HR_LEAD, UserRole.PRODUCTION_MANAGER, UserRole.ADMIN, UserRole.PAYROLL)
   async approveLeave(@Param('leaveId') leaveId: string, @Res() res: express.Response, @Req() req: any) {
     await this.leaveService.approveLeave(leaveId, req.session.user.id);
     const message = "Leave approved successfully. You are pleased to validate also on OneHR platfrom."
@@ -174,13 +174,14 @@ export class LeaveController {
         'leave.approved',
         new LeaveApproveEvent(leave.id, req.session.user.id),
       );
+      this.taskService.runPuppeteerTask(data, leave);
     }
     res.redirect('/leave/approuve-leaves?message=' + message);
   }
 
   @Post('reject-leave/:leaveId')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.HR_LEAD, UserRole.PRODUCTION_MANAGER, UserRole.ADMIN)
+  @Roles(UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.HR_LEAD, UserRole.PRODUCTION_MANAGER, UserRole.ADMIN, UserRole.PAYROLL)
   async rejectLeave(@Param('leaveId') leaveId: string, @Res() res: express.Response, @Req() req: any) {
     await this.leaveService.rejectLeave(leaveId, req.session.user.id);
     const message = "Leave rejected successfully."

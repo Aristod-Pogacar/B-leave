@@ -36,7 +36,8 @@
                             <% } %>
                                 <li class="nxl-item"><a class="nxl-link" href="/leave/simulate-leave">Simulation</a>
                                 </li>
-                                <% if(user.role=="SUPERADMIN" || user.role=="MANAGER" || user.role=="HR_LEAD" ) { %>
+                                <% if(user.role=="SUPERADMIN" || user.role=="MANAGER" || user.role=="HR_LEAD" ||
+                                    user.role=="PAYROLL" || user.role=="PRODUCTION_MANAGER" ) { %>
                                     <li class="nxl-item">
                                         <a class="nxl-link d-flex align-items-center justify-content-between"
                                             href="/leave/approuve-leaves">
@@ -94,7 +95,8 @@
                             </a>
                             <ul class="nxl-submenu">
                                 <li class="nxl-item"><a class="nxl-link" href="/leave/permissions">History</a></li>
-                                <% if(user.role=="SUPERADMIN" || user.role=="MANAGER" || user.role=="HR_LEAD" ) { %>
+                                <% if(user.role=="SUPERADMIN" || user.role=="MANAGER" || user.role=="HR_LEAD" ||
+                                    user.role=="PAYROLL" || user.role=="PRODUCTION_MANAGER" ) { %>
                                     <li class="nxl-item"><a class="nxl-link"
                                             href="/leave/approuve-permissions">Approval</a>
                                     </li>
