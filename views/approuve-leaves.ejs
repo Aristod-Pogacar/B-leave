@@ -95,7 +95,9 @@
 
                                                                                     <% if(user.role==='MANAGER' ||
                                                                                         user.role==='HR_LEAD' ||
-                                                                                        user.role==='SUPERADMIN' ) { %>
+                                                                                        user.role==='SUPERADMIN' ||
+                                                                                        user.role==='PAYROLL' ||
+                                                                                        user.role==='ADMIN' ) { %>
 
                                                                                         <th style="width:10%;"
                                                                                             class="text-center">
@@ -347,6 +349,10 @@
                                                                                                         user.role==='HR_LEAD'
                                                                                                         ||
                                                                                                         user.role==='SUPERADMIN'
+                                                                                                        ||
+                                                                                                        user.role==='PAYROLL'
+                                                                                                        ||
+                                                                                                        user.role==='ADMIN'
                                                                                                         ) &&
                                                                                                         user.employee.matricule!==leave.employee.matricule
                                                                                                         ) { %>
