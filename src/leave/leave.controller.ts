@@ -174,7 +174,7 @@ export class LeaveController {
         'leave.approved',
         new LeaveApproveEvent(leave.id, req.session.user.id),
       );
-      this.taskService.runPuppeteerTask(data, leave);
+      // this.taskService.runPuppeteerTask(data, leave);
     }
     res.redirect('/leave/approuve-leaves?message=' + message);
   }
