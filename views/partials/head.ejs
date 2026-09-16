@@ -42,4 +42,42 @@
         overflow: hidden;
         word-break: break-word;
     }
+
+    /* PC : ouverture au hover */
+    @media (min-width: 992px) {
+        .nxl-h-item:hover>.dropdown-menu {
+            display: block;
+        }
+    }
+
+    /* Téléphone/tablette : Bootstrap gère l'ouverture au clic */
+    @media (max-width: 991.98px) {
+        .nxl-h-item>.dropdown-menu {
+            display: none;
+        }
+
+        .nxl-h-item>.dropdown-menu.show {
+            display: block;
+        }
+    }
 </style>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const dropdowns = document.querySelectorAll(".nxl-h-item");
+
+        dropdowns.forEach(function (dropdown) {
+            const button = dropdown.querySelector('[data-bs-toggle="dropdown"]');
+
+            if (!button) return;
+
+            // Gestion du clic
+            button.addEventListener("click", function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+
+                const bsDropdown = bootstrap.Dropdown.getOrCreateInstance(button);
+                bsDropdown.toggle();
+            });
+        });
+    });
+</script>
