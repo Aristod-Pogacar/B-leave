@@ -11,6 +11,7 @@ import { Employee } from "../employee/entities/employee.entity";
 import { Leave } from "../leave/entities/leave.entity";
 import { HistoryService } from "../history/history.service";
 import { HistoryReason } from "../history/entities/history.entity";
+import { UserService } from "src/user/user.service";
 
 @Injectable()
 export class TaskService {
@@ -20,6 +21,7 @@ export class TaskService {
     private readonly bot: PuppeteerService,
     private readonly employeeService: EmployeeService,
     private readonly leaveService: LeaveService,
+    private readonly userService: UserService,
     private cryptoService: CryptoService,
     private readonly historyService: HistoryService,
     @InjectRepository(Employee)
@@ -77,26 +79,25 @@ export class TaskService {
                 await this.bot.goToNewLeave(sessionId).then(async (newLeaveResponse) => {
                   if (newLeaveResponse.success == true) {
                     await delay(5000);
-                    // await this.bot.completeFormulaire(sessionId, data).then(async (completeFormResponse) => {
-                    //   if (completeFormResponse.success == true) {
-                    //     console.log("✅ FORM COMPLETE");
-                    //     await delay(5000);
-                    //     await this.leaveService.doneLeave(leave);
-                    //     await this.historyService.create({
-                    //       reason: HistoryReason.LEAVE,
-                    //       message: "New leave " + leave.start_date + " to " + leave.end_date + " of " + leave.employee.name + " " + leave.employee.firstname + " send to OneHR by AUTOMATION PUPPETEER",
-                    //       created_by: "AUTOMATION PUPPETEER",
-                    //     });
-                    // await this.leaveService.approveLeave(leave.id, leave.employee.manager.id);
-                    await this.manager.closeSession(sessionId);
-                    //     // await this.leaveService.save(data);
-                    //     await this.manager.closeSession(sessionId);
-                    //     // res.status(200).json({ success: true, message: "FORM COMPLETE" });
-                    //   } else {
-                    //     await this.manager.closeSession(sessionId);
-                    //     // res.status(500).json({ success: false, message: "❌ FORM NOT COMPLETE" });
-                    //   }
-                    // });
+                    await this.bot.completeFormulaire(sessionId, data).then(async (completeFormResponse) => {
+                      if (completeFormResponse.success == true) {
+                        console.log("✅ FORM COMPLETE");
+                        await delay(5000);
+                        await this.leaveService.doneLeave(leave);
+                        await this.historyService.create({
+                          reason: HistoryReason.LEAVE,
+                          message: "New leave " + leave.start_date + " to " + leave.end_date + " of " + leave.employee.name + " " + leave.employee.firstname + " send to OneHR by AUTOMATION PUPPETEER",
+                          created_by: "AUTOMATION PUPPETEER",
+                        });
+                        await this.manager.closeSession(sessionId);
+                        // await this.leaveService.save(data);
+                        await this.manager.closeSession(sessionId);
+                        // res.status(200).json({ success: true, message: "FORM COMPLETE" });
+                      } else {
+                        await this.manager.closeSession(sessionId);
+                        // res.status(500).json({ success: false, message: "❌ FORM NOT COMPLETE" });
+                      }
+                    });
                   } else {
                     await this.manager.closeSession(sessionId);
                     // res.status(500).json({ success: false, message: "❌ NEW LEAVE NOT FOUND" });

@@ -40,6 +40,32 @@ export class LeaveController {
     return [userSite];
   }
 
+  @Get('export-all-excel')
+  async exportAllLeavesExcel(
+    @Res() response: express.Response,
+  ) {
+
+    return this.leaveService.generateAllLeavesExcel(
+      response,
+    );
+  }
+
+  @Post('global-report')
+  async postGlobalReport(@Body() body: any, @Res() res: express.Response) {
+    const startDate = new Date(body.startDate);
+    const endDate = new Date(body.endDate);
+    console.log("BODY", body)
+    return await this.leaveService.generateGlobalReportTest(startDate, endDate, res);
+  }
+
+  @Get('global-report')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.SUPERADMIN)
+  @Render('global-report')
+  async getGlobalReport(@Query() query: any, @Query() error?: string) {
+    return { title: "Export global report", error: error ? error : null };
+  }
+
   @Get('new-leave')
   @UseGuards(RolesGuard)
   @Roles(UserRole.SUPERADMIN)

@@ -21,6 +21,7 @@ import { WithdrawLeaveDto } from '../api/leave/dto/with-draw-leave.dto';
 import { CarriedForwardService } from '../carried-forward/carried-forward.service';
 import { CarriedForward } from '../carried-forward/entities/carried-forward.entity';
 import { HolidayService } from '../holiday/holiday.service';
+import { Response } from 'express';
 
 @Injectable()
 export class LeaveService {
@@ -2510,6 +2511,898 @@ export class LeaveService {
     return Number(solde.toFixed(2));
   }
 
+  async countLeaves2(
+    date: Date,
+    leaveType: string,
+  ): Promise<number> {
+    const start = new Date(date);
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(date);
+    end.setHours(23, 59, 59, 999);
+
+    const count = await this.leaveRepository
+      .createQueryBuilder('leave')
+      .where('leave.status IN (:...statuses)', {
+        statuses: [
+          LeaveStatus.APPROVED,
+          LeaveStatus.APPROVED_BY_MANAGER,
+          LeaveStatus.PENDING,
+        ],
+      })
+      .andWhere('leave.leave_type = :leaveType', {
+        leaveType,
+      })
+      .andWhere('leave.start_date <= :end', {
+        end,
+      })
+      .andWhere('leave.end_date >= :start', {
+        start,
+      })
+      .getCount();
+
+    return count;
+  }
+
+  async countLeaves(
+    date: Date,
+    leaveType: string,
+    employeeType: string,
+  ): Promise<number> {
+    const start = new Date(date);
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(date);
+    end.setHours(23, 59, 59, 999);
+
+    const count = await this.leaveRepository
+      .createQueryBuilder('leave')
+      .innerJoin('leave.employee', 'employee')
+      .where('leave.status IN (:...status)', {
+        status: [LeaveStatus.APPROVED, LeaveStatus.PENDING],
+      })
+      .andWhere('leave.leave_type = :leaveType', {
+        leaveType,
+      })
+      // .andWhere('employee.employee_type = :employeeType', {
+      //   employeeType,
+      // })
+      .andWhere('leave.start_date <= :end', {
+        end,
+      })
+      .andWhere('leave.end_date >= :start', {
+        start,
+      })
+      .getCount();
+
+    return count;
+  }
+
+  async generateGlobalReport(
+    startDate: Date,
+    endDate: Date,
+    response: Response,
+  ) {
+    const workbook = new ExcelJS.Workbook();
+
+    const worksheet = workbook.addWorksheet('Global Report');
+
+    /*
+     * Les Leave Types à afficher dans le rapport.
+     * Modifie cette liste selon les types présents dans ton application.
+     */
+    const leaveTypes = [
+      'Local_Leave_AMD',
+      'Permission_AMD',
+      'Indisponibilite_AMD',
+    ];
+
+    /*
+     * Les Employee Types correspondant
+     * aux colonnes DM / DNM / IND.
+     */
+    const employeeTypes = ['DM', 'DNM', 'IND'];
+
+    /*
+     * Génération de la liste des dates.
+     */
+    const dates: Date[] = [];
+
+    const currentDate = new Date(startDate);
+    currentDate.setHours(0, 0, 0, 0);
+
+    const lastDate = new Date(endDate);
+    lastDate.setHours(0, 0, 0, 0);
+
+    while (currentDate <= lastDate) {
+      dates.push(new Date(currentDate));
+
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    /*
+     * -----------------------------------------
+     * HEADER
+     * -----------------------------------------
+     */
+
+    worksheet.getCell('B2').value = 'LEAVE TYPE';
+
+    worksheet.getCell('B3').value = 'Employee Type';
+
+    let column = 3; // C
+
+    /*
+     * On crée les colonnes pour chaque date.
+     *
+     * Exemple :
+     *
+     * C = DM
+     * D = DNM
+     * E = IND
+     * F = SUBTOTAL
+     *
+     * G = DM
+     * H = DNM
+     * I = IND
+     * J = SUBTOTAL
+     */
+
+    for (const date of dates) {
+      const startColumn = column;
+
+      worksheet.mergeCells(
+        2,
+        startColumn,
+        2,
+        startColumn + 3,
+      );
+
+      const dateCell = worksheet.getCell(2, startColumn);
+
+      dateCell.value = date;
+
+      dateCell.numFmt = 'dd/mm/yyyy';
+
+      dateCell.alignment = {
+        horizontal: 'center',
+        vertical: 'middle',
+      };
+
+      dateCell.font = {
+        bold: true,
+      };
+
+      /*
+       * Employee Types
+       */
+      worksheet.getCell(3, column).value = 'DM';
+      worksheet.getCell(3, column + 1).value = 'DNM';
+      worksheet.getCell(3, column + 2).value = 'IND';
+      worksheet.getCell(3, column + 3).value = 'SUBTOTAL';
+
+      for (let i = 0; i < 4; i++) {
+        const cell = worksheet.getCell(3, column + i);
+
+        cell.alignment = {
+          horizontal: 'center',
+          vertical: 'middle',
+        };
+
+        cell.font = {
+          bold: true,
+        };
+      }
+
+      column += 4;
+    }
+
+    /*
+     * -----------------------------------------
+     * DATA
+     * -----------------------------------------
+     */
+
+    let row = 4;
+
+    for (const leaveType of leaveTypes) {
+      worksheet.getCell(row, 2).value = leaveType;
+
+      let dataColumn = 3;
+
+      for (const date of dates) {
+        /*
+         * DM
+         */
+        const dm = await this.countLeaves(
+          date,
+          leaveType,
+          'DM',
+        );
+
+        /*
+         * DNM
+         */
+        const dnm = await this.countLeaves(
+          date,
+          leaveType,
+          'DNM',
+        );
+
+        /*
+         * IND
+         */
+        const ind = await this.countLeaves(
+          date,
+          leaveType,
+          'IND',
+        );
+
+        worksheet.getCell(row, dataColumn).value = dm;
+
+        worksheet.getCell(row, dataColumn + 1).value = dnm;
+
+        worksheet.getCell(row, dataColumn + 2).value = ind;
+
+        /*
+         * SUBTOTAL
+         */
+        worksheet.getCell(row, dataColumn + 3).value = {
+          formula: `SUM(${worksheet.getCell(row, dataColumn).address}:${worksheet.getCell(row, dataColumn + 2).address})`,
+        };
+
+        dataColumn += 4;
+      }
+
+      row++;
+    }
+
+    /*
+     * -----------------------------------------
+     * TOTAL
+     * -----------------------------------------
+     */
+
+    const totalRow = row;
+
+    worksheet.getCell(totalRow, 2).value = 'TOTAL';
+
+    let totalColumn = 3;
+
+    for (const date of dates) {
+      /*
+       * DM
+       */
+      worksheet.getCell(totalRow, totalColumn).value = {
+        formula: `SUM(${worksheet.getCell(4, totalColumn).address}:${worksheet.getCell(totalRow - 1, totalColumn).address})`,
+      };
+
+      /*
+       * DNM
+       */
+      worksheet.getCell(totalRow, totalColumn + 1).value = {
+        formula: `SUM(${worksheet.getCell(4, totalColumn + 1).address}:${worksheet.getCell(totalRow - 1, totalColumn + 1).address})`,
+      };
+
+      /*
+       * IND
+       */
+      worksheet.getCell(totalRow, totalColumn + 2).value = {
+        formula: `SUM(${worksheet.getCell(4, totalColumn + 2).address}:${worksheet.getCell(totalRow - 1, totalColumn + 2).address})`,
+      };
+
+      /*
+       * SUBTOTAL
+       */
+      worksheet.getCell(totalRow, totalColumn + 3).value = {
+        formula: `SUM(${worksheet.getCell(totalRow, totalColumn).address}:${worksheet.getCell(totalRow, totalColumn + 2).address})`,
+      };
+
+      totalColumn += 4;
+    }
+
+    /*
+     * -----------------------------------------
+     * STYLE
+     * -----------------------------------------
+     */
+
+    const lastColumn = 2 + dates.length * 4;
+
+    /*
+     * Largeurs
+     */
+    worksheet.getColumn(2).width = 28;
+
+    for (let i = 3; i <= lastColumn; i++) {
+      worksheet.getColumn(i).width = 12;
+    }
+
+    /*
+     * Header
+     */
+    for (let col = 2; col <= lastColumn; col++) {
+      for (let r = 2; r <= 3; r++) {
+        const cell = worksheet.getCell(r, col);
+
+        cell.font = {
+          bold: true,
+        };
+
+        cell.alignment = {
+          horizontal: 'center',
+          vertical: 'middle',
+        };
+
+        cell.border = {
+          top: {
+            style: 'thin',
+          },
+          bottom: {
+            style: 'thin',
+          },
+          left: {
+            style: 'thin',
+          },
+          right: {
+            style: 'thin',
+          },
+        };
+      }
+    }
+
+    /*
+     * Bordures du tableau
+     */
+    for (let r = 4; r <= totalRow; r++) {
+      for (let c = 2; c <= lastColumn; c++) {
+        const cell = worksheet.getCell(r, c);
+
+        cell.border = {
+          top: {
+            style: 'thin',
+          },
+          bottom: {
+            style: 'thin',
+          },
+          left: {
+            style: 'thin',
+          },
+          right: {
+            style: 'thin',
+          },
+        };
+
+        cell.alignment = {
+          horizontal: 'center',
+          vertical: 'middle',
+        };
+      }
+    }
+
+    /*
+     * Leave Type aligné à gauche
+     */
+    for (let r = 4; r <= totalRow; r++) {
+      worksheet.getCell(r, 2).alignment = {
+        horizontal: 'left',
+        vertical: 'middle',
+      };
+    }
+
+    /*
+     * TOTAL en gras
+     */
+    for (let c = 2; c <= lastColumn; c++) {
+      worksheet.getCell(totalRow, c).font = {
+        bold: true,
+      };
+    }
+
+    /*
+     * Freeze panes
+     */
+    worksheet.views = [
+      {
+        state: 'frozen',
+        xSplit: 2,
+        ySplit: 3,
+      },
+    ];
+
+    /*
+     * -----------------------------------------
+     * DOWNLOAD
+     * -----------------------------------------
+     */
+
+    const fileName =
+      `Global_Report_${this.formatDate(startDate)}_${this.formatDate(endDate)}.xlsx`;
+
+    response.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    );
+
+    response.setHeader(
+      'Content-Disposition',
+      `attachment; filename="${fileName}"`,
+    );
+
+    await workbook.xlsx.write(response);
+
+    response.end();
+  }
+
+  async generateGlobalReportTest(
+    startDate: Date,
+    endDate: Date,
+    response: Response,
+  ) {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Global Report');
+
+    // Les types de congés à afficher
+    const leaveTypes = [
+      'Local_Leave_AMD',
+      'Permission_AMD',
+      'Indisponibilite_AMD',
+    ];
+
+    // Générer la liste des dates
+    const dates: Date[] = [];
+
+    const currentDate = new Date(startDate);
+    currentDate.setHours(0, 0, 0, 0);
+
+    const lastDate = new Date(endDate);
+    lastDate.setHours(0, 0, 0, 0);
+
+    while (currentDate <= lastDate) {
+      dates.push(new Date(currentDate));
+
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    // =========================
+    // TITRE
+    // =========================
+
+    worksheet.mergeCells(
+      1,
+      1,
+      1,
+      dates.length + 2,
+    );
+
+    const titleCell = worksheet.getCell('A1');
+
+    titleCell.value = 'GLOBAL LEAVE REPORT';
+
+    titleCell.font = {
+      bold: true,
+      size: 14,
+    };
+
+    titleCell.alignment = {
+      horizontal: 'center',
+      vertical: 'middle',
+    };
+
+    // =========================
+    // EN-TÊTES
+    // =========================
+
+    const headerRow = worksheet.getRow(3);
+
+    headerRow.getCell(1).value = 'LEAVE TYPE';
+
+    dates.forEach((date, index) => {
+      const columnIndex = index + 2;
+
+      headerRow.getCell(columnIndex).value =
+        this.formatDate(date);
+    });
+
+    // Colonne Total
+    const totalColumnIndex = dates.length + 2;
+
+    headerRow.getCell(totalColumnIndex).value = 'TOTAL';
+
+    // Style des en-têtes
+    headerRow.eachCell((cell) => {
+      cell.font = {
+        bold: true,
+        color: {
+          argb: 'FFFFFF',
+        },
+      };
+
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: {
+          argb: '4472C4',
+        },
+      };
+
+      cell.alignment = {
+        horizontal: 'center',
+        vertical: 'middle',
+      };
+
+      cell.border = {
+        top: {
+          style: 'thin',
+        },
+        bottom: {
+          style: 'thin',
+        },
+        left: {
+          style: 'thin',
+        },
+        right: {
+          style: 'thin',
+        },
+      };
+    });
+
+    // =========================
+    // DONNÉES
+    // =========================
+
+    for (let i = 0; i < leaveTypes.length; i++) {
+      const leaveType = leaveTypes[i];
+
+      const rowIndex = i + 4;
+      const row = worksheet.getRow(rowIndex);
+
+      row.getCell(1).value = leaveType;
+
+      for (let j = 0; j < dates.length; j++) {
+        const date = dates[j];
+
+        const columnIndex = j + 2;
+
+        const count = await this.countLeaves2(
+          date,
+          leaveType,
+        );
+
+        row.getCell(columnIndex).value = count;
+      }
+
+      // Formule du total pour le Leave Type
+      const firstDateColumn = 'B';
+      const lastDateColumn = this.getExcelColumn(
+        dates.length + 1,
+      );
+
+      row.getCell(totalColumnIndex).value = {
+        formula: `SUM(${firstDateColumn}${rowIndex}:${lastDateColumn}${rowIndex})`
+      }
+    }
+
+    // =========================
+    // LIGNE TOTAL
+    // =========================
+
+    const totalRowIndex = leaveTypes.length + 4;
+    const totalRow = worksheet.getRow(totalRowIndex);
+
+    totalRow.getCell(1).value = 'TOTAL';
+
+    for (let columnIndex = 2; columnIndex <= totalColumnIndex; columnIndex++) {
+      const columnLetter = this.getExcelColumn(columnIndex);
+
+      totalRow.getCell(columnIndex).value = {
+        formula: `SUM(${columnLetter}4:${columnLetter}${totalRowIndex - 1})`
+      }
+    }
+
+    // =========================
+    // STYLE DES DONNÉES
+    // =========================
+
+    worksheet.eachRow((row, rowNumber) => {
+      if (rowNumber < 3) {
+        return;
+      }
+
+      row.eachCell((cell) => {
+        cell.alignment = {
+          horizontal: 'center',
+          vertical: 'middle',
+        };
+
+        cell.border = {
+          top: {
+            style: 'thin',
+          },
+          bottom: {
+            style: 'thin',
+          },
+          left: {
+            style: 'thin',
+          },
+          right: {
+            style: 'thin',
+          },
+        };
+      });
+    });
+
+    // Style de la ligne TOTAL
+    totalRow.eachCell((cell) => {
+      cell.font = {
+        bold: true,
+      };
+
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: {
+          argb: 'D9EAF7',
+        },
+      };
+    });
+
+    // =========================
+    // LARGEUR DES COLONNES
+    // =========================
+
+    worksheet.getColumn(1).width = 30;
+
+    for (let columnIndex = 2; columnIndex <= totalColumnIndex; columnIndex++) {
+      worksheet.getColumn(columnIndex).width = 15;
+    }
+
+    // Figer les en-têtes
+    worksheet.views = [
+      {
+        state: 'frozen',
+        ySplit: 3,
+        xSplit: 1,
+      },
+    ];
+
+    // =========================
+    // TÉLÉCHARGEMENT
+    // =========================
+
+    response.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    );
+
+    response.setHeader(
+      'Content-Disposition',
+      'attachment; filename="global-leave-report.xlsx"',
+    );
+
+    await workbook.xlsx.write(response);
+
+    response.end();
+  }
+
+  // =========================
+  // FORMAT DE DATE
+  // =========================
+
+  private formatDate(date: Date): string {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+
+    return `${day}/${month}/${year}`;
+  }
+
+  // =========================
+  // NUMÉRO DE COLONNE EXCEL
+  // =========================
+
+  private getExcelColumn(columnNumber: number): string {
+    let columnName = '';
+
+    while (columnNumber > 0) {
+      const remainder = (columnNumber - 1) % 26;
+
+      columnName = String.fromCharCode(65 + remainder) + columnName;
+
+      columnNumber = Math.floor((columnNumber - 1) / 26);
+    }
+
+    return columnName;
+  }
+
+  async generateAllLeavesExcel(
+    response: Response,
+  ): Promise<void> {
+
+    // Récupérer tous les leaves avec les employés
+    const leaves = await this.leaveRepository
+      .createQueryBuilder('leave')
+      .leftJoinAndSelect('leave.employee', 'employee')
+      .orderBy('leave.created_at', 'DESC')
+      .getMany();
+
+    console.log("LEAVES:", leaves)
+
+    // Créer le workbook Excel
+    const workbook = new ExcelJS.Workbook();
+
+    const worksheet = workbook.addWorksheet('All Leaves');
+
+    // Définir les colonnes
+    worksheet.columns = [
+      {
+        header: 'Matricule',
+        key: 'matricule',
+        width: 18,
+      },
+      {
+        header: 'Name',
+        key: 'name',
+        width: 20,
+      },
+      {
+        header: 'Firstname',
+        key: 'firstname',
+        width: 20,
+      },
+      {
+        header: 'Leave Type',
+        key: 'leaveType',
+        width: 25,
+      },
+      {
+        header: 'Date Début',
+        key: 'startDate',
+        width: 18,
+      },
+      {
+        header: 'Date Fin',
+        key: 'endDate',
+        width: 18,
+      },
+      {
+        header: 'Submit Date',
+        key: 'submitDate',
+        width: 20,
+      },
+      {
+        header: 'Leave Status',
+        key: 'status',
+        width: 20,
+      },
+    ];
+
+    // Ajouter les leaves
+    for (const leave of leaves) {
+
+      worksheet.addRow({
+        matricule: leave.employee?.matricule ?? '',
+        name: leave.employee?.name ?? '',
+        firstname: leave.employee?.firstname ?? '',
+
+        leaveType: leave.leave_type,
+
+        startDate: leave.start_date
+          ? new Date(leave.start_date)
+          : '',
+
+        endDate: leave.end_date
+          ? new Date(leave.end_date)
+          : '',
+
+        submitDate: leave.created_at
+        ,
+
+        status: leave.status,
+      });
+    }
+
+    // Style de l'en-tête
+    const headerRow = worksheet.getRow(1);
+
+    headerRow.font = {
+      bold: true,
+      color: {
+        argb: 'FFFFFFFF',
+      },
+    };
+
+    headerRow.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: {
+        argb: 'FF1F4E78',
+      },
+    };
+
+    headerRow.alignment = {
+      horizontal: 'center',
+      vertical: 'middle',
+    };
+
+    headerRow.height = 25;
+
+    // Format des dates
+    worksheet.getColumn('startDate').numFmt = 'dd/mm/yyyy';
+    worksheet.getColumn('endDate').numFmt = 'dd/mm/yyyy';
+    worksheet.getColumn('submitDate').numFmt =
+      'dd/mm/yyyy hh:mm';
+
+    // Bordures et alignement
+    worksheet.eachRow((row) => {
+
+      row.eachCell((cell) => {
+
+        cell.border = {
+          top: {
+            style: 'thin',
+            color: {
+              argb: 'FFD9E2F3',
+            },
+          },
+          bottom: {
+            style: 'thin',
+            color: {
+              argb: 'FFD9E2F3',
+            },
+          },
+          left: {
+            style: 'thin',
+            color: {
+              argb: 'FFD9E2F3',
+            },
+          },
+          right: {
+            style: 'thin',
+            color: {
+              argb: 'FFD9E2F3',
+            },
+          },
+        };
+
+        cell.alignment = {
+          vertical: 'middle',
+        };
+
+      });
+
+    });
+
+    // Figer la première ligne
+    worksheet.views = [
+      {
+        state: 'frozen',
+        ySplit: 1,
+      },
+    ];
+
+    // Filtre automatique
+    worksheet.autoFilter = {
+      from: 'A1',
+      to: 'H1',
+    };
+
+    // Réponse HTTP
+    response.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    );
+
+    response.setHeader(
+      'Content-Disposition',
+      'attachment; filename="all-leaves.xlsx"',
+    );
+
+    // Envoyer le fichier Excel
+    await workbook.xlsx.write(response);
+
+    response.end();
+  }
 }
 
 export interface MonthlyAbsenceStat {
