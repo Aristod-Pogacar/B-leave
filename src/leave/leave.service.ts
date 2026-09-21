@@ -2559,7 +2559,7 @@ export class LeaveService {
       .createQueryBuilder('leave')
       .innerJoin('leave.employee', 'employee')
       .where('leave.status IN (:...status)', {
-        status: [LeaveStatus.APPROVED, LeaveStatus.PENDING],
+        status: [LeaveStatus.APPROVED, LeaveStatus.PENDING, LeaveStatus.APPROVED_BY_MANAGER],
       })
       .andWhere('leave.leave_type = :leaveType', {
         leaveType,
