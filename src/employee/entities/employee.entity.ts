@@ -6,6 +6,12 @@ import { User } from '../../user/entities/user.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, JoinColumn, Index, OneToOne } from 'typeorm';
 import { CarriedForward } from '../../carried-forward/entities/carried-forward.entity';
 
+export enum EmployeeType {
+    DM = 'Direct Machinist',
+    IND = 'Indirect',
+    DNM = 'Direct Non Machinist',
+}
+
 @Entity('employees')
 export class Employee {
     @PrimaryGeneratedColumn('uuid')
@@ -44,8 +50,8 @@ export class Employee {
     @Column()
     job_level!: string;
 
-    // @Column()
-    // job_post!: string;
+    @Column({ nullable: true })
+    employee_type?: EmployeeType;
 
     @Column()
     designation!: string;
@@ -62,7 +68,7 @@ export class Employee {
     @Column({ default: true })
     is_active!: boolean;
 
-    @OneToMany(() => Leave, leave => leave.employee, { onDelete: 'NO ACTION' })
+    @OneToMany(() => Leave, leave => leave.employee, { onDelete: 'NO ACTION', onUpdate: 'CASCADE' })
     leaves: Leave[];
 
     @OneToMany(() => Permission2h, permission2h => permission2h.employee, { onDelete: 'NO ACTION' })

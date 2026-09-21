@@ -55,7 +55,8 @@ export class LeaveController {
     const startDate = new Date(body.startDate);
     const endDate = new Date(body.endDate);
     console.log("BODY", body)
-    return await this.leaveService.generateGlobalReportTest(startDate, endDate, res);
+    return await this.leaveService.generateGlobalReport(startDate, endDate, res);
+    // return await this.leaveService.generateGlobalReportTest(startDate, endDate, res);
   }
 
   @Get('global-report')

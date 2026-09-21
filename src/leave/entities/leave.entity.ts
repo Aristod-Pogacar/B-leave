@@ -22,7 +22,7 @@ export class Leave {
     @PrimaryGeneratedColumn('uuid')
     id!: string;
 
-    @ManyToOne(() => Employee, employee => employee.leaves)
+    @ManyToOne(() => Employee, employee => employee.leaves, { onUpdate: 'CASCADE' })
     @JoinColumn({ name: 'employee_id' })
     employee!: Employee;
 

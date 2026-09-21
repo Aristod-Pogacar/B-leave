@@ -13,6 +13,7 @@ import { UserService } from '../user/user.service';
 import { HistoryService } from '../history/history.service';
 import { HistoryReason } from '../history/entities/history.entity';
 import * as bcrypt from 'bcrypt';
+import { EmployeeType } from './entities/employee.entity';
 
 @Controller('employee')
 export class EmployeeController {
@@ -447,7 +448,6 @@ export class EmployeeController {
       const cleanData = filtered.filter(x => x.matricule);
 
       for (const data of cleanData) {
-
         await this.employeeService.updateManager(data);
       }
       await this.historyService.create({

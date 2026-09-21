@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Employee } from './entities/employee.entity';
+import { Employee, EmployeeType } from './entities/employee.entity';
 import { Between, In, IsNull, LessThanOrEqual, Like, MoreThanOrEqual, Not, Repository } from 'typeorm';
 import * as ExcelJS from 'exceljs';
 import * as XLSX from 'xlsx';
@@ -120,6 +120,13 @@ export class EmployeeService {
     const data = await query.getMany();
 
     return data;
+  }
+
+  async updateEmployeeType(data: { matricule: string, employeeType: EmployeeType }) {
+    const employee = await this.employeeRepository.findOne({ where: { matricule: data.matricule } });
+    if (!employee) return;
+    employee.employee_type = data.employeeType;
+    await this.employeeRepository.save(employee);
   }
 
   async updateManager(data: { matricule: any; manager: any; }) {
@@ -1104,6 +1111,7 @@ export class EmployeeService {
         job_level: row['Job Level'],
         designation: row['Designation'],
         site: row['Sit'],
+        employee_type: row['Employee Type'] as EmployeeType,
         app_password: bcrypt.hashSync("" + row['App password'], salt),
         onehr_password: this.cryptoService.encrypt(String(row['Onehr password'])),
       }));
@@ -1128,6 +1136,7 @@ export class EmployeeService {
               'name',
               'firstname',
               'job_level',
+              'employee_type',
               'designation',
               'app_password',
               'onehr_password',
@@ -1188,6 +1197,7 @@ export class EmployeeService {
         name: row.getCell(headerMap['name']).value?.toString(),
         firstname: row.getCell(headerMap['firstname']).value?.toString(),
         job_level: row.getCell(headerMap['job level']).value?.toString(),
+        employee_type: row.getCell(headerMap['Employee Type']).value?.toString() as EmployeeType,
         // job_post: row.getCell(headerMap['job post']).value?.toString(),
         designation: row.getCell(headerMap['designation']).value?.toString(),
         site: row.getCell(headerMap['sit']).value?.toString(),
@@ -1211,6 +1221,7 @@ export class EmployeeService {
           'name',
           'firstname',
           'job_level',
+          'employee_type',
           'designation',
           'site',
         ],

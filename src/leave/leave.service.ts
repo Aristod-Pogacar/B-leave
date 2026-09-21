@@ -4,7 +4,7 @@ import { UpdateLeaveDto } from './dto/update-leave.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Leave, LeaveStatus, WithdrawStatus } from './entities/leave.entity';
 import { Between, In, IsNull, LessThanOrEqual, Like, MoreThanOrEqual, Not, Repository } from 'typeorm';
-import { Employee } from '../employee/entities/employee.entity';
+import { Employee, EmployeeType } from '../employee/entities/employee.entity';
 import * as express from 'express';
 import * as ExcelJS from 'exceljs';
 import * as XLSX from 'xlsx';
@@ -2555,7 +2555,7 @@ export class LeaveService {
     const end = new Date(date);
     end.setHours(23, 59, 59, 999);
 
-    const count = await this.leaveRepository
+    const query = this.leaveRepository
       .createQueryBuilder('leave')
       .innerJoin('leave.employee', 'employee')
       .where('leave.status IN (:...status)', {
@@ -2564,16 +2564,21 @@ export class LeaveService {
       .andWhere('leave.leave_type = :leaveType', {
         leaveType,
       })
-      // .andWhere('employee.employee_type = :employeeType', {
-      //   employeeType,
-      // })
+      .andWhere('employee.employee_type = :employeeType', {
+        employeeType,
+      })
       .andWhere('leave.start_date <= :end', {
         end,
       })
       .andWhere('leave.end_date >= :start', {
         start,
       })
-      .getCount();
+    console.log(query.getSql())
+    const count = await query.getCount();
+
+    if (count > 0) {
+      console.log("COUNT:", count, date)
+    }
 
     return count;
   }
@@ -2583,6 +2588,7 @@ export class LeaveService {
     endDate: Date,
     response: Response,
   ) {
+
     const workbook = new ExcelJS.Workbook();
 
     const worksheet = workbook.addWorksheet('Global Report');
@@ -2717,7 +2723,7 @@ export class LeaveService {
         const dm = await this.countLeaves(
           date,
           leaveType,
-          'DM',
+          'Direct Machinist',
         );
 
         /*
@@ -2726,7 +2732,7 @@ export class LeaveService {
         const dnm = await this.countLeaves(
           date,
           leaveType,
-          'DNM',
+          'Direct Non Machinist',
         );
 
         /*
@@ -2735,7 +2741,7 @@ export class LeaveService {
         const ind = await this.countLeaves(
           date,
           leaveType,
-          'IND',
+          'Indirect',
         );
 
         worksheet.getCell(row, dataColumn).value = dm;

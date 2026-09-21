@@ -98,4 +98,14 @@ export class TaskScheduler {
     })
   }
 
+  @Cron(CronExpression.EVERY_10_SECONDS)
+  async testTask1() {
+    console.log("EVERY 10 sec")
+  }
+
+  @Cron(CronExpression.EVERY_30_SECONDS)
+  async testTask2() {
+    console.log("EVERY 30 sec")
+  }
+
 }
