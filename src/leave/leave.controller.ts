@@ -51,6 +51,8 @@ export class LeaveController {
   }
 
   @Post('global-report')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.PRODUCTION_MANAGER, UserRole.HR_LEAD)
   async postGlobalReport(@Body() body: any, @Res() res: express.Response) {
     const startDate = new Date(body.startDate);
     const endDate = new Date(body.endDate);
@@ -61,7 +63,7 @@ export class LeaveController {
 
   @Get('global-report')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN)
+  @Roles(UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.PRODUCTION_MANAGER, UserRole.HR_LEAD)
   @Render('global-report')
   async getGlobalReport(@Query() query: any, @Query() error?: string) {
     return { title: "Export global report", error: error ? error : null };
