@@ -15,6 +15,7 @@ import { TaskService } from '../task/task.service';
 import { LeaveStatus } from './entities/leave.entity';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { LeaveApproveEvent } from '../notification/events/leave-approve.event';
+import * as ExcelJS from 'exceljs';
 
 @Controller('leave')
 export class LeaveController {
@@ -50,6 +51,27 @@ export class LeaveController {
     );
   }
 
+  @Get('global-report/preview')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.PRODUCTION_MANAGER, UserRole.HR_LEAD)
+  async previewGlobalReport(
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
+  ) {
+    const result = await this.leaveService
+      .buildGlobalReportData(
+        new Date(`${startDate}T00:00:00`),
+        new Date(`${endDate}T00:00:00`),
+      );
+
+    return result.reportData;
+  }
+
+  @Get('total-leave-this-year')
+  async getTotalLeaves() {
+    // const total 
+  }
+
   @Post('global-report')
   @UseGuards(RolesGuard)
   @Roles(UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.PRODUCTION_MANAGER, UserRole.HR_LEAD)
@@ -64,7 +86,7 @@ export class LeaveController {
   @Get('global-report')
   @UseGuards(RolesGuard)
   @Roles(UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.PRODUCTION_MANAGER, UserRole.HR_LEAD)
-  @Render('global-report')
+  @Render('test2')
   async getGlobalReport(@Query() query: any, @Query() error?: string) {
     return { title: "Export global report", error: error ? error : null };
   }
@@ -273,6 +295,135 @@ export class LeaveController {
   @Get('leaves-line-section/:line/:section')
   async getLeavesByLineAndSection(@Param('line') line: string, @Param('section') section: string) {
     return this.leaveService.getLeavesByLineAndSection(line, section);
+  }
+
+  @Get('weekly-report')
+  @Render('weekly-report')
+  getWeeklyReportPage(
+    @Res() res: express.Response,
+  ) {
+    return { title: "Approuve Permissions" };
+  }
+
+  @Get('download-weekly-report')
+  async downloadWeeklyReport(
+    @Query('date') date: string,
+    @Res() res: express.Response,
+  ) {
+    if (!date) {
+      return res.status(400).send(
+        'Please provide a date.',
+      );
+    }
+
+    const report =
+      await this.leaveService.getWeeklyReport(date);
+
+    const workbook = new ExcelJS.Workbook();
+
+    const worksheet =
+      workbook.addWorksheet('Weekly Report');
+
+    worksheet.mergeCells('A1:C1');
+
+    worksheet.getCell('A1').value =
+      'B-LEAVE WEEKLY REPORT';
+
+    worksheet.getCell('A1').font = {
+      bold: true,
+      size: 16,
+    };
+
+    worksheet.getCell('A1').alignment = {
+      horizontal: 'center',
+    };
+
+    worksheet.getCell('A3').value =
+      'Reporting Week';
+
+    worksheet.getCell('B3').value =
+      `${report.weekStart
+        .toISOString()
+        .slice(0, 10)} → ${report.weekEnd
+          .toISOString()
+          .slice(0, 10)}`;
+
+    worksheet.getCell('A4').value =
+      'Reporting Year';
+
+    worksheet.getCell('B4').value =
+      report.year;
+
+    worksheet.getRow(6).values = [
+      'Metric',
+      'Period',
+      'Number of Leaves',
+    ];
+
+    worksheet.getRow(6).font = {
+      bold: true,
+    };
+
+    worksheet.addRow([
+      'Leaves Created',
+      'Monday - Sunday',
+      report.weeklyCreated,
+    ]);
+
+    worksheet.addRow([
+      'Leaves Approved',
+      'Monday - Sunday',
+      report.weeklyApproved,
+    ]);
+
+    worksheet.addRow([
+      'Leaves Created',
+      `Year ${report.year}`,
+      report.yearlyCreated,
+    ]);
+
+    worksheet.addRow([
+      'Leaves Approved',
+      `Year ${report.year}`,
+      report.yearlyApproved,
+    ]);
+
+    worksheet.getColumn(1).width = 25;
+    worksheet.getColumn(2).width = 25;
+    worksheet.getColumn(3).width = 20;
+
+    worksheet.eachRow((row) => {
+      row.eachCell((cell) => {
+        cell.border = {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' },
+        };
+      });
+    });
+
+    const fileName =
+      `Weekly_Report_${report.weekStart
+        .toISOString()
+        .slice(0, 10)}_to_${report.weekEnd
+          .toISOString()
+          .slice(0, 10)}.xlsx`;
+
+    const buffer =
+      await workbook.xlsx.writeBuffer();
+
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    );
+
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="${fileName}"`,
+    );
+
+    res.send(buffer);
   }
 
   @Get('range')

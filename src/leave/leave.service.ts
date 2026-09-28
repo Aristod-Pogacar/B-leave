@@ -345,6 +345,14 @@ export class LeaveService {
   }
 
   async getLeavesByRange(year: number, startMonth: number, endMonth: number, line: string, departement: string, section: string, division: string, site: string, user: any, search: string) {
+    console.log("YEAR", year);
+    console.log("Start Month", startMonth);
+    console.log("End Month", endMonth);
+    console.log("Line", line);
+    console.log("Section", section);
+    console.log("Division", division);
+    console.log("Site", site);
+
     if (user.role == UserRole.MANAGER) {
       if (search && search.trim() !== "") {
         return this.leaveRepository.find({
@@ -1096,6 +1104,13 @@ export class LeaveService {
     skip = 0,
     take = 30,
   ) {
+    console.log("YEAR:", year)
+    console.log("Start month:", startMonth)
+    console.log("End month:", endMonth)
+    console.log("Line:", line)
+    console.log("Section:", section)
+    console.log("skip:", skip)
+    console.log("Take:", take)
     const startDate = new Date(year, startMonth - 1, 1);
     const endDate = new Date(year, endMonth, 0); // dernier jour du mois
 
@@ -2282,6 +2297,317 @@ export class LeaveService {
       : 0;
   }
 
+  private sumYearMonth(year: number, month: number): string {
+    const sum = '' + year + '-' + month.toString().padStart(2, "0");
+    return sum;
+  }
+
+  async getGlobalLeavesPlanningReport(year: number, month: number) {
+    const defaultDate = this.sumYearMonth(year, month)
+
+    const { leaveTaken } =
+      await this.globalLeaveBalances(defaultDate, defaultDate, [LeaveStatus.APPROVED, LeaveStatus.APPROVED_BY_MANAGER]);
+
+    const employeesCount = (await this.employeeService.findAll()).length;
+
+    const leavesUntilThisMonth =
+      await this.globalLeaveBalances(this.sumYearMonth(year, 1), defaultDate, [LeaveStatus.APPROVED, LeaveStatus.APPROVED_BY_MANAGER])
+
+    const leavesAfterThisMonth =
+      await this.globalLeaveBalances(this.sumYearMonth(year, month + 1), this.sumYearMonth(year, 12), [LeaveStatus.APPROVED, LeaveStatus.APPROVED_BY_MANAGER, LeaveStatus.PENDING]);
+
+    const expectedTakenLeaves = leavesUntilThisMonth.leaveTaken + leavesAfterThisMonth.leaveTaken
+
+    const totalLeaveBalances = 30 * employeesCount;
+
+    const expectedSoldLeft = totalLeaveBalances - expectedTakenLeaves
+
+    const averageBalance = expectedSoldLeft / employeesCount;
+
+    return {
+      month: defaultDate,
+      monthTakenLeaves: leaveTaken,
+      balanceAfterMonth: leavesUntilThisMonth.soldLeft,
+      plannedAfterMonth: leavesAfterThisMonth.leaveTaken,
+      balanceEndOfYear: expectedSoldLeft,
+      averageBalance: averageBalance
+    }
+
+  }
+
+  async getWeeklyReport(
+    referenceDate: string,
+  ) {
+    const date = new Date(`${referenceDate}T00:00:00Z`);
+
+    if (isNaN(date.getTime())) {
+      throw new Error(
+        'Invalid date format. Expected YYYY-MM-DD.',
+      );
+    }
+
+    // Lundi de la semaine
+    const day = date.getUTCDay(); // Sunday = 0
+    const diffToMonday = day === 0 ? -6 : 1 - day;
+
+    const monday = new Date(date);
+    monday.setUTCDate(
+      monday.getUTCDate() + diffToMonday,
+    );
+
+    // Dimanche de la semaine
+    const sunday = new Date(monday);
+    sunday.setUTCDate(
+      sunday.getUTCDate() + 6,
+    );
+
+    const mondayStart = new Date(monday);
+    mondayStart.setUTCHours(0, 0, 0, 0);
+
+    const sundayEnd = new Date(sunday);
+    sundayEnd.setUTCHours(23, 59, 59, 999);
+
+    const year = date.getUTCFullYear();
+
+    const yearStart = new Date(
+      Date.UTC(year, 0, 1, 0, 0, 0, 0),
+    );
+
+    const yearEnd = new Date(
+      Date.UTC(year, 11, 31, 23, 59, 59, 999),
+    );
+
+    // Leaves created during the week
+    const weeklyCreated = await this.leaveRepository
+      .createQueryBuilder('leave')
+      .where(
+        'leave.created_at >= :mondayStart',
+        { mondayStart },
+      )
+      .andWhere(
+        'leave.created_at <= :sundayEnd',
+        { sundayEnd },
+      )
+      .getCount();
+
+    // Leaves approved during the week
+    const weeklyApproved = await this.leaveRepository
+      .createQueryBuilder('leave')
+      .where(
+        'leave.approved_date >= :mondayStart',
+        { mondayStart },
+      )
+      .andWhere(
+        'leave.approved_date <= :sundayEnd',
+        { sundayEnd },
+      )
+      .getCount();
+
+    // Leaves created during the year
+    const yearlyCreated = await this.leaveRepository
+      .createQueryBuilder('leave')
+      .where(
+        'leave.created_at >= :yearStart',
+        { yearStart },
+      )
+      .andWhere(
+        'leave.created_at <= :yearEnd',
+        { yearEnd },
+      )
+      .getCount();
+
+    // Leaves approved during the year
+    const yearlyApproved = await this.leaveRepository
+      .createQueryBuilder('leave')
+      .where(
+        'leave.approved_date >= :yearStart',
+        { yearStart },
+      )
+      .andWhere(
+        'leave.approved_date <= :yearEnd',
+        { yearEnd },
+      )
+      .getCount();
+
+    return {
+      year,
+      weekStart: monday,
+      weekEnd: sunday,
+      weeklyCreated,
+      weeklyApproved,
+      yearlyCreated,
+      yearlyApproved,
+    };
+  }
+
+  async countLeaveDaysByMonth(
+    month: string,
+    type: LeaveStatus[]
+  ): Promise<number> {
+
+    // Validate month format
+    if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) {
+      throw new Error(
+        'Invalid month format. Expected YYYY-MM.',
+      );
+    }
+
+    // Define month boundaries
+    const [year, monthNumber] = month
+      .split('-')
+      .map(Number);
+
+    // First day of the month
+    const monthStart = new Date(
+      Date.UTC(year, monthNumber - 1, 1),
+    );
+
+    // Last day of the month
+    const monthEnd = new Date(
+      Date.UTC(year, monthNumber, 0),
+    );
+
+    // Get all leaves overlapping the requested month
+    const leaves = await this.leaveRepository
+      .createQueryBuilder('leave')
+      .where('leave.status IN (:...statuses)', {
+        statuses: type,
+      })
+      .andWhere('leave.start_date <= :monthEnd', {
+        monthEnd: monthEnd.toISOString().slice(0, 10),
+      })
+      .andWhere('leave.end_date >= :monthStart', {
+        monthStart: monthStart.toISOString().slice(0, 10),
+      })
+      .andWhere('leave.leave_type = :leave_type', {
+        leave_type: 'Local_Leave_AMD'
+      })
+      .getMany();
+
+    let totalDays = 0;
+
+    for (const leave of leaves) {
+
+      // Convert database dates to UTC dates
+      const leaveStart = new Date(
+        `${leave.start_date}T00:00:00Z`,
+      );
+
+      const leaveEnd = new Date(
+        `${leave.end_date}T00:00:00Z`,
+      );
+
+      // Get the overlap between the leave and the month
+      const effectiveStart =
+        leaveStart > monthStart
+          ? leaveStart
+          : monthStart;
+
+      const effectiveEnd =
+        leaveEnd < monthEnd
+          ? leaveEnd
+          : monthEnd;
+
+      // Calculate inclusive number of days
+      const diffTime =
+        effectiveEnd.getTime() -
+        effectiveStart.getTime();
+
+      const diffDays =
+        Math.floor(
+          diffTime / (1000 * 60 * 60 * 24),
+        ) + 1;
+
+      // Add to total
+      if (diffDays > 0) {
+        totalDays += diffDays;
+      }
+    }
+
+    return totalDays;
+  }
+
+  async globalLeaveBalances(
+    startMonth: string,
+    endMonth: string,
+    type: LeaveStatus[],
+  ) {
+    if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(startMonth)) {
+      throw new Error('Invalid month format. Expected YYYY-MM.');
+    }
+
+    const [startYear, startMonthNumber] = startMonth.split('-').map(Number);
+
+    if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(endMonth)) {
+      throw new Error('Invalid month format. Expected YYYY-MM.');
+    }
+
+    const [endYear, endMonthNumber] = endMonth.split('-').map(Number);
+
+    if (endYear != startYear) {
+      throw new Error('Start year and end year don\'t match.');
+    }
+
+    const year = endYear;
+
+    let tt = 0
+    for (let index = startMonthNumber; index <= endMonthNumber; index++) {
+      const i = ("" + index).padStart(2, "0")
+      const m = '' + year + '-' + i;
+      const leaveTaken = await this.countLeaveDaysByMonth(m, type);
+      tt += leaveTaken;
+    }
+
+    const employeesCount = (await this.employeeService.findAll()).length;
+    const totalSolde = 30 * employeesCount;
+    const soldLeft = totalSolde - tt
+    return { leaveTaken: tt, soldLeft };
+  }
+
+  async sumRemainingLeaveBalances(
+    month: string,
+    type: LeaveStatus[],
+  ): Promise<number> {
+    if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) {
+      throw new Error('Invalid month format. Expected YYYY-MM.');
+    }
+
+    const [year, monthNumber] = month.split('-').map(Number);
+
+    let tt = 0
+    for (let index = 1; index <= monthNumber; index++) {
+      const i = ("" + index).padStart(2, "0")
+      const m = '' + year + '-' + i;
+      const leaveTaken = await this.countLeaveDaysByMonth(m, type);
+      tt += leaveTaken;
+    }
+
+    const employeesCount = (await this.employeeService.findAll()).length;
+    const totalSolde = 30 * employeesCount;
+    const soldLeft = totalSolde - tt
+    return soldLeft;
+  }
+
+  async countPlannedLeaveDays(
+    month: string,
+  ): Promise<number> {
+    if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) {
+      throw new Error('Invalid month format. Expected YYYY-MM.');
+    }
+
+    const [year, monthNumber] = month.split('-').map(Number);
+
+    let tt = 0
+    for (let index = monthNumber; index <= 12; index++) {
+      const i = ("" + index).padStart(2, "0")
+      const m = '' + year + '-' + i;
+      const leaveTaken = await this.countLeaveDaysByMonth(m, [LeaveStatus.APPROVED, LeaveStatus.APPROVED_BY_MANAGER, LeaveStatus.PENDING]);
+      tt += leaveTaken;
+    }
+
+    return tt;
+  }
+
   async getOngoingLeavesBySection() {
 
     const today = new Date();
@@ -2573,7 +2899,6 @@ export class LeaveService {
       .andWhere('leave.end_date >= :start', {
         start,
       })
-    console.log(query.getSql())
     const count = await query.getCount();
 
     if (count > 0) {
@@ -2583,35 +2908,44 @@ export class LeaveService {
     return count;
   }
 
-  async generateGlobalReport(
+  private formatReportDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(
+      date.getMonth() + 1,
+    ).padStart(2, '0');
+    const day = String(
+      date.getDate(),
+    ).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+  }
+
+  async buildGlobalReportData(
     startDate: Date,
     endDate: Date,
-    response: Response,
   ) {
-
-    const workbook = new ExcelJS.Workbook();
-
-    const worksheet = workbook.addWorksheet('Global Report');
-
-    /*
-     * Les Leave Types à afficher dans le rapport.
-     * Modifie cette liste selon les types présents dans ton application.
-     */
     const leaveTypes = [
       'Local_Leave_AMD',
       'Permission_AMD',
       'Indisponibilite_AMD',
     ];
 
-    /*
-     * Les Employee Types correspondant
-     * aux colonnes DM / DNM / IND.
-     */
-    const employeeTypes = ['DM', 'DNM', 'IND'];
+    const employeeTypes = [
+      {
+        key: 'DM',
+        value: 'Direct Machinist',
+      },
+      {
+        key: 'DNM',
+        value: 'Direct Non Machinist',
+      },
+      {
+        key: 'IND',
+        value: 'Indirect',
+      },
+    ];
 
-    /*
-     * Génération de la liste des dates.
-     */
+    // Génération des dates
     const dates: Date[] = [];
 
     const currentDate = new Date(startDate);
@@ -2623,9 +2957,73 @@ export class LeaveService {
     while (currentDate <= lastDate) {
       dates.push(new Date(currentDate));
 
-      currentDate.setDate(currentDate.getDate() + 1);
+      currentDate.setDate(
+        currentDate.getDate() + 1,
+      );
     }
 
+    // Structure des données
+    const reportData: Record<string, any> = {};
+
+    for (const date of dates) {
+      const dateKey = this.formatReportDate(date);
+
+      reportData[dateKey] = {};
+
+      for (const leaveType of leaveTypes) {
+        reportData[dateKey][leaveType] = {
+          DM: 0,
+          DNM: 0,
+          IND: 0,
+          SUBTOTAL: 0,
+        };
+
+        for (const employeeType of employeeTypes) {
+          const count = await this.countLeaves(
+            date,
+            leaveType,
+            employeeType.value,
+          );
+
+          reportData[dateKey][leaveType][
+            employeeType.key
+          ] = count;
+        }
+
+        // Subtotal
+        const values = reportData[dateKey][leaveType];
+
+        values.SUBTOTAL =
+          values.DM +
+          values.DNM +
+          values.IND;
+      }
+    }
+
+    return {
+      dates,
+      leaveTypes,
+      reportData,
+    };
+  }
+
+  async generateGlobalReport(
+    startDate: Date,
+    endDate: Date,
+    response: Response,
+  ) {
+
+    const workbook = new ExcelJS.Workbook();
+
+    const worksheet = workbook.addWorksheet('Global Report');
+    const {
+      dates,
+      leaveTypes,
+      reportData,
+    } = await this.buildGlobalReportData(
+      startDate,
+      endDate,
+    );
     /*
      * -----------------------------------------
      * HEADER
@@ -2708,54 +3106,31 @@ export class LeaveService {
      * DATA
      * -----------------------------------------
      */
-
     let row = 4;
 
     for (const leaveType of leaveTypes) {
+
       worksheet.getCell(row, 2).value = leaveType;
 
       let dataColumn = 3;
 
       for (const date of dates) {
-        /*
-         * DM
-         */
-        const dm = await this.countLeaves(
-          date,
-          leaveType,
-          'Direct Machinist',
-        );
 
-        /*
-         * DNM
-         */
-        const dnm = await this.countLeaves(
-          date,
-          leaveType,
-          'Direct Non Machinist',
-        );
+        const dateKey = this.formatDate(date);
 
-        /*
-         * IND
-         */
-        const ind = await this.countLeaves(
-          date,
-          leaveType,
-          'Indirect',
-        );
+        const values = reportData[dateKey][leaveType];
 
-        worksheet.getCell(row, dataColumn).value = dm;
+        worksheet.getCell(row, dataColumn).value =
+          values.DM;
 
-        worksheet.getCell(row, dataColumn + 1).value = dnm;
+        worksheet.getCell(row, dataColumn + 1).value =
+          values.DNM;
 
-        worksheet.getCell(row, dataColumn + 2).value = ind;
+        worksheet.getCell(row, dataColumn + 2).value =
+          values.IND;
 
-        /*
-         * SUBTOTAL
-         */
-        worksheet.getCell(row, dataColumn + 3).value = {
-          formula: `SUM(${worksheet.getCell(row, dataColumn).address}:${worksheet.getCell(row, dataColumn + 2).address})`,
-        };
+        worksheet.getCell(row, dataColumn + 3).value =
+          values.SUBTOTAL;
 
         dataColumn += 4;
       }
@@ -3189,6 +3564,18 @@ export class LeaveService {
     await workbook.xlsx.write(response);
 
     response.end();
+  }
+
+  async globalLeaveTotalSolde() {
+    const individualSolde = 30;
+    const employeeCount = (await this.employeeService.findAll()).length;
+    const total = individualSolde * employeeCount;
+    return total
+  }
+
+  async globalLeaveTakenSolde() {
+    const allLeaves = await this.leaveRepository.find()
+
   }
 
   // =========================
