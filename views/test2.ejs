@@ -1,0 +1,727 @@
+<%- include('partials/head.ejs') %>
+    <style>
+        .report-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Zone de défilement */
+        .table-container {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: auto;
+            overflow-y: auto;
+            max-height: 650px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            position: relative;
+            isolation: isolate;
+        }
+
+        /* Tableau */
+        #reportPreviewTable {
+            border-collapse: separate;
+            border-spacing: 0;
+            table-layout: fixed;
+            width: max-content;
+            min-width: max-content;
+            margin: 0;
+        }
+
+        /* Première colonne : Leave Type */
+        #reportPreviewTable .leave-type-column {
+            width: 230px;
+            min-width: 230px;
+            max-width: 230px;
+        }
+
+        /* Colonnes des données */
+        #reportPreviewTable .data-column {
+            width: 105px;
+            min-width: 105px;
+            max-width: 105px;
+        }
+
+        #reportPreviewTable th,
+        #reportPreviewTable td {
+            height: 44px;
+            padding: 8px 10px;
+            border-right: 1px solid #dee2e6;
+            border-bottom: 1px solid #dee2e6;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        /* En-têtes */
+        #reportPreviewTable thead th {
+            height: 48px;
+            background: #e7f1ff;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 4;
+        }
+
+        /* Première colonne fixe */
+        #reportPreviewTable .fixed-column {
+            position: sticky;
+            left: 0;
+            background: white;
+            text-align: left;
+            box-shadow: 3px 0 5px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Première colonne dans l'en-tête */
+        #reportPreviewTable thead .fixed-column {
+            z-index: 8;
+            background: #cfe2ff;
+            text-align: center;
+        }
+
+        /* Première colonne dans le corps */
+        #reportPreviewTable tbody .fixed-column {
+            z-index: 2;
+        }
+
+        /* Lignes de type de congé */
+        #reportPreviewTable tbody tr:nth-child(even) td {
+            background-color: #fafafa;
+        }
+
+        #reportPreviewTable tbody tr:nth-child(even) .fixed-column {
+            background-color: #fafafa;
+        }
+
+        /* Colonne subtotal */
+        #reportPreviewTable .subtotal-column {
+            background-color: #fff3cd !important;
+            font-weight: bold;
+        }
+
+        /* Ligne Total */
+        #reportPreviewTable .total-row td {
+            background-color: #d1e7dd !important;
+            font-weight: bold;
+        }
+
+        #reportPreviewTable .total-row .fixed-column {
+            background-color: #d1e7dd !important;
+            z-index: 3;
+        }
+
+        /* Première ligne de titre */
+        #reportPreviewTable .date-header {
+            background: #cfe2ff;
+            text-align: center;
+        }
+
+        /* Message vide / chargement */
+        .empty-message {
+            text-align: center !important;
+            padding: 25px !important;
+            color: #6c757d;
+        }
+
+        /* Bouton */
+        .btn-generate {
+            min-width: 180px;
+        }
+
+        @media (max-width: 768px) {
+            .page-container {
+                padding: 12px;
+            }
+
+            .report-card {
+                padding: 15px;
+            }
+
+            #reportPreviewTable .leave-type-column {
+                width: 190px;
+                min-width: 190px;
+                max-width: 190px;
+            }
+
+            #reportPreviewTable .data-column {
+                width: 95px;
+                min-width: 95px;
+                max-width: 95px;
+            }
+        }
+    </style>
+    </head>
+
+    <body>
+        <%- include('partials/sidebar.ejs') %>
+            <%- include('partials/header.ejs') %>
+                <main class="nxl-container">
+                    <div class="nxl-content">
+                        <div class="page-header">
+                            <div class="page-header-left d-flex align-items-center">
+                                <div class="page-header-title">
+                                    <h5 class="m-b-10">B-Leave</h5>
+                                </div>
+                                <ul class="breadcrumb">
+                                    <li class="breadcrumb-item">Employee</li>
+                                    <li class="breadcrumb-item">New employee</li>
+                                </ul>
+                            </div>
+                            <div class="page-header-right ms-auto">
+                                <div class="page-header-right-items">
+                                    <div class="d-flex d-md-none">
+                                        <a href="javascript:void(0)" class="page-header-right-close-toggle">
+                                            <i class="feather-arrow-left me-2"></i>
+                                            <span>Back</span>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="d-md-none d-flex align-items-center">
+                                    <a href="javascript:void(0)" class="page-header-right-open-toggle">
+                                        <i class="feather-align-right fs-20"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- [ page-header ] end -->
+                        <div class="bg-white py-3 border-bottom rounded-0 p-md-0 mb-0">
+                            <div class="d-md-none d-flex align-items-center justify-content-between">
+                                <a href="javascript:void(0)" class="page-content-left-open-toggle">
+                                    <i class="feather-align-left fs-20"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <!-- [ Main Content ] start -->
+                        <div class="main-content py-4">
+                            <div class="container-fluid">
+                                <div class="report-card">
+
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <div>
+                                            <h3 class="mb-1">Global Leave Report</h3>
+                                            <p class="text-muted mb-0">
+                                                Preview of leave statistics by employee type
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Formulaire -->
+                                    <form id="userForm" method="POST" action="/leave/global-report">
+                                        <div class="row g-3 align-items-end">
+
+                                            <div class="col-md-4">
+                                                <label for="startDate" class="form-label fw-bold">
+                                                    Start date
+                                                </label>
+
+                                                <input type="date" id="startDate" name="startDate" class="form-control"
+                                                    required />
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <label for="endDate" class="form-label fw-bold">
+                                                    End date
+                                                </label>
+
+                                                <input type="date" id="endDate" name="endDate" class="form-control"
+                                                    required />
+                                            </div>
+
+                                            <div class="col-md-4 d-flex gap-2">
+                                                <button type="button" id="previewButton"
+                                                    class="btn btn-primary btn-generate">
+                                                    Preview
+                                                </button>
+
+                                                <button type="submit" class="btn btn-success btn-generate">
+                                                    Generate Excel
+                                                </button>
+                                            </div>
+
+                                        </div>
+                                    </form>
+
+                                    <hr class="my-4" />
+
+                                    <!-- Titre preview -->
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h5 class="mb-0">Report Preview</h5>
+
+                                        <span id="previewStatus" class="badge bg-secondary">
+                                            No data
+                                        </span>
+                                    </div>
+
+                                    <!-- Tableau avec scroll -->
+                                    <div class="table-container">
+                                        <table id="reportPreviewTable" class="table table-sm mb-0">
+                                            <thead id="reportPreviewHead">
+                                                <tr>
+                                                    <th class="leave-type-column fixed-column">
+                                                        Leave Type
+                                                    </th>
+
+                                                    <th class="data-column">
+                                                        DM
+                                                    </th>
+
+                                                    <th class="data-column">
+                                                        DNM
+                                                    </th>
+
+                                                    <th class="data-column">
+                                                        IND
+                                                    </th>
+
+                                                    <th class="data-column">
+                                                        SUBTOTAL
+                                                    </th>
+                                                </tr>
+                                            </thead>
+
+                                            <tbody id="reportPreviewBody">
+                                                <tr>
+                                                    <td colspan="5" class="empty-message">
+                                                        Select dates to preview the report.
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <%- include('partials/footer.ejs') %>
+
+                        <script>
+                            const startDateInput = document.getElementById("startDate");
+                            const endDateInput = document.getElementById("endDate");
+                            const previewButton = document.getElementById("previewButton");
+
+                            const reportHead = document.getElementById("reportPreviewHead");
+                            const reportBody = document.getElementById("reportPreviewBody");
+                            const previewStatus = document.getElementById("previewStatus");
+
+                            const leaveTypes = [
+                                "Local_Leave_AMD",
+                                "Permission_AMD",
+                                "Indisponibilite_AMD"
+                            ];
+
+                            const employeeTypes = [
+                                {
+                                    key: "DM",
+                                    label: "DM"
+                                },
+                                {
+                                    key: "DNM",
+                                    label: "DNM"
+                                },
+                                {
+                                    key: "IND",
+                                    label: "IND"
+                                }
+                            ];
+
+                            function formatDate(date) {
+                                const year = date.getFullYear();
+                                const month = String(date.getMonth() + 1).padStart(2, "0");
+                                const day = String(date.getDate()).padStart(2, "0");
+
+                                return `${year}-${month}-${day}`;
+                            }
+
+                            function getDatesBetween(startDate, endDate) {
+                                const dates = [];
+
+                                const current = new Date(`${startDate}T00:00:00`);
+                                const end = new Date(`${endDate}T00:00:00`);
+
+                                while (current <= end) {
+                                    dates.push(formatDate(current));
+                                    current.setDate(current.getDate() + 1);
+                                }
+
+                                return dates;
+                            }
+
+                            function formatLeaveType(leaveType) {
+                                const names = {
+                                    Local_Leave_AMD: "Local Leave",
+                                    Permission_AMD: "Permission",
+                                    Indisponibilite_AMD: "Indisponibilite"
+                                };
+
+                                return names[leaveType] || leaveType;
+                            }
+
+                            function createCell(text, className = "") {
+                                const cell = document.createElement("td");
+
+                                cell.textContent = text;
+                                cell.className = className;
+
+                                return cell;
+                            }
+
+                            function createHeaderCell(text, className = "", colSpan = 1) {
+                                const cell = document.createElement("th");
+
+                                cell.textContent = text;
+                                cell.className = className;
+                                cell.colSpan = colSpan;
+
+                                return cell;
+                            }
+
+                            function renderTableHeader(dates) {
+                                reportHead.innerHTML = "";
+
+                                /*
+                                 * Ligne 1 :
+                                 * Leave Type + une cellule par date
+                                 */
+                                const firstRow = document.createElement("tr");
+
+                                firstRow.appendChild(
+                                    createHeaderCell(
+                                        "Leave Type",
+                                        "leave-type-column fixed-column",
+                                        1
+                                    )
+                                );
+
+                                dates.forEach((date) => {
+                                    const dateCell = createHeaderCell(
+                                        date,
+                                        "date-header",
+                                        4
+                                    );
+
+                                    firstRow.appendChild(dateCell);
+                                });
+
+                                /*
+                                 * Ligne 2 :
+                                 * Cellule vide + DM / DNM / IND / SUBTOTAL
+                                 */
+                                const secondRow = document.createElement("tr");
+
+                                secondRow.appendChild(
+                                    createHeaderCell(
+                                        "",
+                                        "leave-type-column fixed-column"
+                                    )
+                                );
+
+                                dates.forEach(() => {
+                                    employeeTypes.forEach((employeeType) => {
+                                        secondRow.appendChild(
+                                            createHeaderCell(
+                                                employeeType.label,
+                                                "data-column"
+                                            )
+                                        );
+                                    });
+
+                                    secondRow.appendChild(
+                                        createHeaderCell(
+                                            "SUBTOTAL",
+                                            "data-column subtotal-column"
+                                        )
+                                    );
+                                });
+
+                                reportHead.appendChild(firstRow);
+                                reportHead.appendChild(secondRow);
+                            }
+
+                            function calculateSubtotal(values) {
+                                return (
+                                    Number(values?.DM || 0) +
+                                    Number(values?.DNM || 0) +
+                                    Number(values?.IND || 0)
+                                );
+                            }
+
+                            function renderTableBody(dates, reportData) {
+                                reportBody.innerHTML = "";
+
+                                let grandTotal = 0;
+
+                                dates.forEach((date) => {
+                                    const dateData = reportData[date] || {};
+
+                                    leaveTypes.forEach((leaveType) => {
+                                        const values = dateData[leaveType] || {};
+
+                                        const row = document.createElement("tr");
+
+                                        /*
+                                         * Première colonne fixe
+                                         */
+                                        const leaveTypeCell = createCell(
+                                            formatLeaveType(leaveType),
+                                            "leave-type-column fixed-column"
+                                        );
+
+                                        row.appendChild(leaveTypeCell);
+
+                                        /*
+                                         * Données pour chaque date
+                                         */
+                                        const dm = Number(values.DM || 0);
+                                        const dnm = Number(values.DNM || 0);
+                                        const ind = Number(values.IND || 0);
+
+                                        const subtotal = calculateSubtotal(values);
+
+                                        grandTotal += subtotal;
+
+                                        row.appendChild(
+                                            createCell(dm, "data-column")
+                                        );
+
+                                        row.appendChild(
+                                            createCell(dnm, "data-column")
+                                        );
+
+                                        row.appendChild(
+                                            createCell(ind, "data-column")
+                                        );
+
+                                        row.appendChild(
+                                            createCell(
+                                                subtotal,
+                                                "data-column subtotal-column"
+                                            )
+                                        );
+
+                                        /*
+                                         * Cette ligne doit contenir les données
+                                         * pour toutes les dates.
+                                         *
+                                         * On ajoute les cellules restantes
+                                         * après la première date ci-dessous.
+                                         */
+                                        row.dataset.date = date;
+                                        row.dataset.leaveType = leaveType;
+
+                                        reportBody.appendChild(row);
+                                    });
+                                });
+
+                                /*
+                                 * Reconstruction du tableau pour afficher
+                                 * toutes les dates horizontalement.
+                                 */
+                                reportBody.innerHTML = "";
+
+                                leaveTypes.forEach((leaveType) => {
+                                    const row = document.createElement("tr");
+
+                                    row.appendChild(
+                                        createCell(
+                                            formatLeaveType(leaveType),
+                                            "leave-type-column fixed-column"
+                                        )
+                                    );
+
+                                    dates.forEach((date) => {
+                                        const values =
+                                            reportData[date]?.[leaveType] || {};
+
+                                        const dm = Number(values.DM || 0);
+                                        const dnm = Number(values.DNM || 0);
+                                        const ind = Number(values.IND || 0);
+                                        const subtotal = calculateSubtotal(values);
+
+                                        row.appendChild(
+                                            createCell(dm, "data-column")
+                                        );
+
+                                        row.appendChild(
+                                            createCell(dnm, "data-column")
+                                        );
+
+                                        row.appendChild(
+                                            createCell(ind, "data-column")
+                                        );
+
+                                        row.appendChild(
+                                            createCell(
+                                                subtotal,
+                                                "data-column subtotal-column"
+                                            )
+                                        );
+                                    });
+
+                                    reportBody.appendChild(row);
+                                });
+
+                                /*
+                                 * Ligne Total
+                                 */
+                                const totalRow = document.createElement("tr");
+                                totalRow.className = "total-row";
+
+                                totalRow.appendChild(
+                                    createCell(
+                                        "TOTAL",
+                                        "leave-type-column fixed-column"
+                                    )
+                                );
+
+                                dates.forEach((date) => {
+                                    let dmTotal = 0;
+                                    let dnmTotal = 0;
+                                    let indTotal = 0;
+
+                                    leaveTypes.forEach((leaveType) => {
+                                        const values =
+                                            reportData[date]?.[leaveType] || {};
+
+                                        dmTotal += Number(values.DM || 0);
+                                        dnmTotal += Number(values.DNM || 0);
+                                        indTotal += Number(values.IND || 0);
+                                    });
+
+                                    const subtotalTotal =
+                                        dmTotal + dnmTotal + indTotal;
+
+                                    totalRow.appendChild(
+                                        createCell(dmTotal, "data-column")
+                                    );
+
+                                    totalRow.appendChild(
+                                        createCell(dnmTotal, "data-column")
+                                    );
+
+                                    totalRow.appendChild(
+                                        createCell(indTotal, "data-column")
+                                    );
+
+                                    totalRow.appendChild(
+                                        createCell(
+                                            subtotalTotal,
+                                            "data-column subtotal-column"
+                                        )
+                                    );
+                                });
+
+                                reportBody.appendChild(totalRow);
+                            }
+
+                            async function loadPreview() {
+                                const startDate = startDateInput.value;
+                                const endDate = endDateInput.value;
+
+                                if (!startDate || !endDate) {
+                                    alert("Please select both dates.");
+                                    return;
+                                }
+
+                                if (startDate > endDate) {
+                                    alert("The start date cannot be after the end date.");
+                                    return;
+                                }
+
+                                previewButton.disabled = true;
+                                previewButton.textContent = "Loading...";
+
+                                previewStatus.textContent = "Loading";
+                                previewStatus.className = "badge bg-warning text-dark";
+
+                                reportBody.innerHTML = `
+        <tr>
+          <td colspan="5" class="empty-message">
+            Loading report...
+          </td>
+        </tr>
+      `;
+
+                                try {
+                                    const url =
+                                        `/leave/global-report/preview?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}`;
+
+                                    const response = await fetch(url);
+
+                                    if (!response.ok) {
+                                        throw new Error(
+                                            `Server error: ${response.status}`
+                                        );
+                                    }
+
+                                    const reportData = await response.json();
+
+                                    const dates = getDatesBetween(
+                                        startDate,
+                                        endDate
+                                    );
+
+                                    renderTableHeader(dates);
+                                    renderTableBody(dates, reportData);
+
+                                    previewStatus.textContent = "Loaded";
+                                    previewStatus.className = "badge bg-success";
+
+                                } catch (error) {
+                                    console.error("Preview error:", error);
+
+                                    reportBody.innerHTML = `
+          <tr>
+            <td colspan="5" class="empty-message text-danger">
+              Unable to load the report.
+            </td>
+          </tr>
+        `;
+
+                                    previewStatus.textContent = "Error";
+                                    previewStatus.className = "badge bg-danger";
+
+                                    alert(
+                                        "An error occurred while loading the report."
+                                    );
+
+                                } finally {
+                                    previewButton.disabled = false;
+                                    previewButton.textContent = "Preview";
+                                }
+                            }
+
+                            previewButton.addEventListener(
+                                "click",
+                                loadPreview
+                            );
+
+                            /*
+                             * Chargement automatique lorsque
+                             * les deux dates sont sélectionnées.
+                             */
+                            startDateInput.addEventListener(
+                                "change",
+                                () => {
+                                    if (startDateInput.value && endDateInput.value) {
+                                        loadPreview();
+                                    }
+                                }
+                            );
+
+                            endDateInput.addEventListener(
+                                "change",
+                                () => {
+                                    if (startDateInput.value && endDateInput.value) {
+                                        loadPreview();
+                                    }
+                                }
+                            );
+                        </script>
+    </body>
+
+    </html>
