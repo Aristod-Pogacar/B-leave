@@ -1722,19 +1722,19 @@ export class LeaveService {
       const monthEnd = new Date(year, month + 1, 0);
 
       const leaveApproved =
-        await this.getLeaveDaysBetween(monthStart, monthEnd, [LeaveStatus.APPROVED]);
+        await this.getLeaveDaysBetween(monthStart, monthEnd, [LeaveStatus.APPROVED, LeaveStatus.APPROVED_BY_MANAGER]);
 
       const leavePending =
         await this.getLeaveDaysBetween(monthStart, monthEnd, [LeaveStatus.PENDING]);
 
       const permissionApproved =
-        await this.getPermissionDaysBetween(monthStart, monthEnd, [LeaveStatus.APPROVED]);
+        await this.getPermissionDaysBetween(monthStart, monthEnd, [LeaveStatus.APPROVED, LeaveStatus.APPROVED_BY_MANAGER]);
 
       const permissionPending =
         await this.getPermissionDaysBetween(monthStart, monthEnd, [LeaveStatus.PENDING]);
 
       const indispoApproved =
-        await this.getIndisponibilityDaysBetween(monthStart, monthEnd, [LeaveStatus.APPROVED]);
+        await this.getIndisponibilityDaysBetween(monthStart, monthEnd, [LeaveStatus.APPROVED, LeaveStatus.APPROVED_BY_MANAGER]);
 
       const indispoPending =
         await this.getIndisponibilityDaysBetween(monthStart, monthEnd, [LeaveStatus.PENDING]);
@@ -3107,6 +3107,7 @@ export class LeaveService {
      * -----------------------------------------
      */
     let row = 4;
+    console.log("REPORT DATA:", reportData)
 
     for (const leaveType of leaveTypes) {
 
