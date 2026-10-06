@@ -10,6 +10,8 @@ import { WsAdapter } from '@nestjs/platform-ws';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
+  app.set('trust proxy', 1);
+
   app.setBaseViewsDir(join(__dirname, '..', 'views'));
   app.setViewEngine('ejs');
   app.useStaticAssets(join(__dirname, '..', 'public'));
@@ -22,14 +24,16 @@ async function bootstrap() {
 
   app.use(
     session({
-      secret: 'ajdgreyfgcgajycbjeugyfghktehnfugbqkclqhfgyekfsfvbqjbxkqgefrkbgk',
+      secret: process.env.SESSION_SECRET!,
       resave: false,
       saveUninitialized: false,
       rolling: true,
       cookie: {
-        maxAge: 5 * 60 * 1000, // 5 minutes
+        maxAge: 5 * 60 * 1000,
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        // secure: process.env.NODE_ENV === 'production',
+        secure: true,
+        sameSite: 'lax',
       },
     }),
   );
