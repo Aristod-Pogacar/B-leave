@@ -745,6 +745,7 @@ export class EmployeeService {
       } else {
         // 1️⃣ Récupérer les employés
         [employees, total] = await this.employeeRepository.findAndCount({
+          // where: { line, section, division, site, is_active: true, is_deleted: false },
           where: { line, section, division, site, is_active: true, is_deleted: false },
           order: { matricule: 'ASC' },
           skip,

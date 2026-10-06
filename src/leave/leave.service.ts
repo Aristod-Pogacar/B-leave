@@ -57,7 +57,7 @@ export class LeaveService {
         employee: { matricule: matricule },
         start_date: LessThanOrEqual(end),
         end_date: MoreThanOrEqual(start),
-        status: In([LeaveStatus.APPROVED, LeaveStatus.PENDING])
+        status: In([LeaveStatus.APPROVED, LeaveStatus.PENDING, LeaveStatus.APPROVED_BY_MANAGER])
       },
       relations: ['employee']
     });
@@ -1494,7 +1494,7 @@ export class LeaveService {
   private async getLeaveDaysBetween(
     start: Date,
     end: Date,
-    status = [LeaveStatus.APPROVED]
+    status = [LeaveStatus.APPROVED, LeaveStatus.APPROVED_BY_MANAGER, LeaveStatus.PENDING]
   ): Promise<number> {
     const leaves = await this.leaveRepository
       .createQueryBuilder('leave')
@@ -1755,7 +1755,7 @@ export class LeaveService {
   private async getPermissionDaysBetween(
     start: Date,
     end: Date,
-    status = [LeaveStatus.APPROVED]
+    status = [LeaveStatus.APPROVED, LeaveStatus.APPROVED_BY_MANAGER, LeaveStatus.PENDING]
   ): Promise<number> {
     const permissions = await this.leaveRepository
       .createQueryBuilder('leave')
@@ -1815,7 +1815,7 @@ export class LeaveService {
   private async getIndisponibilityDaysBetween(
     start: Date,
     end: Date,
-    status = [LeaveStatus.APPROVED],
+    status = [LeaveStatus.APPROVED, LeaveStatus.APPROVED_BY_MANAGER, LeaveStatus.PENDING]
   ): Promise<number> {
 
     const indisponibilities = await this.leaveRepository
