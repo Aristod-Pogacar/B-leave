@@ -16,6 +16,7 @@ import { HistoryReason } from '../history/entities/history.entity';
 import { EmployeeHistory } from '../employee-history/entities/employee-history.entity';
 import { HolidayService } from '../holiday/holiday.service';
 import { CarriedForward } from '../carried-forward/entities/carried-forward.entity';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class EmployeeService {
@@ -33,7 +34,8 @@ export class EmployeeService {
     private readonly carriedForwardRepository: Repository<CarriedForward>,
     private readonly cryptoService: CryptoService,
     private readonly holidayService: HolidayService,
-    private readonly historyService: HistoryService
+    private readonly historyService: HistoryService,
+    private readonly dataSource: DataSource
   ) { }
 
   async archiveEmployee(id: string, dor: any) {
@@ -1323,6 +1325,13 @@ export class EmployeeService {
 
   async searchForUser(q: string, user: any) {
     const allowedSites = this.getAllowedSites(user.site);
+    const dbType = this.dataSource.options.type;
+
+    const daysTakenExpression =
+      dbType === 'mssql'
+        ? 'SUM(DATEDIFF(day, leave.start_date, leave.end_date) + 1)'
+        : 'SUM(DATEDIFF(leave.end_date, leave.start_date) + 1)';
+
     if (!q) return [];
     const year = new Date().getFullYear();
     const queryBuilder = this.employeeRepository
@@ -1373,7 +1382,7 @@ export class EmployeeService {
       .select('employee.id', 'employeeId')
       .addSelect('leave.start_date', 'start_date')
       .addSelect('leave.end_date', 'end_date')
-      .addSelect('SUM(DATEDIFF(day, leave.start_date, leave.end_date) + 1)', 'daysTaken')
+      .addSelect(daysTakenExpression, 'daysTaken')
       .where('employee.id IN (:...employeeIds)', {
         employeeIds: data.map((e) => e.id),
       })
@@ -1403,7 +1412,7 @@ export class EmployeeService {
       .select('employee.id', 'employeeId')
       .addSelect('leave.start_date', 'start_date')
       .addSelect('leave.end_date', 'end_date')
-      .addSelect('SUM(DATEDIFF(day, leave.start_date, leave.end_date) + 1)', 'daysTaken')
+      .addSelect(daysTakenExpression, 'daysTaken')
       .where('employee.id IN (:...employeeIds)', {
         employeeIds: data.map((e) => e.id),
       })
@@ -1569,6 +1578,12 @@ export class EmployeeService {
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    const dbType = this.dataSource.options.type;
+
+    const daysTakenExpression =
+      dbType === 'mssql'
+        ? 'SUM(DATEDIFF(day, leave.start_date, leave.end_date) + 1)'
+        : 'SUM(DATEDIFF(leave.end_date, leave.start_date) + 1)';
 
     const takenLeaves = await this.leaveRepository
       .createQueryBuilder('leave')
@@ -1577,7 +1592,7 @@ export class EmployeeService {
       .addSelect('leave.start_date', 'start_date')
       .addSelect('leave.end_date', 'end_date')
       .addSelect(
-        'SUM(DATEDIFF(day, leave.start_date, leave.end_date) + 1)',
+        daysTakenExpression,
         'daysTaken',
       )
       .where('employee.id IN (:...employeeIds)', {
@@ -1610,7 +1625,7 @@ export class EmployeeService {
       .addSelect('leave.start_date', 'start_date')
       .addSelect('leave.end_date', 'end_date')
       .addSelect(
-        'SUM(DATEDIFF(day, leave.start_date, leave.end_date) + 1)',
+        daysTakenExpression,
         'daysTaken',
       )
       .where('employee.id IN (:...employeeIds)', {
