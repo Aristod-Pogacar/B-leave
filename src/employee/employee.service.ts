@@ -112,8 +112,8 @@ export class EmployeeService {
 
     if (search && search.trim() !== '') {
       query.andWhere(
-        '(e.matricule LIKE :s OR e.name LIKE :s OR e.firstname LIKE :s OR e.section LIKE :s OR e.designation LIKE :s) AND e.is_deleted = false AND e.is_active = true',
-        { s: `%${search}%` }
+        '(e.matricule LIKE :s OR e.name LIKE :s OR e.firstname LIKE :s OR e.section LIKE :s OR e.designation LIKE :s) AND e.is_deleted = :isDeleted AND e.is_active = :isActive',
+        { s: `%${search}%`, isDeleted: false, isActive: true }
       );
     }
 
@@ -992,7 +992,7 @@ export class EmployeeService {
     const results = await this.employeeRepository
       .createQueryBuilder('empoyee')
       .select('DISTINCT empoyee.departement', 'departement')
-      .where('empoyee.is_active = true AND empoyee.is_deleted = false')
+      .where('empoyee.is_active = :isActive AND empoyee.is_deleted = :isDeleted', { isActive: true, isDeleted: false })
       .getRawMany();
 
     // this.employeeRepository.find({
@@ -1007,7 +1007,7 @@ export class EmployeeService {
     const results = await this.employeeRepository
       .createQueryBuilder('employee')
       .select('DISTINCT employee.division', 'division')
-      .where('employee.is_active = true AND employee.is_deleted = false')
+      .where('employee.is_active = :isActive AND employee.is_deleted = :isDeleted', { isActive: true, isDeleted: false })
       .orderBy('employee.division', 'ASC')
       .getRawMany();
 
@@ -1018,7 +1018,7 @@ export class EmployeeService {
     const results = await this.employeeRepository
       .createQueryBuilder('employee')
       .select('DISTINCT employee.section', 'section')
-      .where('employee.is_active = true AND employee.is_deleted = false')
+      .where('employee.is_active = :isActive AND employee.is_deleted = :isDeleted', { isActive: true, isDeleted: false })
       .orderBy('employee.section', 'ASC')
       .getRawMany();
 
@@ -1030,7 +1030,7 @@ export class EmployeeService {
       .createQueryBuilder('employee')
       .select('DISTINCT employee.departement', 'departement')
       .where('employee.departement IS NOT NULL')
-      .andWhere('employee.is_active = true AND employee.is_deleted = false')
+      .andWhere('employee.is_active = :isActive AND employee.is_deleted = :isDeleted', { isActive: true, isDeleted: false })
       .orderBy('employee.departement', 'ASC')
       .getRawMany();
 
@@ -1042,7 +1042,7 @@ export class EmployeeService {
       .createQueryBuilder('employee')
       .select('DISTINCT employee.line', 'line')
       .where('employee.line IS NOT NULL')
-      .andWhere('employee.is_active = true AND employee.is_deleted = false')
+      .andWhere('employee.is_active = :isActive AND employee.is_deleted = :isDeleted', { isActive: true, isDeleted: false })
       .orderBy('employee.line', 'ASC')
       .getRawMany();
 
@@ -1064,7 +1064,6 @@ export class EmployeeService {
 
   async updateEmployee(id: string, updateEmployeeDto: UpdateEmployeeDto, res: any, managerId: string) {
     delete updateEmployeeDto.managerId;
-    console.log(updateEmployeeDto);
     try {
       const employee = await this.employeeRepository.findOne({ where: { id } });
       if (!employee) {
@@ -1119,12 +1118,16 @@ export class EmployeeService {
 
       const cleanData = filtered.filter(x => x.matricule);
 
-      try {
+      const BATCH_SIZE = 100;
+
+      for (let i = 0; i < cleanData.length; i += BATCH_SIZE) {
+        const batch = cleanData.slice(i, i + BATCH_SIZE);
+
         await this.employeeRepository
           .createQueryBuilder()
           .insert()
           .into(Employee)
-          .values(cleanData)
+          .values(batch)
           .orUpdate(
             [
               'type',
@@ -1139,14 +1142,11 @@ export class EmployeeService {
               'job_level',
               'employee_type',
               'designation',
-              'app_password',
-              'onehr_password',
+              'site',
             ],
-            ['matricule']
+            ['matricule'],
           )
           .execute();
-      } catch (e) {
-        console.log(e);
       }
       return {
         result: 'success',
@@ -1332,8 +1332,7 @@ export class EmployeeService {
         '(e.matricule LIKE :q OR e.name LIKE :q OR e.firstname LIKE :q)',
         { q: `%${q}%` },
       )
-      .andWhere('e.is_active = true')
-      .andWhere('e.is_deleted = false')
+      .andWhere('employee.is_active = :isActive AND employee.is_deleted = :isDeleted', { isActive: true, isDeleted: false })
       .andWhere('u.id IS NULL')
       .select([
         'e.id',
@@ -1374,17 +1373,28 @@ export class EmployeeService {
       .select('employee.id', 'employeeId')
       .addSelect('leave.start_date', 'start_date')
       .addSelect('leave.end_date', 'end_date')
-      .addSelect(
-        'SUM(DATEDIFF(leave.end_date, leave.start_date) + 1)',
-        'daysTaken'
-      )
-      .where('employee.id IN (:...employeeIds)', { employeeIds: data.map((e) => e.id) })
-      .andWhere('leave.status = :status', { status: LeaveStatus.APPROVED })
-      .andWhere('leave.leave_type = :type', { type: 'Local_Leave_AMD' })
-      .andWhere('YEAR(leave.start_date) = :year', { year })
-      .andWhere('leave.start_date <= :today', { today })
-      .andWhere('employee.site IN (:...allowedSites)', { allowedSites })
+      .addSelect('SUM(DATEDIFF(day, leave.start_date, leave.end_date) + 1)', 'daysTaken')
+      .where('employee.id IN (:...employeeIds)', {
+        employeeIds: data.map((e) => e.id),
+      })
+      .andWhere('leave.status = :status', {
+        status: LeaveStatus.APPROVED,
+      })
+      .andWhere('leave.leave_type = :type', {
+        type: 'Local_Leave_AMD',
+      })
+      .andWhere('YEAR(leave.start_date) = :year', {
+        year,
+      })
+      .andWhere('leave.start_date <= :today', {
+        today,
+      })
+      .andWhere('employee.site IN (:...allowedSites)', {
+        allowedSites,
+      })
       .groupBy('employee.id')
+      .addGroupBy('leave.start_date')
+      .addGroupBy('leave.end_date')
       .getRawMany();
 
     const takenPermissions = await this.leaveRepository
@@ -1393,34 +1403,60 @@ export class EmployeeService {
       .select('employee.id', 'employeeId')
       .addSelect('leave.start_date', 'start_date')
       .addSelect('leave.end_date', 'end_date')
-      .addSelect(
-        'SUM(DATEDIFF(leave.end_date, leave.start_date) + 1)',
-        'daysTaken'
-      )
-      .where('employee.id IN (:...employeeIds)', { employeeIds: data.map((e) => e.id) })
-      .andWhere('leave.status = :status', { status: LeaveStatus.APPROVED })
-      .andWhere('leave.leave_type = :type', { type: 'Permission_AMD' })
-      .andWhere('YEAR(leave.start_date) = :year', { year })
-      .andWhere('leave.start_date <= :today', { today })
-      .andWhere('employee.site IN (:...allowedSites)', { allowedSites })
+      .addSelect('SUM(DATEDIFF(day, leave.start_date, leave.end_date) + 1)', 'daysTaken')
+      .where('employee.id IN (:...employeeIds)', {
+        employeeIds: data.map((e) => e.id),
+      })
+      .andWhere('leave.status = :status', {
+        status: LeaveStatus.APPROVED,
+      })
+      .andWhere('leave.leave_type = :type', {
+        type: 'Permission_AMD',
+      })
+      .andWhere('YEAR(leave.start_date) = :year', {
+        year,
+      })
+      .andWhere('leave.start_date <= :today', {
+        today,
+      })
+      .andWhere('employee.site IN (:...allowedSites)', {
+        allowedSites,
+      })
       .groupBy('employee.id')
+      .addGroupBy('leave.start_date')
+      .addGroupBy('leave.end_date')
       .getRawMany();
+
     const takenLeavesMap = new Map<string, number>();
     const takenPermissionsMap = new Map<string, number>();
 
-    takenLeaves.forEach(async l => {
-      const holidays = await this.getDaysTakenWithHoliday(l.start_date, l.end_date);
-      const daysTaken = Number(l.daysTaken) - holidays;
-      takenLeavesMap.set(l.employeeId, Number(daysTaken.toFixed(2)));
-      // takenLeavesMap.set(l.employeeId, Number(l.daysTaken));
-    });
+    for (const l of takenLeaves) {
+      const holidays = await this.getDaysTakenWithHoliday(
+        l.start_date,
+        l.end_date,
+      );
 
-    takenPermissions.forEach(async l => {
-      const holidays = await this.getDaysTakenWithHoliday(l.start_date, l.end_date);
       const daysTaken = Number(l.daysTaken) - holidays;
-      takenPermissionsMap.set(l.employeeId, Number(daysTaken.toFixed(2)));
-      // takenLeavesMap.set(l.employeeId, Number(l.daysTaken));
-    });
+
+      takenLeavesMap.set(
+        l.employeeId,
+        Number(daysTaken.toFixed(2)),
+      );
+    }
+
+    for (const l of takenPermissions) {
+      const holidays = await this.getDaysTakenWithHoliday(
+        l.start_date,
+        l.end_date,
+      );
+
+      const daysTaken = Number(l.daysTaken) - holidays;
+
+      takenPermissionsMap.set(
+        l.employeeId,
+        Number(daysTaken.toFixed(2)),
+      );
+    }
 
     // 3️⃣ Calcul solde cumulatif dynamique
     let soldeCumul = 0;
@@ -1510,7 +1546,7 @@ export class EmployeeService {
         '(e.matricule LIKE :q OR e.name LIKE :q OR e.firstname LIKE :q)',
         { q: `%${q}%` },
       )
-      .andWhere('e.is_active = true AND e.is_deleted = false')
+      .andWhere('e.is_active = :isActive AND e.is_deleted = :isDeleted', { isActive: true, isDeleted: false })
       .select(['e.id', 'e.matricule', 'e.name', 'e.firstname', 'e.line', 'e.departement', 'e.section', 'e.site', 'e.section', 'e.DOE'])
       .take(10);
 
@@ -1541,16 +1577,30 @@ export class EmployeeService {
       .addSelect('leave.start_date', 'start_date')
       .addSelect('leave.end_date', 'end_date')
       .addSelect(
-        'SUM(DATEDIFF(leave.end_date, leave.start_date) + 1)',
-        'daysTaken'
+        'SUM(DATEDIFF(day, leave.start_date, leave.end_date) + 1)',
+        'daysTaken',
       )
-      .where('employee.id IN (:...employeeIds)', { employeeIds: data.map((e) => e.id) })
-      .andWhere('leave.status = :status', { status: LeaveStatus.APPROVED })
-      .andWhere('leave.leave_type = :type', { type: 'Local_Leave_AMD' })
-      .andWhere('YEAR(leave.start_date) = :year', { year })
-      .andWhere('leave.start_date <= :today', { today })
-      .andWhere('employee.site IN (:...allowedSites)', { allowedSites })
+      .where('employee.id IN (:...employeeIds)', {
+        employeeIds: data.map((e) => e.id),
+      })
+      .andWhere('leave.status IN (:...status)', {
+        status: [LeaveStatus.APPROVED, LeaveStatus.APPROVED_BY_MANAGER],
+      })
+      .andWhere('leave.leave_type = :type', {
+        type: 'Local_Leave_AMD',
+      })
+      .andWhere('YEAR(leave.start_date) = :year', {
+        year,
+      })
+      .andWhere('leave.start_date <= :today', {
+        today,
+      })
+      .andWhere('employee.site IN (:...allowedSites)', {
+        allowedSites,
+      })
       .groupBy('employee.id')
+      .addGroupBy('leave.start_date')
+      .addGroupBy('leave.end_date')
       .getRawMany();
 
     const takenPermissions = await this.leaveRepository
@@ -1560,16 +1610,30 @@ export class EmployeeService {
       .addSelect('leave.start_date', 'start_date')
       .addSelect('leave.end_date', 'end_date')
       .addSelect(
-        'SUM(DATEDIFF(leave.end_date, leave.start_date) + 1)',
-        'daysTaken'
+        'SUM(DATEDIFF(day, leave.start_date, leave.end_date) + 1)',
+        'daysTaken',
       )
-      .where('employee.id IN (:...employeeIds)', { employeeIds: data.map((e) => e.id) })
-      .andWhere('leave.status = :status', { status: LeaveStatus.APPROVED })
-      .andWhere('leave.leave_type = :type', { type: 'Permission_AMD' })
-      .andWhere('YEAR(leave.start_date) = :year', { year })
-      .andWhere('leave.start_date <= :today', { today })
-      .andWhere('employee.site IN (:...allowedSites)', { allowedSites })
+      .where('employee.id IN (:...employeeIds)', {
+        employeeIds: data.map((e) => e.id),
+      })
+      .andWhere('leave.status IN (:...status)', {
+        status: [LeaveStatus.APPROVED, LeaveStatus.APPROVED_BY_MANAGER],
+      })
+      .andWhere('leave.leave_type = :type', {
+        type: 'Permission_AMD',
+      })
+      .andWhere('YEAR(leave.start_date) = :year', {
+        year,
+      })
+      .andWhere('leave.start_date <= :today', {
+        today,
+      })
+      .andWhere('employee.site IN (:...allowedSites)', {
+        allowedSites,
+      })
       .groupBy('employee.id')
+      .addGroupBy('leave.start_date')
+      .addGroupBy('leave.end_date')
       .getRawMany();
 
     const takenLeavesMap = new Map<string, number>();

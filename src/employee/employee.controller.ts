@@ -89,7 +89,6 @@ export class EmployeeController {
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   async postEmployeeEdit(@Param('id') id: string, @Body() body: any, @Res() res: any) {
     const managerId = body.managerId;
-    console.log("BODY: ", body);
     // delete body.managerId;
     return await this.employeeService.updateEmployee(id, body, res, managerId);
   }
@@ -313,7 +312,6 @@ export class EmployeeController {
   ) {
 
     const employees = await this.employeeService.getEmployeesWithBalances(line, "", section, division, site, +skip, +take, +year, req.session.user, search);
-    // console.log('employees', employees)
     return employees;
   }
 
@@ -534,7 +532,6 @@ export class EmployeeController {
 
   @Post('employee-with-balances')
   async find(@Body() body: any) {
-    console.log('body', body);
     const result = await this.employeeService.getEmployeeWithBalances(body.matricule, body.date);
     const employee = result.data[0]
     return employee;
