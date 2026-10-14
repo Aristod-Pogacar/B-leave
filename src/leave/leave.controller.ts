@@ -53,7 +53,7 @@ export class LeaveController {
 
   @Get('global-report/preview')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.PRODUCTION_MANAGER, UserRole.HR_LEAD)
+  // @Roles(UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.PRODUCTION_MANAGER, UserRole.HR_LEAD)
   async previewGlobalReport(
     @Query('startDate') startDate: string,
     @Query('endDate') endDate: string,
@@ -63,6 +63,8 @@ export class LeaveController {
         new Date(`${startDate}T00:00:00`),
         new Date(`${endDate}T00:00:00`),
       );
+
+    console.log("REPORT DATA:", result.reportData)
 
     return result.reportData;
   }
@@ -426,6 +428,12 @@ export class LeaveController {
     res.send(buffer);
   }
 
+  @Get('leave-review')
+  @Render('leave-review')
+  async getLeaveReview() {
+    return { title: "Leave preview" };
+  }
+
   @Get('range')
   async getLeavesByRange(
     @Req() req: any,
@@ -449,7 +457,6 @@ export class LeaveController {
     @Param('startDate') startDate: string,
     @Param('endDate') endDate: string,
   ) {
-    console.log(matricule, startDate, endDate);
     const st = new Date(startDate);
     const et = new Date(endDate);
     const leaves = await this.leaveService.getLeavesOverlap(matricule, st, et);
@@ -541,7 +548,10 @@ export class LeaveController {
       });
       return res.redirect(`/leave/planning-view`);
     } catch (error) {
-      return res.redirect(`/leave/import-leaves?error=${error.message}`);
+      console.error('❌ IMPORT LEAVES ERROR:', error);
+      return res.redirect(
+        `/leave/import-leaves?error=${encodeURIComponent(error.message)}`
+      );
     }
   }
 

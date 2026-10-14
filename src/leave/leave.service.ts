@@ -138,7 +138,7 @@ export class LeaveService {
 
         return daysBefore <= 1;
       });
-    } else if (user.role === UserRole.HR_LEAD || user.role === UserRole.ADMIN) {
+    } else if (user.role === UserRole.HR_LEAD) {
       leaves = await this.leaveRepository.find({
         where: {
           employee: {
@@ -315,15 +315,12 @@ export class LeaveService {
 
   async approveLeave(leaveId: string, id: string) {
     const user = await this.userRepository.findOne({ where: { id } });
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
     const leave = await this.leaveRepository.findOne({ where: { id: leaveId } });
     if (!leave) {
       throw new NotFoundException('Leave not found');
     }
-    if (user.role == UserRole.MANAGER || user.role == UserRole.PRODUCTION_MANAGER) { leave.approver = user; leave.status = LeaveStatus.APPROVED_BY_MANAGER; }
-    if (user.role == UserRole.ADMIN || user.role == UserRole.PAYROLL) { leave.approver1 = user; leave.status = LeaveStatus.APPROVED; }
+    if (user?.role == UserRole.MANAGER || user?.role == UserRole.PRODUCTION_MANAGER) { leave.approver = user; leave.status = LeaveStatus.APPROVED_BY_MANAGER; }
+    if (user?.role == UserRole.ADMIN || user?.role == UserRole.PAYROLL || id == "00000000-0000-0000-0000-000000000001") { leave.approver1 = user; leave.status = LeaveStatus.APPROVED; }
 
     leave.approved_date = new Date();
     return this.leaveRepository.save(leave);
@@ -331,9 +328,6 @@ export class LeaveService {
 
   async rejectLeave(leaveId: string, id: string) {
     const user = await this.userRepository.findOne({ where: { id } });
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
     const leave = await this.leaveRepository.findOne({ where: { id: leaveId } });
     if (!leave) {
       throw new NotFoundException('Leave not found');
@@ -345,13 +339,6 @@ export class LeaveService {
   }
 
   async getLeavesByRange(year: number, startMonth: number, endMonth: number, line: string, departement: string, section: string, division: string, site: string, user: any, search: string) {
-    console.log("YEAR", year);
-    console.log("Start Month", startMonth);
-    console.log("End Month", endMonth);
-    console.log("Line", line);
-    console.log("Section", section);
-    console.log("Division", division);
-    console.log("Site", site);
 
     if (user.role == UserRole.MANAGER) {
       if (search && search.trim() !== "") {
@@ -558,86 +545,149 @@ export class LeaveService {
   }
 
   async importLeaves(file: Express.Multer.File, userId: string) {
-    try {
-      const workbook = new ExcelJS.Workbook();
-      await workbook.xlsx.load(file.buffer as any);
+    const workbook = new ExcelJS.Workbook();
 
-      const worksheet = workbook.getWorksheet("Leaves");
+    console.log('1️⃣ Loading Excel...');
+    await workbook.xlsx.load(file.buffer as any);
 
-      if (!worksheet) {
-        const message = 'No sheet found in the Excel file'
-        throw new Error(message);
+    const worksheet = workbook.getWorksheet('Leaves');
+
+    if (!worksheet) {
+      throw new Error('No sheet found in the Excel file');
+    }
+
+    console.log('2️⃣ Sheet found:', worksheet.name);
+    console.log('3️⃣ Number of rows:', worksheet.rowCount);
+
+    const headerRow = worksheet.getRow(1);
+    const headerMap: Record<string, number> = {};
+
+    headerRow.eachCell((cell, colNumber) => {
+      const headerName = cell.value?.toString().trim().toLowerCase();
+
+      if (headerName) {
+        headerMap[headerName] = colNumber;
       }
-      const headerRow = worksheet.getRow(1);
-      const headerMap: Record<string, number> = {};
+    });
 
-      headerRow.eachCell((cell, colNumber) => {
-        const headerName = cell.value?.toString().trim().toLowerCase();
-        if (headerName) {
-          headerMap[headerName] = colNumber;
-        }
+    console.log('4️⃣ Headers:', headerMap);
+
+    const requiredColumns = [
+      'matricule',
+      'fullname',
+      'type',
+      'start date',
+      'end date',
+      'reason',
+    ];
+
+    for (const column of requiredColumns) {
+      if (!headerMap[column]) {
+        throw new Error(`Missing column: ${column}`);
+      }
+    }
+
+    const leaves: Partial<Leave>[] = [];
+
+    console.log('5️⃣ Starting rows processing...');
+
+    for (let i = 2; i <= worksheet.rowCount; i++) {
+      const row = worksheet.getRow(i);
+
+      const matricule = row
+        .getCell(headerMap['matricule'])
+        .value
+        ?.toString()
+        .trim();
+
+      if (!matricule) {
+        console.log(`⚠️ Row ${i}: empty matricule, skipped`);
+        continue;
+      }
+
+      console.log(`➡️ Row ${i}: ${matricule}`);
+
+      const employee = await this.employeeRepository.findOne({
+        where: { matricule },
       });
 
-
-      // 2️⃣ Vérifier que les colonnes obligatoires existent
-      const requiredColumns = ['matricule', 'fullname', 'type', 'start date', 'end date', 'reason'];
-
-      for (const column of requiredColumns) {
-        if (!headerMap[column]) {
-          throw new Error(`Missing column: ${column}`);
-        }
+      if (!employee) {
+        console.log(`⚠️ Employee not found: ${matricule}`);
+        continue;
       }
-      const leaves: Partial<Leave>[] = [];
 
-      for (let i = 2; i <= worksheet.rowCount; i++) {
-        const row = worksheet.getRow(i);
-        console.log(row.getCell(headerMap['matricule']).value?.toString());
-        const employee = await this.employeeRepository.findOne({ where: { matricule: row.getCell(headerMap['matricule']).value?.toString() } });
-        let leave_type = row.getCell(headerMap['type']).value?.toString();
-        if (leave_type === "Local Leave") {
-          leave_type = "Local_Leave_AMD";
-        } else if (leave_type === "Permission") {
-          leave_type = "Permission_AMD";
-        } else if (leave_type === "Indisponibilite") {
-          leave_type = "Indisponibilite_AMD";
-        }
-        if (!employee) {
-          continue;
-        }
-        const user = await this.userRepository.findOne({ where: { id: userId } });
+      let leave_type = row
+        .getCell(headerMap['type'])
+        .value
+        ?.toString()
+        .trim();
+
+      if (leave_type === 'Local Leave') {
+        leave_type = 'Local_Leave_AMD';
+      } else if (leave_type === 'Permission') {
+        leave_type = 'Permission_AMD';
+      } else if (leave_type === 'Indisponibilite') {
+        leave_type = 'Indisponibilite_AMD';
+      }
+
+      const SUPERADMIN_ID = '00000000-0000-0000-0000-000000000001';
+
+      let user: User | null = null;
+
+      if (userId !== SUPERADMIN_ID) {
+        user = await this.userRepository.findOne({
+          where: { id: userId },
+        });
+
         if (!user) {
-          continue;
+          throw new Error(`User not found: ${userId}`);
         }
-        const startDate = row.getCell(headerMap['start date']).value as Date;
-        const endDate = row.getCell(headerMap['end date']).value as Date;
-        const reason = row.getCell(headerMap['reason']).value as string;
-        const duration = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24) + 1;
-        const data = {
-          employee: employee,
-          leave_type: leave_type,
-          start_date: startDate,
-          end_date: endDate,
-          duration: duration,
-          status: LeaveStatus.APPROVED,
-          imported: true,
-          reason: reason,
-          approver: user,
-          approved_date: new Date(),
-        }
-        leaves.push(data);
       }
 
-      await this.leaveRepository.save(leaves);
-      return {
-        result: 'success',
-        message: 'File readed successfully',
-      };
-    } catch (error) {
-      return {
-        result: 'error',
-        message: error.message,
-      };
+      // if (!user) {
+      //   console.log(`⚠️ User not found: ${userId}`);
+      //   continue;
+      // }
+
+      const startDate = row.getCell(headerMap['start date']).value as Date;
+      const endDate = row.getCell(headerMap['end date']).value as Date;
+      const reason = row.getCell(headerMap['reason']).value as string;
+
+      const duration =
+        (endDate.getTime() - startDate.getTime()) /
+        (1000 * 60 * 60 * 24) +
+        1;
+
+      leaves.push({
+        employee,
+        leave_type,
+        start_date: startDate,
+        end_date: endDate,
+        duration,
+        status: LeaveStatus.APPROVED,
+        imported: true,
+        reason,
+        approver: user,
+        approved_date: new Date(),
+      });
     }
+
+    console.log(`6️⃣ Leaves prepared: ${leaves.length}`);
+
+    if (leaves.length === 0) {
+      throw new Error('No valid leaves found in the Excel file');
+    }
+
+    console.log('7️⃣ Saving leaves...');
+
+    await this.leaveRepository.save(leaves);
+
+    console.log('8️⃣ Leaves saved successfully');
+
+    return {
+      result: 'success',
+      message: 'File read successfully',
+    };
   }
 
   async importCarriedForwardLeaves(file: Express.Multer.File, date: Date) {
@@ -673,7 +723,6 @@ export class LeaveService {
 
       for (let i = 2; i <= worksheet.rowCount; i++) {
         const row = worksheet.getRow(i);
-        console.log('ROW:', i)
         const employee = await this.employeeRepository.findOne({ where: { matricule: row.getCell(headerMap['matricule']).value?.toString() } });
         if (!employee) {
           continue;
@@ -729,8 +778,6 @@ export class LeaveService {
       .setParameter('year', year)
       .getRawOne();
 
-    console.log("CARRIED FORWARD:", carriedForwards)
-
     if (carriedForwards) {
 
       const carriedForwardMap = new Map(
@@ -748,8 +795,8 @@ export class LeaveService {
     const [data] = await this.employeeRepository
       .createQueryBuilder('e')
       .where(
-        'e.id = :id AND e.is_active = true AND e.is_deleted = false',
-        { id: employeeId },
+        'e.id = :id AND e.is_active = :isActive AND e.is_deleted = :isDeleted',
+        { id: employeeId, isActive: true, isDeleted: false },
       )
       // .andWhere('u.id IS NULL')
       .select(['e.id', 'e.matricule', 'e.name', 'e.firstname', 'e.DOE'])
@@ -763,15 +810,17 @@ export class LeaveService {
       .addSelect('leave.start_date', 'start_date')
       .addSelect('leave.end_date', 'end_date')
       .addSelect(
-        'SUM(DATEDIFF(leave.end_date, leave.start_date) + 1)',
+        'SUM(DATEDIFF(day,leave.end_date, leave.start_date) + 1)',
         'daysTaken'
       )
       .where('employee.id IN (:...employeeIds)', { employeeIds: [employeeId] })
       .andWhere('leave.status IN (:...status)', { status: [LeaveStatus.APPROVED, LeaveStatus.PENDING] })
       .andWhere('leave.leave_type = :type', { type: 'Local_Leave_AMD' })
       .andWhere('YEAR(leave.start_date) = :year', { year: date.getFullYear() })
-      .andWhere('employee.is_active = true AND employee.is_deleted = false')
+      .andWhere('employee.is_active = :isActive AND employee.is_deleted = :isDeleted', { isActive: true, isDeleted: false })
       .groupBy('employee.id')
+      .addGroupBy('leave.start_date')
+      .addGroupBy('leave.end_date')
       .getRawMany();
     // // return data;
 
@@ -875,10 +924,6 @@ export class LeaveService {
         }
       }
 
-      console.log('soldeDebut', soldeDebut);
-      console.log('restant', restant);
-      console.log('cumulSolde', cumulSolde);
-
       return {
         ...emp,
         solde_cumul: Number(cumulSolde.toFixed(2)),
@@ -906,7 +951,7 @@ export class LeaveService {
       .addSelect('leave.start_date', 'start_date')
       .addSelect('leave.end_date', 'end_date')
       .addSelect(
-        'SUM(DATEDIFF(leave.end_date, leave.start_date) + 1)',
+        'SUM(DATEDIFF(day,leave.end_date, leave.start_date) + 1)',
         'daysTaken'
       )
       .where('employee.id = :employeeId', { employeeId: employee.id })
@@ -915,6 +960,8 @@ export class LeaveService {
       .andWhere('YEAR(leave.start_date) = :year', { year })
       .andWhere('leave.start_date <= :at', { at })
       .groupBy('employee.id')
+      .addGroupBy('leave.start_date')
+      .addGroupBy('leave.end_date')
       .getRawMany();
 
 
@@ -1104,13 +1151,6 @@ export class LeaveService {
     skip = 0,
     take = 30,
   ) {
-    console.log("YEAR:", year)
-    console.log("Start month:", startMonth)
-    console.log("End month:", endMonth)
-    console.log("Line:", line)
-    console.log("Section:", section)
-    console.log("skip:", skip)
-    console.log("Take:", take)
     const startDate = new Date(year, startMonth - 1, 1);
     const endDate = new Date(year, endMonth, 0); // dernier jour du mois
 
@@ -1136,11 +1176,11 @@ export class LeaveService {
       .andWhere('leave.status != :status', { status: LeaveStatus.REJECTED });
 
     if (line) {
-      query.andWhere('employee.line = :line  AND employee.is_active = true AND employee.is_deleted = false', { line });
+      query.andWhere('employee.line = :line  AND employee.is_active = :isActive AND employee.is_deleted = :isDeleted', { line, isActive: true, isDeleted: false });
     }
 
     if (section) {
-      query.andWhere('employee.section = :section AND employee.is_active = true AND employee.is_deleted = false', { section });
+      query.andWhere('employee.section = :section AND employee.is_active = :isActive AND employee.is_deleted = :isDeleted', { line, isActive: true, isDeleted: false });
     }
 
     query
@@ -1938,7 +1978,7 @@ export class LeaveService {
       .createQueryBuilder("employee")
       .select("employee.section", "section")
       .addSelect("COUNT(employee.id)", "total")
-      .where("employee.is_active = true AND employee.is_deleted = false")
+      .where('employee.is_active = :isActive AND employee.is_deleted = :isDeleted', { isActive: true, isDeleted: false })
       .groupBy("employee.section")
       .getRawMany();
 
@@ -1948,9 +1988,10 @@ export class LeaveService {
       const absent = await this.leaveRepository
         .createQueryBuilder("leave")
         .innerJoin("leave.employee", "employee")
-        .where("employee.section = :section AND employee.is_active = true AND employee.is_deleted = false", {
+        .where("employee.section = :section", {
           section: s.section,
         })
+        .andWhere('employee.is_active = :isActive AND employee.is_deleted = :isDeleted', { isActive: true, isDeleted: false })
         .andWhere("leave.status = :status", {
           status: LeaveStatus.APPROVED,
         })
@@ -2095,8 +2136,7 @@ export class LeaveService {
     const sections = await this.employeeRepository
       .createQueryBuilder('employee')
       .select('employee.section', 'section')
-      .where('employee.is_deleted = false')
-      .andWhere('employee.is_active = true')
+      .where('employee.is_active = :isActive AND employee.is_deleted = :isDeleted', { isActive: true, isDeleted: false })
       .groupBy('employee.section')
       .orderBy('employee.section', 'ASC')
       .getRawMany();
@@ -2226,6 +2266,8 @@ export class LeaveService {
       0,
     );
 
+    console.log("MONTHS:", monthStart, monthEnd)
+
     const daysInMonth = monthEnd.getDate();
 
     const totalEmployees =
@@ -2238,8 +2280,8 @@ export class LeaveService {
 
     const leaves = await this.leaveRepository
       .createQueryBuilder('leave')
-      .where('leave.status = :status', {
-        status: LeaveStatus.APPROVED,
+      .where('leave.status IN (:...statuses)', {
+        statuses: [LeaveStatus.APPROVED, LeaveStatus.APPROVED_BY_MANAGER, LeaveStatus.PENDING],
       })
       .andWhere(
         'leave.start_date <= :monthEnd',
@@ -2251,9 +2293,13 @@ export class LeaveService {
       )
       .getMany();
 
+    console.log("LEAVES:", leaves)
+
     let totalAbsenceDays = 0;
 
     for (const leave of leaves) {
+
+      console.log("LEAVE:", new Date(leave.start_date).toLocaleDateString(), leave.status, leave.id)
 
       const startDate =
         new Date(leave.start_date);
@@ -2282,6 +2328,8 @@ export class LeaveService {
 
       totalAbsenceDays += absenceDays;
     }
+
+    console.log(daysInMonth)
 
     const totalAvailableDays =
       totalEmployees * daysInMonth;
@@ -2616,8 +2664,7 @@ export class LeaveService {
       .createQueryBuilder('employee')
       .select('employee.section', 'section')
       .addSelect('COUNT(employee.id)', 'totalEmployees')
-      .where('employee.is_active = true')
-      .andWhere('employee.is_deleted = false')
+      .where('employee.is_active = :isActive AND employee.is_deleted = :isDeleted', { isActive: true, isDeleted: false })
       .groupBy('employee.section')
       .orderBy('employee.section', 'ASC')
       .getRawMany();
@@ -2685,8 +2732,7 @@ export class LeaveService {
     const sections = await this.employeeRepository
       .createQueryBuilder('employee')
       .select('employee.section', 'section')
-      .where('employee.is_active = true')
-      .andWhere('employee.is_deleted = false')
+      .where('employee.is_active = :isActive AND employee.is_deleted = :isDeleted', { isActive: true, isDeleted: false })
       .groupBy('employee.section')
       .orderBy('employee.section', 'ASC')
       .getRawMany();
@@ -2901,10 +2947,6 @@ export class LeaveService {
       })
     const count = await query.getCount();
 
-    if (count > 0) {
-      console.log("COUNT:", count, date)
-    }
-
     return count;
   }
 
@@ -3107,7 +3149,6 @@ export class LeaveService {
      * -----------------------------------------
      */
     let row = 4;
-    console.log("REPORT DATA:", reportData)
 
     for (const leaveType of leaveTypes) {
 
@@ -3117,8 +3158,7 @@ export class LeaveService {
 
       for (const date of dates) {
 
-        const dateKey = this.formatDate(date);
-
+        const dateKey = `${date.toLocaleDateString('sv-SE')}`
         const values = reportData[dateKey][leaveType];
 
         worksheet.getCell(row, dataColumn).value =
@@ -3619,8 +3659,6 @@ export class LeaveService {
       .leftJoinAndSelect('leave.employee', 'employee')
       .orderBy('leave.created_at', 'DESC')
       .getMany();
-
-    console.log("LEAVES:", leaves)
 
     // Créer le workbook Excel
     const workbook = new ExcelJS.Workbook();
