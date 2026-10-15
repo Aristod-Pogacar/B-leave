@@ -130,7 +130,7 @@ import { CarriedForwardService } from './carried-forward/carried-forward.service
 
         synchronize: true,
 
-        // logging: ['query', 'error', 'schema'],
+        logging: ['query', 'error', 'schema'],
 
         options: {
           encrypt: false,
