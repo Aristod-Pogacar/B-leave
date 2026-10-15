@@ -191,7 +191,6 @@ export class Permission2hService {
     limit: number,
     date: string,
   ) {
-    console.log("ID:", id);
     const skip = (page - 1) * limit;
     const query = this.permission2hRepository
       .createQueryBuilder('p')
@@ -256,13 +255,11 @@ export class Permission2hService {
     var managerUser: User | null = null;
     if (manager) {
       managerUser = await this.userService.findOneByMatricule(manager.matricule);
-      console.log("MANAGER USER:", managerUser?.email);
       if (managerUser && managerUser.email !== undefined && managerUser.email !== null && managerUser.email !== "" && managerUser.email !== "undefined") email.push(managerUser.email);
     }
 
     const emailAdress = this.configService.get<string>('EMAIL_ADRESS')
     const emailPassword = this.configService.get<string>('EMAIL_PASSWORD')
-    console.log(email)
     if (email.length > 0) {
       if (emailAdress && emailPassword) {
         //     await this.mailerService.sendMail({

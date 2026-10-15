@@ -48,13 +48,13 @@ export class EmployeeHistory {
     @Column({ type: 'date', nullable: true })
     DOR?: Date;
 
-    @CreateDateColumn({ type: 'timestamp' })
+    @CreateDateColumn({ type: 'datetime2' })
     createdAt!: Date;
 
-    @UpdateDateColumn({ type: 'timestamp' })
+    @UpdateDateColumn({ type: 'datetime2' })
     updatedAt?: Date;
 
-    @ManyToOne(() => Employee, employee => employee.histories, { nullable: false, onDelete: 'CASCADE', onUpdate: 'CASCADE' })
+    @ManyToOne(() => Employee, employee => employee.histories, { nullable: false, onDelete: 'NO ACTION', onUpdate: 'CASCADE' })
     @JoinColumn({ name: 'employee_id' })
     employee!: Employee;
 }

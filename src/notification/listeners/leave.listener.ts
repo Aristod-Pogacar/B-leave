@@ -50,6 +50,11 @@ export class LeaveListener {
         if (!manager)
             return;
 
+
+        let url;
+        if (leave.leave_type !== "Permission_AMD") { url = `/leave/approuve-leaves` } else { url = `/leave/approuve-permissions` }
+        console.log("URL:", url)
+
         await this.notificationService.create({
 
             recipient: manager,
@@ -59,7 +64,7 @@ export class LeaveListener {
             message:
                 `${leave.employee.name} ${leave.employee.firstname} requested leave.`,
 
-            url: `/leave/approuve-leaves`,
+            url: url,
 
         });
 

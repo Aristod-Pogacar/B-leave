@@ -56,7 +56,7 @@ export class Permission2h {
     @Column({ default: LeaveStatus.PENDING })
     status: LeaveStatus;
 
-    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+    @Column({ type: 'datetime2', default: () => 'CURRENT_TIMESTAMP' })
     applied_at: Date;
 
 }

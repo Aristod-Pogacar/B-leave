@@ -79,11 +79,39 @@ import { CarriedForwardService } from './carried-forward/carried-forward.service
       isGlobal: true,
     }),
     EventEmitterModule.forRoot(),
+    // TypeOrmModule.forRootAsync({
+    //   inject: [ConfigService],
+    //   useFactory: (config: ConfigService) => ({
+    //     type: config.get<'mysql' | 'postgres'>('DATABASE_TYPE'),
+    //     url: config.get<string>('MYSQL_URL'),
+    //     entities: [
+    //       Leave,
+    //       Employee,
+    //       User,
+    //       ManagerAssignation,
+    //       Permission2h,
+    //       MedicalService,
+    //       SmiaOstie,
+    //       History,
+    //       EmployeeHistory,
+    //       Holiday,
+    //       Notification,
+    //       Withdraw,
+    //       CarriedForward
+    //     ],
+    //     synchronize: true,
+    //   }),
+    // }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        type: config.get<'mysql' | 'postgres'>('DATABASE_TYPE'),
-        url: config.get<string>('MYSQL_URL'),
+        type: 'mssql',
+        host: config.get<string>('DATABASE_HOST'),
+        port: Number(config.get<string>('DATABASE_PORT')),
+        username: config.get<string>('DATABASE_USER'),
+        password: config.get<string>('DATABASE_PASSWORD'),
+        database: config.get<string>('DATABASE_NAME'),
+
         entities: [
           Leave,
           Employee,
@@ -99,10 +127,17 @@ import { CarriedForwardService } from './carried-forward/carried-forward.service
           Withdraw,
           CarriedForward
         ],
+
         synchronize: true,
+
+        // logging: ['query', 'error', 'schema'],
+
+        options: {
+          encrypt: false,
+          trustServerCertificate: true,
+        },
       }),
-    }),
-    // TypeOrmModule.forRoot({
+    }),    // TypeOrmModule.forRoot({
     //   type: 'sqlite',
     //   database: 'database.sqlite',
     //   entities: [__dirname + '/**/*.entity{.ts,.js}'],

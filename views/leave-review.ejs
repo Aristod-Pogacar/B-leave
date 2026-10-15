@@ -1,0 +1,409 @@
+<%- include('partials/head.ejs') %>
+    <link rel="stylesheet" type="text/css" href="/assets/css/dashboard.css">
+
+    <body>
+        <style>
+            :root {
+                --report-primary: #2563eb;
+                --report-primary-dark: #1e40af;
+                --report-primary-light: #eff6ff;
+                --report-secondary: #64748b;
+                --report-border: #dbeafe;
+                --report-track: #e2e8f0;
+            }
+
+            /* REPORT HEADER */
+            .leave-report-header {
+                padding: 20px 25px;
+                border-bottom: 1px solid var(--report-border);
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+
+            .leave-report-header h2 {
+                font-size: 30px;
+                font-weight: 700;
+                margin: 0;
+                color: #1e293b;
+            }
+
+            .leave-report-header h2 span {
+                font-weight: 400;
+                color: var(--report-primary);
+            }
+
+            .leave-report-header .badge {
+                background: var(--report-primary) !important;
+            }
+
+            .company-logo img {
+                width: 85px;
+                height: 85px;
+                object-fit: contain;
+            }
+
+            /* KPI CARDS */
+            .kpi-grid .card,
+            .main-content .card {
+                border: 1px solid var(--report-border);
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(37, 99, 235, 0.06);
+            }
+
+            .kpi-value {
+                font-size: 36px;
+                font-weight: 700;
+                color: var(--report-primary);
+                margin-bottom: 8px;
+            }
+
+            .kpi-label {
+                font-size: 16px;
+                font-weight: 600;
+                color: #1e293b;
+                margin-bottom: 4px;
+            }
+
+            .kpi-description {
+                font-size: 14px;
+                color: var(--report-secondary);
+            }
+
+            /* TRAJECTORY */
+            .leave-trajectory {
+                padding: 0 5px;
+            }
+
+            .leave-trajectory>h5 {
+                font-size: 15px;
+                font-weight: 700;
+                padding-top: 12px;
+                border-top: 3px solid var(--report-primary);
+                color: var(--report-primary-dark);
+            }
+
+            .trajectory-value {
+                font-size: 64px;
+                font-weight: 700;
+                line-height: 1.2;
+                color: var(--report-primary);
+            }
+
+            .trajectory-label {
+                font-size: 18px;
+                font-weight: 600;
+                color: #1e293b;
+            }
+
+            .trajectory-description {
+                font-size: 14px;
+                margin-top: 5px;
+                color: var(--report-secondary);
+            }
+
+            /* PROGRESS BARS */
+            .leave-progress-section {
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+                margin-top: 25px;
+            }
+
+            .progress-row {
+                display: grid;
+                grid-template-columns: 205px minmax(100px, 1fr) 120px;
+                align-items: center;
+                gap: 15px;
+            }
+
+            .progress-label {
+                font-size: 14px;
+                font-weight: 600;
+                color: #334155;
+            }
+
+            .progress-track {
+                width: 100%;
+                height: 25px;
+                background: var(--report-track);
+                border-radius: 4px;
+                overflow: hidden;
+            }
+
+            .progress-fill {
+                height: 100%;
+                background: var(--report-primary);
+                border-radius: 4px;
+            }
+
+            .progress-value {
+                font-size: 14px;
+                font-weight: 700;
+                text-align: right;
+                color: var(--report-primary-dark);
+            }
+
+            /* KEY MESSAGE */
+            .leave-trajectory>.card:last-child {
+                border-left: 4px solid var(--report-primary);
+                background: var(--report-primary-light);
+                border-radius: 4px;
+            }
+
+            .leave-trajectory>.card:last-child h5 {
+                color: var(--report-primary-dark);
+                font-weight: 700;
+            }
+
+            .leave-trajectory>.card:last-child p {
+                color: #334155;
+                line-height: 1.7;
+            }
+
+            /* RESPONSIVE */
+            @media (max-width: 768px) {
+                .leave-report-header h2 {
+                    font-size: 23px;
+                }
+
+                .trajectory-value {
+                    font-size: 45px;
+                }
+
+                .progress-row {
+                    grid-template-columns: 1fr auto;
+                    gap: 8px;
+                }
+
+                .progress-label {
+                    grid-column: 1 / -1;
+                }
+
+                .progress-track {
+                    grid-column: 1;
+                }
+
+                .progress-value {
+                    grid-column: 2;
+                }
+
+                .company-logo img {
+                    width: 60px;
+                    height: 60px;
+                }
+            }
+        </style>
+        <%- include('partials/sidebar.ejs') %>
+            <%- include('partials/header.ejs') %>
+                <main class="nxl-container">
+                    <!-- <main class="main"> -->
+                    <div class="nxl-content">
+                        <div class="page-header">
+                            <div class="page-header-left d-flex align-items-center">
+                                <div class="page-header-title">
+                                    <h5 class="m-b-10">B-Leave</h5>
+                                </div>
+                                <ul class="breadcrumb">
+                                    <li class="breadcrumb-item">Dashboard</li>
+                                    <!-- <li class="breadcrumb-item">Overview</li> -->
+                                </ul>
+                            </div>
+                            <div class="page-header-right ms-auto">
+                                <div class="page-header-right-items">
+                                    <div class="d-flex d-md-none">
+                                        <a href="javascript:void(0)" class="page-header-right-close-toggle">
+                                            <i class="feather-arrow-left me-2"></i>
+                                            <span>Back</span>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="d-md-none d-flex align-items-center">
+                                    <a href="javascript:void(0)" class="page-header-right-open-toggle">
+                                        <i class="feather-align-right fs-20"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- <div class="content"> -->
+
+                        <div class="main-content">
+
+                            <!-- REPORT HEADER -->
+                            <div class="leave-report-header d-flex justify-content-between align-items-center mb-4">
+                                <div>
+                                    <div class="d-flex align-items-center gap-3 mb-2">
+                                        <span class="badge bg-secondary px-4 py-2">HR Review</span>
+                                        <span>July 2026</span>
+                                    </div>
+                                    <h2>
+                                        Leave Situation
+                                        <span>target : max year-end balance 10 day per employee</span>
+                                    </h2>
+                                </div>
+                            </div>
+
+                            <!-- KPI CARDS -->
+                            <div class="row g-3 mb-4">
+
+                                <div class="col-12 col-md-6 col-xl-3">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <div class="kpi-value">2,812 d</div>
+                                            <div class="kpi-label">Taken in July</div>
+                                            <div class="kpi-description">Actual leave consumption</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-6 col-xl-3">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <div class="kpi-value">22,080 d</div>
+                                            <div class="kpi-label">Balance after July</div>
+                                            <div class="kpi-description">Outstanding to be absorbed</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-6 col-xl-3">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <div class="kpi-value">2,881 d</div>
+                                            <div class="kpi-label">Already planned (Aug → Dec)</div>
+                                            <div class="kpi-description">
+                                                Only <strong>13%</strong> of the balance is booked
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-6 col-xl-3">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <div class="kpi-value">32,436 d</div>
+                                            <div class="kpi-label">Projected balance at end of Dec</div>
+                                            <div class="kpi-description">If no further action</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <!-- CURRENT TRAJECTORY VS TARGET -->
+                            <div class="leave-trajectory mt-4">
+
+                                <h5 class="mb-3">CURRENT TRAJECTORY VS. TARGET</h5>
+
+                                <!-- FORECAST VS TARGET -->
+                                <div class="row g-3 align-items-center mb-4">
+
+                                    <div class="col-12 col-md-5">
+                                        <div class="card h-100">
+                                            <div class="card-body">
+                                                <div class="trajectory-value">30.6 days</div>
+                                                <div class="trajectory-label">
+                                                    Forecast closing balance / employee
+                                                </div>
+                                                <div class="trajectory-description">
+                                                    = 32,436 d across 1,059 HC
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-md-2 text-center">
+                                        <h3>VS.</h3>
+                                    </div>
+
+                                    <div class="col-12 col-md-5">
+                                        <div class="card h-100">
+                                            <div class="card-body">
+                                                <div class="trajectory-value">10 days</div>
+                                                <div class="trajectory-label">
+                                                    Target closing balance / employee
+                                                </div>
+                                                <div class="trajectory-description">
+                                                    = 10,590 d total — objective
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <!-- PROGRESS BARS -->
+                                <div class="leave-progress-section">
+
+                                    <div class="progress-row">
+                                        <div class="progress-label">Forecast at year-end</div>
+                                        <div class="progress-track">
+                                            <div class="progress-fill" style="width: 100%;"></div>
+                                        </div>
+                                        <div class="progress-value">32,436 d</div>
+                                    </div>
+
+                                    <div class="progress-row">
+                                        <div class="progress-label">Target at year-end</div>
+                                        <div class="progress-track">
+                                            <div class="progress-fill" style="width: 32.66%;"></div>
+                                        </div>
+                                        <div class="progress-value">10,590 d</div>
+                                    </div>
+
+                                    <div class="progress-row">
+                                        <div class="progress-label">Already planned Aug → Dec</div>
+                                        <div class="progress-track">
+                                            <div class="progress-fill" style="width: 8.88%;"></div>
+                                        </div>
+                                        <div class="progress-value">2,881 d</div>
+                                    </div>
+
+                                    <div class="progress-row">
+                                        <div class="progress-label">Still to be planned</div>
+                                        <div class="progress-track">
+                                            <div class="progress-fill" style="width: 67.42%;"></div>
+                                        </div>
+                                        <div class="progress-value">21,866 d</div>
+                                    </div>
+
+                                </div>
+
+                                <!-- KEY MESSAGE -->
+                                <div class="card mt-3">
+                                    <div class="card-body">
+                                        <h5>KEY MESSAGE — progress made, but still far from target</h5>
+
+                                        <p>
+                                            Some plannings have been received
+                                            (<strong>+415 d</strong> vs. end-June, planned days
+                                            rose from <strong>2,466</strong> to
+                                            <strong>2,881 d</strong>) — but this covers only
+                                            <strong>13%</strong> of the outstanding balance.
+                                            An additional <strong>21,866 days</strong> must still
+                                            be scheduled between August and December to reach
+                                            the year-end target of ≤10 days per employee.
+                                        </p>
+
+                                        <p class="mb-0">
+                                            <strong>
+                                                → Efforts must continue: every department head
+                                                is expected to submit complete H2 leave
+                                                plannings without delay.
+                                            </strong>
+                                        </p>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- FOOTER -->
+                    <%- include('partials/footer.ejs') %>
+                </main>
+
+    </body>
+
+    </html>

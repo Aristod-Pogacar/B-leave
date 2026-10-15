@@ -13,7 +13,7 @@ export class Withdraw {
     @PrimaryGeneratedColumn('uuid')
     id!: string;
 
-    @ManyToOne(() => Leave, leave => leave.withdraw_Request, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
+    @ManyToOne(() => Leave, leave => leave.withdraw_Request, { onDelete: 'NO ACTION', onUpdate: 'CASCADE' })
     @JoinColumn({ name: 'leave_id' })
     leave!: Leave;
 
@@ -23,10 +23,10 @@ export class Withdraw {
     @Column({ default: false })
     onehr_status: boolean;
 
-    @Column({ type: 'timestamp', nullable: true })
+    @Column({ type: 'datetime2', nullable: true })
     approved_date?: Date;
 
-    @ManyToOne(() => User, user => user.withdrawn, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
+    @ManyToOne(() => User, user => user.withdrawn, { onDelete: 'NO ACTION', onUpdate: 'CASCADE' })
     @JoinColumn({ name: 'approver_id' })
     approver?: User;
 

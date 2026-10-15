@@ -3,7 +3,7 @@ import { CreateWithdrawDto } from './dto/create-withdraw.dto';
 import { UpdateWithdrawDto } from './dto/update-withdraw.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Withdraw, WithdrawStatus } from './entities/withdraw.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { LeaveService } from '../leave/leave.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { WithdrawRequestEvent } from '../notification/events/withdraw-request.event';
@@ -92,8 +92,28 @@ export class WithdrawService {
   }
 
 
-  async findBySite(site: Site, status: WithdrawStatus = WithdrawStatus.WITHDRAW_PENDING, onehr_status: boolean = false) {
-    const allowedSites = this.getAllowedSites(site);
+  async findBySite(user: any, status: WithdrawStatus = WithdrawStatus.WITHDRAW_PENDING, onehr_status: boolean = false) {
+    var allowedSites: any = []
+    if (user.id == "00000000-0000-0000-0000-000000000001") {
+      allowedSites = [Site.ABE1, Site.ABE2, Site.TANA]
+    } else {
+      allowedSites = this.getAllowedSites(user.site);
+    }
+
+    const withdraw = await this.withdrawRepository.find({
+      where: {
+        status,
+        leave: {
+          employee: {
+            site: In(allowedSites)
+          }
+        },
+        onehr_status
+      }
+    })
+
+    console.log(withdraw)
+
     const withdraws = await this.withdrawRepository
       .createQueryBuilder('withdraw')
       .leftJoinAndSelect('withdraw.leave', 'leave')

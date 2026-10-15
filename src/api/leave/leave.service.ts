@@ -38,12 +38,18 @@ export class LeaveService {
 
     const leaves = await this.leaveRepository.find({
       where: {
-        employee,
-        status: In([LeaveStatus.APPROVED, LeaveStatus.PENDING]),
+        employee: {
+          matricule,
+          is_active: true,
+          is_deleted: false
+        },
+        status: In([LeaveStatus.APPROVED, LeaveStatus.PENDING, LeaveStatus.APPROVED_BY_MANAGER]),
       },
       order: { created_at: 'DESC' },
       relations: ['employee']
     });
+
+    console.log("LEAVES:", leaves)
 
     return leaves;
   }
@@ -77,6 +83,8 @@ export class LeaveService {
       const days_taken = (nbDate / (1000 * 60 * 60 * 24)) + 1;
 
       if ((permissionCount + days_taken) > 10) {
+        console.log("Permission solde:", (10 - permissionCount));
+
         return res.status(400).json({ message: 'Permission solde not enough', solde_left: (10 - permissionCount) });
       }
     }
@@ -97,6 +105,8 @@ export class LeaveService {
       },
     });
     if (overlappingLeave.length > 0) {
+      console.log("Leaves overlap");
+
       return res.status(400).json({ message: 'Leave dates overlap with existing leave' });
     }
 
@@ -104,6 +114,8 @@ export class LeaveService {
     const endDate = new Date(createLeaveDto.end_date);
 
     if (startDate > endDate) {
+      console.log("Start date is after end date");
+
       return res.status(400).json({ message: 'Start date is after end date' });
     }
 
@@ -113,6 +125,8 @@ export class LeaveService {
     if (createLeaveDto.leave_type == 'Local_Leave_AMD') {
       const employeeSolde = await this.employeeService.getEmployeeSolde(employee.matricule, createLeaveDto.start_date);
       if ((employeeSolde.solde_restant - duration) < 0) {
+        console.log('Local leave solde not enough:', employeeSolde.solde_restant);
+
         return res.status(400).json({ message: 'Local leave solde not enough', solde_left: employeeSolde.solde_restant });
       }
     }

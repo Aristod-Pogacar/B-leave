@@ -53,16 +53,16 @@ export class Leave {
     @Column({ nullable: true })
     reason?: string;
 
-    @Column({ type: 'timestamp', nullable: true })
+    @Column({ type: 'datetime2', nullable: true })
     approved_date?: Date;
 
     @ManyToOne(() => User, user => user.leaves)
     @JoinColumn({ name: 'approver1_id' })
-    approver1?: User;
+    approver1?: User | null;
 
-    @ManyToOne(() => User, user => user.leaves)
+    @ManyToOne(() => User, user => user.leaves, { nullable: true })
     @JoinColumn({ name: 'approver_id' })
-    approver?: User;
+    approver?: User | null;
 
     @Column({ default: () => "CURRENT_TIMESTAMP" })
     created_at?: Date;

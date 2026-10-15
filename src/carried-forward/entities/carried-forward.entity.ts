@@ -18,12 +18,12 @@ export class CarriedForward {
     @Column()
     date: Date;
 
-    @CreateDateColumn({ type: 'timestamp' })
+    @CreateDateColumn({ type: 'datetime2' })
     createdAt!: Date;
 
-    @UpdateDateColumn({ type: 'timestamp' })
+    @UpdateDateColumn({ type: 'datetime2' })
     updatedAt?: Date;
 
-    @DeleteDateColumn({ type: 'timestamp' })
+    @DeleteDateColumn({ type: 'datetime2' })
     deletedAt: Date;
 }

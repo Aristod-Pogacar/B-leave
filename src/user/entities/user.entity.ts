@@ -50,7 +50,7 @@ export class User {
     password: string;
 
     @Column({
-        type: 'enum',
+        type: 'varchar',
         enum: UserRole,
         default: UserRole.PAYROLL
     })
@@ -59,13 +59,13 @@ export class User {
     // @Column({ nullable: true })
     // verificationCode: string;
 
-    @Column({ type: 'enum', enum: Site, default: Site.ABE1 })
+    @Column({ type: 'varchar', enum: Site, default: Site.ABE1 })
     site: Site;
 
-    @CreateDateColumn({ type: 'timestamp' })
+    @CreateDateColumn({ type: 'datetime2' })
     createdAt: Date;
 
-    @UpdateDateColumn({ type: 'timestamp' })
+    @UpdateDateColumn({ type: 'datetime2' })
     updatedAt: Date;
 
     // @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP(6)", nullable: true })
@@ -102,7 +102,7 @@ export class User {
     //     nullable: true
     // })
     // approver: User;
-    @OneToOne(() => Employee, employee => employee.user, { nullable: true, onDelete: 'CASCADE' })
+    @OneToOne(() => Employee, employee => employee.user, { nullable: true, onDelete: 'NO ACTION' })
     @JoinColumn({ name: 'employee_id' })
     employee?: Employee | null;
 }

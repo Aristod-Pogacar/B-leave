@@ -78,7 +78,7 @@ export class Employee {
     smia_ostie: SmiaOstie[];
 
     @Index()
-    @ManyToOne(() => Employee, manager => manager.subordinates, { nullable: true, onDelete: 'SET NULL' })
+    @ManyToOne(() => Employee, manager => manager.subordinates, { nullable: true })
     @JoinColumn({ name: 'manager_id' })
     manager?: Employee | null;
 
@@ -91,7 +91,7 @@ export class Employee {
     @OneToMany(() => EmployeeHistory, employeeHistory => employeeHistory.employee, { onDelete: 'NO ACTION' })
     histories: EmployeeHistory[];
 
-    @Column({ type: 'int', nullable: true, unique: true })
+    @Column({ type: 'int', nullable: true })
     fingerprintId?: number | null;
 
     @Column({ type: 'varchar', nullable: true })

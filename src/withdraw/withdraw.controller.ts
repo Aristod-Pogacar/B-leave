@@ -24,9 +24,7 @@ export class WithdrawController {
   @Get('tasks')
   @Render('withdraw-tasks')
   async findAllApprovedRequest(@Req() req: any, @Res() res: any) {
-    console.log("USER:", req.session.user.site);
     const requests = await this.withdrawService.findBySite(req.session.user.site, WithdrawStatus.WITHDRAW_APPROVED);
-    console.log("REQUESTS:", requests);
     return { title: "Approved withdraws", error: req.query.error, requests: requests, message: req.query.message }
   }
 
@@ -36,7 +34,7 @@ export class WithdrawController {
   @Get('request')
   @Render('withdraw-request')
   async findAllRequest(@Req() req: any, @Res() res: any) {
-    const requests = await this.withdrawService.findBySite(req.session.user.site);
+    const requests = await this.withdrawService.findBySite(req.session.user);
     return { title: "Approuve withdraws", error: req.query.error, requests: requests, message: req.query.message }
   }
 

@@ -515,7 +515,7 @@ export class SmiaOstieService {
       .select("employee.section", "section")
       .addSelect("COUNT(DISTINCT employee.id)", "employees")
       .addSelect("COUNT(DISTINCT smia.employee_matricule)", "consultation")
-      .where("employee.is_active = true")
+      .where('employee.is_active = :isActive AND employee.is_deleted = :isDeleted', { isActive: true, isDeleted: false })
       .groupBy("employee.section")
       .getRawMany();
 
