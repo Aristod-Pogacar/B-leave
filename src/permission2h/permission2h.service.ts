@@ -102,7 +102,7 @@ export class Permission2hService {
         OR p.reason LIKE :search
         OR p.expectedStartTime LIKE :search
         OR p.expectedEndTime LIKE :search
-        OR DATE(p.date) LIKE :search
+        OR CAST(p.date AS DATE) LIKE :search
       )`,
         { search: `%${search}%` },
       );
@@ -113,17 +113,18 @@ export class Permission2hService {
     }
 
     if (startDate) {
-      query.andWhere('DATE(p.date) >= :startDate', { startDate });
+      query.andWhere('CAST(p.date AS DATE) >= :startDate', { startDate });
     }
 
     if (endDate) {
-      query.andWhere('DATE(p.date) <= :endDate', { endDate });
+      query.andWhere('CAST(p.date AS DATE) <= :endDate', { endDate });
     }
 
     const [data, total] = await query
       .orderBy('p.date', 'DESC')
-      .skip(skip)
-      .take(limit)
+      .addOrderBy('p.id', 'ASC')
+      .offset(skip)
+      .limit(limit)
       .getManyAndCount();
 
     return {
@@ -133,6 +134,7 @@ export class Permission2hService {
       currentPage: page,
     };
   }
+
   async getToExport(
     search: string,
     startDate: string,
@@ -159,7 +161,7 @@ export class Permission2hService {
         OR p.reason LIKE :search
         OR p.expectedStartTime LIKE :search
         OR p.expectedEndTime LIKE :search
-        OR DATE(p.date) LIKE :search
+        OR CAST(p.date AS DATE) LIKE :search
       )`,
         { search: `%${search}%` },
       );
@@ -170,11 +172,11 @@ export class Permission2hService {
     }
 
     if (startDate) {
-      query.andWhere('DATE(p.date) >= :startDate', { startDate });
+      query.andWhere('CAST(p.date AS DATE) >= :startDate', { startDate });
     }
 
     if (endDate) {
-      query.andWhere('DATE(p.date) <= :endDate', { endDate });
+      query.andWhere('CAST(p.date AS DATE) <= :endDate', { endDate });
     }
 
     const [data, total] = await query
@@ -208,7 +210,7 @@ export class Permission2hService {
     // }
 
     if (date) {
-      query.where('DATE(p.date) = :date', { date });
+      query.where('CAST(p.date AS DATE) = :date', { date });
     }
 
     const [data, total] = await query

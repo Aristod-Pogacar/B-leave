@@ -132,6 +132,10 @@ import { CarriedForwardService } from './carried-forward/carried-forward.service
 
         logging: ['query', 'error', 'schema'],
 
+        // Timeout en millisecondes
+        connectionTimeout: 60000, // 60 secondes pour se connecter
+        requestTimeout: 120000,   // 120 secondes pour exécuter une requête
+
         options: {
           encrypt: false,
           trustServerCertificate: true,
