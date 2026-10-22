@@ -111,11 +111,13 @@ export class SmiaOstieService {
     const allowedSites = this.getAllowedSites(user.site);
     const query = this.SmiaOstieRepo.createQueryBuilder('ms')
       .leftJoinAndSelect('ms.employee', 'employee')
-      .andWhere('employee.site IN (:...sites)', { sites: allowedSites });
+    // .andWhere('employee.site IN (:...sites)', { sites: allowedSites });
+
+    console.log("ALLOWED SITES:", allowedSites)
 
     if (search && search.trim() !== '') {
       query.andWhere(
-        '(employee.matricule LIKE :s OR employee.fullname LIKE :s)',
+        '(employee.matricule LIKE :s OR employee.name LIKE :s OR employee.firstname LIKE :s)',
         { s: `%${search}%` }
       );
     }
@@ -133,6 +135,8 @@ export class SmiaOstieService {
       .skip((page - 1) * limit)
       .take(limit)
       .getMany();
+
+    console.log("CONSULTATION:", data)
 
     return { data, total, totalPages: Math.ceil(total / limit) };
   }
