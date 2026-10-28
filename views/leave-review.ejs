@@ -4,13 +4,22 @@
     <body>
         <style>
             :root {
-                --report-primary: #2563eb;
+                --report-primary: #1e40af;
                 --report-primary-dark: #1e40af;
                 --report-primary-light: #eff6ff;
                 --report-secondary: #64748b;
                 --report-border: #dbeafe;
                 --report-track: #e2e8f0;
             }
+
+            /* :root {
+                --report-primary: #2563eb;
+                --report-primary-dark: #1e40af;
+                --report-primary-light: #eff6ff;
+                --report-secondary: #64748b;
+                --report-border: #dbeafe;
+                --report-track: #e2e8f0;
+            } */
 
             /* REPORT HEADER */
             .leave-report-header {
@@ -226,104 +235,133 @@
                         </div>
                         <!-- <div class="content"> -->
 
-                        <div class="main-content">
+                        <% const month=defaultDate || new Date().toLocaleDateString('en-US', { month: 'long' ,
+                            year: 'numeric' }); const taken=Number(globalLeaves?.monthTakenLeaves) || 0; const
+                            balance=Number(globalLeaves?.balanceAfterMonth) || 0; const
+                            planned=Number(globalLeaves?.plannedAfterMonth) || 0; const
+                            endBalance=Number(globalLeaves?.balanceEndOfYear) || 0; const
+                            averageBalance=Number(globalLeaves?.averageBalance) || 0; const targetPerEmployee=15; const
+                            plannedPercentage=balance> 0
+                            ? Math.min(100, Math.max(0, planned / balance * 100))
+                            : 0;
 
-                            <!-- REPORT HEADER -->
-                            <div class="leave-report-header d-flex justify-content-between align-items-center mb-4">
-                                <div>
-                                    <div class="d-flex align-items-center gap-3 mb-2">
-                                        <span class="badge bg-secondary px-4 py-2">HR Review</span>
-                                        <span>July 2026</span>
-                                    </div>
-                                    <h2>
-                                        Leave Situation
-                                        <span>target : max year-end balance 10 day per employee</span>
-                                    </h2>
-                                </div>
-                            </div>
+                            const remainingToPlan = Math.max(0, balance - planned);
 
-                            <!-- KPI CARDS -->
-                            <div class="row g-3 mb-4">
+                            // Formatage des nombres
+                            const formatDays = (value) =>
+                            value.toLocaleString('fr-FR', {
+                            maximumFractionDigits: 2
+                            });
 
-                                <div class="col-12 col-md-6 col-xl-3">
-                                    <div class="card h-100">
-                                        <div class="card-body">
-                                            <div class="kpi-value">2,812 d</div>
-                                            <div class="kpi-label">Taken in July</div>
-                                            <div class="kpi-description">Actual leave consumption</div>
+                            const formatPercentage = (value) =>
+                            value.toLocaleString('fr-FR', {
+                            maximumFractionDigits: 1
+                            });
+
+                            // Éviter une largeur de barre négative ou supérieure à 100 %
+                            const forecastPercentage = endBalance > 0 ? 100 : 0;
+                            %>
+
+                            <div class="main-content">
+
+                                <!-- REPORT HEADER -->
+                                <div class="leave-report-header d-flex justify-content-between align-items-center mb-4">
+                                    <div>
+                                        <div class="d-flex align-items-center gap-3 mb-2">
+                                            <span class="badge bg-secondary px-4 py-2">
+                                                HR Review
+                                            </span>
+
+                                            <span>
+                                                <%= month %>
+                                            </span>
                                         </div>
+
+                                        <h2>
+                                            Leave Situation
+                                            <span>
+                                                Target: maximum year-end balance of
+                                                <%= targetPerEmployee %> days per employee
+                                            </span>
+                                        </h2>
                                     </div>
                                 </div>
 
-                                <div class="col-12 col-md-6 col-xl-3">
-                                    <div class="card h-100">
-                                        <div class="card-body">
-                                            <div class="kpi-value">22,080 d</div>
-                                            <div class="kpi-label">Balance after July</div>
-                                            <div class="kpi-description">Outstanding to be absorbed</div>
-                                        </div>
-                                    </div>
-                                </div>
+                                <!-- KPI CARDS -->
+                                <div class="row g-3 mb-4">
 
-                                <div class="col-12 col-md-6 col-xl-3">
-                                    <div class="card h-100">
-                                        <div class="card-body">
-                                            <div class="kpi-value">2,881 d</div>
-                                            <div class="kpi-label">Already planned (Aug → Dec)</div>
-                                            <div class="kpi-description">
-                                                Only <strong>13%</strong> of the balance is booked
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-12 col-md-6 col-xl-3">
-                                    <div class="card h-100">
-                                        <div class="card-body">
-                                            <div class="kpi-value">32,436 d</div>
-                                            <div class="kpi-label">Projected balance at end of Dec</div>
-                                            <div class="kpi-description">If no further action</div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-
-                            <!-- CURRENT TRAJECTORY VS TARGET -->
-                            <div class="leave-trajectory mt-4">
-
-                                <h5 class="mb-3">CURRENT TRAJECTORY VS. TARGET</h5>
-
-                                <!-- FORECAST VS TARGET -->
-                                <div class="row g-3 align-items-center mb-4">
-
-                                    <div class="col-12 col-md-5">
+                                    <!-- Taken this month -->
+                                    <div class="col-12 col-md-6 col-xl-3">
                                         <div class="card h-100">
                                             <div class="card-body">
-                                                <div class="trajectory-value">30.6 days</div>
-                                                <div class="trajectory-label">
-                                                    Forecast closing balance / employee
+                                                <div class="kpi-value">
+                                                    <%= formatDays(taken) %> d
                                                 </div>
-                                                <div class="trajectory-description">
-                                                    = 32,436 d across 1,059 HC
+
+                                                <div class="kpi-label">
+                                                    Taken in <%= month %>
+                                                </div>
+
+                                                <div class="kpi-description">
+                                                    Actual leave consumption
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div class="col-12 col-md-2 text-center">
-                                        <h3>VS.</h3>
-                                    </div>
-
-                                    <div class="col-12 col-md-5">
+                                    <!-- Balance after month -->
+                                    <div class="col-12 col-md-6 col-xl-3">
                                         <div class="card h-100">
                                             <div class="card-body">
-                                                <div class="trajectory-value">10 days</div>
-                                                <div class="trajectory-label">
-                                                    Target closing balance / employee
+                                                <div class="kpi-value">
+                                                    <%= formatDays(balance) %> d
                                                 </div>
-                                                <div class="trajectory-description">
-                                                    = 10,590 d total — objective
+
+                                                <div class="kpi-label">
+                                                    Balance after <%= month %>
+                                                </div>
+
+                                                <div class="kpi-description">
+                                                    Outstanding leave balance
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Already planned -->
+                                    <div class="col-12 col-md-6 col-xl-3">
+                                        <div class="card h-100">
+                                            <div class="card-body">
+                                                <div class="kpi-value">
+                                                    <%= formatDays(planned) %> d
+                                                </div>
+
+                                                <div class="kpi-label">
+                                                    Already planned
+                                                </div>
+
+                                                <div class="kpi-description">
+                                                    <%= formatPercentage(plannedPercentage) %>%
+                                                        of the balance
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Projected year-end balance -->
+                                    <div class="col-12 col-md-6 col-xl-3">
+                                        <div class="card h-100">
+                                            <div class="card-body">
+                                                <div class="kpi-value">
+                                                    <%= formatDays(endBalance) %> d
+                                                </div>
+
+                                                <div class="kpi-label">
+                                                    Projected balance at end of December
+                                                </div>
+
+                                                <div class="kpi-description">
+                                                    If no further leave is planned
                                                 </div>
                                             </div>
                                         </div>
@@ -331,72 +369,171 @@
 
                                 </div>
 
-                                <!-- PROGRESS BARS -->
-                                <div class="leave-progress-section">
+                                <!-- CURRENT TRAJECTORY VS TARGET -->
+                                <div class="leave-trajectory mt-4">
 
-                                    <div class="progress-row">
-                                        <div class="progress-label">Forecast at year-end</div>
-                                        <div class="progress-track">
-                                            <div class="progress-fill" style="width: 100%;"></div>
+                                    <h5 class="mb-3">
+                                        CURRENT TRAJECTORY VS. TARGET
+                                    </h5>
+
+                                    <!-- FORECAST VS TARGET -->
+                                    <div class="row g-3 align-items-center mb-4">
+
+                                        <div class="col-12 col-md-5">
+                                            <div class="card h-100">
+                                                <div class="card-body">
+                                                    <div class="trajectory-value">
+                                                        <%= formatDays(averageBalance) %> days
+                                                    </div>
+
+                                                    <div class="trajectory-label">
+                                                        Average balance
+                                                    </div>
+
+                                                    <div class="trajectory-description">
+                                                        Projected year-end balance:
+                                                        <%= formatDays(endBalance) %> days in total
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="progress-value">32,436 d</div>
-                                    </div>
 
-                                    <div class="progress-row">
-                                        <div class="progress-label">Target at year-end</div>
-                                        <div class="progress-track">
-                                            <div class="progress-fill" style="width: 32.66%;"></div>
+                                        <div class="col-12 col-md-2 text-center">
+                                            <h3>VS.</h3>
                                         </div>
-                                        <div class="progress-value">10,590 d</div>
-                                    </div>
 
-                                    <div class="progress-row">
-                                        <div class="progress-label">Already planned Aug → Dec</div>
-                                        <div class="progress-track">
-                                            <div class="progress-fill" style="width: 8.88%;"></div>
+                                        <div class="col-12 col-md-5">
+                                            <div class="card h-100">
+                                                <div class="card-body">
+                                                    <div class="trajectory-value">
+                                                        <%= targetPerEmployee %> days
+                                                    </div>
+
+                                                    <div class="trajectory-label">
+                                                        Target closing balance per employee
+                                                    </div>
+
+                                                    <div class="trajectory-description">
+                                                        Maximum objective at year-end
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="progress-value">2,881 d</div>
+
                                     </div>
 
-                                    <div class="progress-row">
-                                        <div class="progress-label">Still to be planned</div>
-                                        <div class="progress-track">
-                                            <div class="progress-fill" style="width: 67.42%;"></div>
+                                    <!-- PROGRESS BARS -->
+                                    <div class="leave-progress-section">
+
+                                        <div class="progress-row">
+                                            <div class="progress-label">
+                                                Projected balance at year-end
+                                            </div>
+
+                                            <div class="progress-track">
+                                                <div class="progress-fill" style="width: <%= forecastPercentage %>%;">
+                                                </div>
+                                            </div>
+
+                                            <div class="progress-value">
+                                                <%= formatDays(endBalance) %> d
+                                            </div>
                                         </div>
-                                        <div class="progress-value">21,866 d</div>
+
+                                        <div class="progress-row">
+                                            <div class="progress-label">
+                                                Already planned
+                                            </div>
+
+                                            <div class="progress-track">
+                                                <div class="progress-fill" style="width: <%= plannedPercentage %>%;">
+                                                </div>
+                                            </div>
+
+                                            <div class="progress-value">
+                                                <%= formatDays(planned) %> d
+                                            </div>
+                                        </div>
+
+                                        <div class="progress-row">
+                                            <div class="progress-label">
+                                                Remaining balance to plan
+                                            </div>
+
+                                            <div class="progress-track">
+                                                <div class="progress-fill" style="width: <%= balance > 0
+                            ? Math.min(100, remainingToPlan / balance * 100)
+                            : 0 %>%;">
+                                                </div>
+                                            </div>
+
+                                            <div class="progress-value">
+                                                <%= formatDays(remainingToPlan) %> d
+                                            </div>
+                                        </div>
+
                                     </div>
 
-                                </div>
+                                    <!-- KEY MESSAGE -->
+                                    <div class="card mt-3">
+                                        <div class="card-body">
 
-                                <!-- KEY MESSAGE -->
-                                <div class="card mt-3">
-                                    <div class="card-body">
-                                        <h5>KEY MESSAGE — progress made, but still far from target</h5>
+                                            <h5>
+                                                KEY MESSAGE — Leave balance overview
+                                            </h5>
 
-                                        <p>
-                                            Some plannings have been received
-                                            (<strong>+415 d</strong> vs. end-June, planned days
-                                            rose from <strong>2,466</strong> to
-                                            <strong>2,881 d</strong>) — but this covers only
-                                            <strong>13%</strong> of the outstanding balance.
-                                            An additional <strong>21,866 days</strong> must still
-                                            be scheduled between August and December to reach
-                                            the year-end target of ≤10 days per employee.
-                                        </p>
+                                            <p>
+                                                During <strong>
+                                                    <%= month %>
+                                                </strong>,
+                                                <strong>
+                                                    <%= formatDays(taken) %> days
+                                                </strong>
+                                                of leave were taken.
 
-                                        <p class="mb-0">
-                                            <strong>
-                                                → Efforts must continue: every department head
-                                                is expected to submit complete H2 leave
-                                                plannings without delay.
-                                            </strong>
-                                        </p>
+                                                The balance after this month is
+                                                <strong>
+                                                    <%= formatDays(balance) %> days
+                                                </strong>,
+                                                of which
+                                                <strong>
+                                                    <%= formatDays(planned) %> days
+                                                </strong>
+                                                are already planned
+                                                (<strong>
+                                                    <%= formatPercentage(plannedPercentage) %>%
+                                                </strong>).
+
+                                                The remaining balance to plan is
+                                                <strong>
+                                                    <%= formatDays(remainingToPlan) %> days
+                                                </strong>.
+                                            </p>
+
+                                            <p>
+                                                The projected balance at the end of December is
+                                                <strong>
+                                                    <%= formatDays(endBalance) %> days
+                                                </strong>.
+                                                The reported average balance is
+                                                <strong>
+                                                    <%= formatDays(averageBalance) %> days
+                                                </strong>.
+                                            </p>
+
+                                            <p class="mb-0">
+                                                <strong>
+                                                    → Continue monitoring leave planning to reduce
+                                                    outstanding balances before the end of the year.
+                                                </strong>
+                                            </p>
+
+                                        </div>
                                     </div>
+
                                 </div>
 
                             </div>
-
-                        </div>
 
                     </div>
 

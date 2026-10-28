@@ -9,6 +9,7 @@ export enum LeaveStatus {
     APPROVED_BY_MANAGER = 'approved_by_manager',
     REJECTED = 'rejected',
     WITHDRAWN = 'withdrawn',
+    CANCELLED = 'cancelled',
 }
 
 export enum WithdrawStatus {

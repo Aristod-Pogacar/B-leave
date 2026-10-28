@@ -1,72 +1,71 @@
 <%- include('partials/head.ejs') %>
 
     <style>
-        .report-card {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-        }
-
-        /* Zone qui permet le scroll horizontal */
-        .table-wrapper {
+        .report-card .leave-table-wrapper {
             width: 100%;
             overflow-x: auto;
-            border: 1px solid #ddd;
         }
 
-        /* Tableau */
-        .report-table {
+        .report-card .leave-table-wrapper .leave-table {
+            width: max-content !important;
+            /* la table prend la taille de son contenu */
+            max-width: none !important;
+            table-layout: auto !important;
             border-collapse: collapse;
-            width: max-content;
+            margin: 0;
         }
 
         /* Toutes les cellules */
-        .report-table th,
-        .report-table td {
-            border: 1px solid #ddd;
+        .report-card .leave-table-wrapper .leave-table th,
+        .report-card .leave-table-wrapper .leave-table td {
+            padding: 4px 6px !important;
+            font-size: 0.8rem !important;
+            line-height: 1.2 !important;
             text-align: center;
-            height: 40px;
-            padding: 5px;
+            white-space: nowrap;
+            border: 1px solid #dee2e6;
         }
 
-        /* Première colonne */
-        .report-table th:first-child,
-        .report-table td:first-child {
+        /* Sous-colonnes DM / DNM / IND / SUB : assez larges pour "DNM" et "IND" */
+        .report-card .leave-table-wrapper .leave-table th.value,
+        .report-card .leave-table-wrapper .leave-table td.value {
+            min-width: 88px !important;
+            width: 88px;
+        }
+
+        /* Première colonne : 100px à 200px */
+        .report-card .leave-table-wrapper .leave-table .start-col {
+            min-width: 100px !important;
+            max-width: 200px !important;
             width: 100px;
-            min-width: 100px;
+            text-align: left;
+            white-space: normal;
+            overflow-wrap: break-word;
         }
 
-        /* Cellules de données */
-        .report-table .value {
-            width: 50px;
-            min-width: 50px;
+        /* Première colonne fixe pendant le scroll horizontal */
+        .report-card .leave-table-wrapper .leave-table th.start-col,
+        .report-card .leave-table-wrapper .leave-table td.start-col {
+            position: sticky;
+            left: 0;
+            z-index: 2;
+            background: #fff;
+            /* obligatoire : sinon on voit les colonnes passer dessous */
+            /* remplace les bordures, qui ne suivent pas une cellule sticky avec border-collapse */
+            box-shadow: inset -1px 0 0 #dee2e6, inset 0 -1px 0 #dee2e6;
         }
 
-        /* Dates */
-        .report-table .date {
-            background: #cfe2ff;
-            font-weight: bold;
+        /* L'en-tête "LEAVE TYPE" au-dessus des autres cellules fixes */
+        .report-card .leave-table-wrapper .leave-table th.start-col {
+            z-index: 3;
+            background: #f8f9fa;
         }
 
-        /* Sous-en-tête */
-        .report-table .type {
-            background: #e7f1ff;
-            font-size: 12px;
-        }
-
-        /* Subtotal */
-        .report-table .subtotal {
-            background: #fff3cd;
-            font-weight: bold;
-        }
-
-        /* Total */
-        .report-table .total {
-            background: #d1e7dd;
-            font-weight: bold;
+        /* Ligne TOTAL : garder son fond si elle en a un */
+        .report-card .leave-table-wrapper .leave-table tr.total td.start-col {
+            background: #f1f3f5;
         }
     </style>
-
 
     <body>
 
@@ -78,476 +77,121 @@
                 <main class="nxl-container">
 
                     <div class="nxl-content">
+                        <div class="page-header">
+                            <div class="page-header-left d-flex align-items-center">
+                                <div class="page-header-title">
+                                    <h5 class="m-b-10">B-Leave</h5>
+                                </div>
+                                <ul class="breadcrumb">
+                                    <li class="breadcrumb-item">Leaves</li>
+                                    <li class="breadcrumb-item">Global report</li>
+                                </ul>
+                            </div>
+                            <div class="page-header-right ms-auto">
+                                <div class="page-header-right-items">
+                                    <div class="d-flex d-md-none">
+                                        <a href="javascript:void(0)" class="page-header-right-close-toggle">
+                                            <i class="feather-arrow-left me-2"></i>
+                                            <span>Back</span>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="d-md-none d-flex align-items-center">
+                                    <a href="javascript:void(0)" class="page-header-right-open-toggle">
+                                        <i class="feather-align-right fs-20"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- [ page-header ] end -->
+                        <div class="bg-white py-3 border-bottom rounded-0 p-md-0 mb-0">
+                            <div class="d-md-none d-flex align-items-center justify-content-between">
+                                <a href="javascript:void(0)" class="page-content-left-open-toggle">
+                                    <i class="feather-align-left fs-20"></i>
+                                </a>
+                            </div>
+                        </div>
 
                         <div class="main-content py-4">
+                            <div class="tab-content">
+                                <div class="tab-pane fade active show" id="overviewTab">
+                                    <div class="row">
 
-                            <div class="container-fluid">
+                                        <div class="col-xl-12">
+                                            <div class="card stretch stretch-full d-flex">
+                                                <div class="card-header">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="avatar-text avatar-lg bg-soft-primary me-3">
+                                                            <i class="feather-file"></i>
+                                                        </div>
 
-                                <div class="report-card">
+                                                        <div>
+                                                            <h4 class="mb-1">Global Leave Report</h4>
+                                                            <p class="text-muted mb-0">
+                                                                Preview of leave statistics
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="card-body border-bottom bg-light">
+
+                                                    <!-- ===== LEFT: FORM ===== -->
+                                                    <div class="col-md-12">
+
+                                                        <!-- Recherche Employé -->
+                                                        <div class="mb-0">
+                                                            <form class="mb-4" action="/leave/global-report"
+                                                                method="post" id="form">
+                                                                <div class="row">
+                                                                    <div class="col-md-6">
+                                                                        <label for="status"
+                                                                            class="form-label">Start</label>
+                                                                        <input type="date" id="startDate"
+                                                                            name="startDate" class="form-control">
+                                                                    </div>
+                                                                    <div class="col-md-6">
+                                                                        <label for="status"
+                                                                            class="form-label">End</label>
+                                                                        <input type="date" id="endDate" name="endDate"
+                                                                            class="form-control">
+                                                                    </div>
+
+                                                                </div>
+                                                            </form>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                                <div class="card-body report-card">
+
+                                                    <div class="modal-body">
+                                                        <div class="row">
+                                                            <div class="col-12">
+                                                                <div id="reportStatus" class="text-muted mb-2"></div>
+
+                                                                <div class="leave-table-wrapper">
+                                                                    <table class="leave-table" id="leaveTable"></table>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-12 row p-2 ms-1">
+                                                                <button type="submit" form="form"
+                                                                    class="btn btn-success  float-right" id="btnExcel">
+
+                                                                    Generate Excel
+
+                                                                </button>
+                                                            </div>
 
 
-                                    <!-- TITRE -->
+                                                        </div>
 
-                                    <h3 class="mb-1">
-                                        Global Leave Report
-                                    </h3>
-
-                                    <p class="text-muted mb-4">
-                                        Preview of leave statistics
-                                    </p>
-
-
-                                    <!-- FORMULAIRE -->
-
-                                    <form class="mb-4">
-
-                                        <div class="row g-3">
-
-                                            <div class="col-md-4">
-
-                                                <label class="form-label">
-                                                    Start date
-                                                </label>
-
-                                                <input type="date" class="form-control" value="2026-10-01">
-
+                                                    </div>
+                                                </div>
                                             </div>
-
-
-                                            <div class="col-md-4">
-
-                                                <label class="form-label">
-                                                    End date
-                                                </label>
-
-                                                <input type="date" class="form-control" value="2026-10-10">
-
-                                            </div>
-
-
-                                            <div class="col-md-4 d-flex align-items-end gap-2">
-
-                                                <button type="button" class="btn btn-primary">
-
-                                                    Preview
-
-                                                </button>
-
-                                                <button type="button" class="btn btn-success">
-
-                                                    Generate Excel
-
-                                                </button>
-
-                                            </div>
-
                                         </div>
-
-                                    </form>
-
-
-                                    <hr>
-
-
-                                    <!-- PREVIEW -->
-
-                                    <h5 class="mt-4 mb-3">
-                                        Report Preview
-                                    </h5>
-
-
-                                    <!-- TABLEAU -->
-
-                                    <div class="table-wrapper">
-
-                                        <table class="report-table">
-
-                                            <thead>
-
-                                                <!-- DATES -->
-
-                                                <tr>
-
-                                                    <th rowspan="2">
-                                                        LEAVE TYPE
-                                                    </th>
-
-                                                    <th colspan="4" class="date">
-                                                        01/10/2026
-                                                    </th>
-
-                                                    <th colspan="4" class="date">
-                                                        02/10/2026
-                                                    </th>
-
-                                                    <th colspan="4" class="date">
-                                                        03/10/2026
-                                                    </th>
-
-                                                    <th colspan="4" class="date">
-                                                        04/10/2026
-                                                    </th>
-
-                                                    <th colspan="4" class="date">
-                                                        05/10/2026
-                                                    </th>
-
-                                                    <th colspan="4" class="date">
-                                                        06/10/2026
-                                                    </th>
-
-                                                    <th colspan="4" class="date">
-                                                        07/10/2026
-                                                    </th>
-
-                                                    <th colspan="4" class="date">
-                                                        08/10/2026
-                                                    </th>
-
-                                                    <th colspan="4" class="date">
-                                                        09/10/2026
-                                                    </th>
-
-                                                    <th colspan="4" class="date">
-                                                        10/10/2026
-                                                    </th>
-
-                                                </tr>
-
-
-                                                <!-- DM / DNM / IND / SUBTOTAL -->
-
-                                                <tr>
-
-                                                    <!-- 01 -->
-
-                                                    <th class="value type">DM</th>
-                                                    <th class="value type">DNM</th>
-                                                    <th class="value type">IND</th>
-                                                    <th class="value type subtotal">SUB</th>
-
-                                                    <!-- 02 -->
-
-                                                    <th class="value type">DM</th>
-                                                    <th class="value type">DNM</th>
-                                                    <th class="value type">IND</th>
-                                                    <th class="value type subtotal">SUB</th>
-
-                                                    <!-- 03 -->
-
-                                                    <th class="value type">DM</th>
-                                                    <th class="value type">DNM</th>
-                                                    <th class="value type">IND</th>
-                                                    <th class="value type subtotal">SUB</th>
-
-                                                    <!-- 04 -->
-
-                                                    <th class="value type">DM</th>
-                                                    <th class="value type">DNM</th>
-                                                    <th class="value type">IND</th>
-                                                    <th class="value type subtotal">SUB</th>
-
-                                                    <!-- 05 -->
-
-                                                    <th class="value type">DM</th>
-                                                    <th class="value type">DNM</th>
-                                                    <th class="value type">IND</th>
-                                                    <th class="value type subtotal">SUB</th>
-
-                                                    <!-- 06 -->
-
-                                                    <th class="value type">DM</th>
-                                                    <th class="value type">DNM</th>
-                                                    <th class="value type">IND</th>
-                                                    <th class="value type subtotal">SUB</th>
-
-                                                    <!-- 07 -->
-
-                                                    <th class="value type">DM</th>
-                                                    <th class="value type">DNM</th>
-                                                    <th class="value type">IND</th>
-                                                    <th class="value type subtotal">SUB</th>
-
-                                                    <!-- 08 -->
-
-                                                    <th class="value type">DM</th>
-                                                    <th class="value type">DNM</th>
-                                                    <th class="value type">IND</th>
-                                                    <th class="value type subtotal">SUB</th>
-
-                                                    <!-- 09 -->
-
-                                                    <th class="value type">DM</th>
-                                                    <th class="value type">DNM</th>
-                                                    <th class="value type">IND</th>
-                                                    <th class="value type subtotal">SUB</th>
-
-                                                    <!-- 10 -->
-
-                                                    <th class="value type">DM</th>
-                                                    <th class="value type">DNM</th>
-                                                    <th class="value type">IND</th>
-                                                    <th class="value type subtotal">SUB</th>
-
-                                                </tr>
-
-                                            </thead>
-
-
-                                            <tbody>
-
-
-                                                <!-- LOCAL LEAVE -->
-
-                                                <tr>
-
-                                                    <td>
-                                                        Local Leave
-                                                    </td>
-
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value subtotal">0</td>
-
-                                                    <td class="value">2</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value subtotal">2</td>
-
-                                                    <td class="value">0</td>
-                                                    <td class="value">1</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value subtotal">1</td>
-
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value subtotal">0</td>
-
-                                                    <td class="value">1</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value subtotal">1</td>
-
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value subtotal">0</td>
-
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value">1</td>
-                                                    <td class="value subtotal">1</td>
-
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value subtotal">0</td>
-
-                                                    <td class="value">2</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value subtotal">2</td>
-
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value subtotal">0</td>
-
-                                                </tr>
-
-
-                                                <!-- PERMISSION -->
-
-                                                <tr>
-
-                                                    <td>
-                                                        Permission
-                                                    </td>
-
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value subtotal">0</td>
-
-                                                    <td class="value">0</td>
-                                                    <td class="value">1</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value subtotal">1</td>
-
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value subtotal">0</td>
-
-                                                    <td class="value">1</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value subtotal">1</td>
-
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value subtotal">0</td>
-
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value subtotal">0</td>
-
-                                                    <td class="value">0</td>
-                                                    <td class="value">1</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value subtotal">1</td>
-
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value subtotal">0</td>
-
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value">1</td>
-                                                    <td class="value subtotal">1</td>
-
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value subtotal">0</td>
-
-                                                </tr>
-
-
-                                                <!-- INDISPONIBILITE -->
-
-                                                <tr>
-
-                                                    <td>
-                                                        Indisponibilite
-                                                    </td>
-
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value subtotal">0</td>
-
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value">1</td>
-                                                    <td class="value subtotal">1</td>
-
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value subtotal">0</td>
-
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value subtotal">0</td>
-
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value">1</td>
-                                                    <td class="value subtotal">1</td>
-
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value subtotal">0</td>
-
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value subtotal">0</td>
-
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value subtotal">0</td>
-
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value subtotal">0</td>
-
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value subtotal">0</td>
-
-                                                </tr>
-
-
-                                                <!-- TOTAL -->
-
-                                                <tr class="total">
-
-                                                    <td>
-                                                        TOTAL
-                                                    </td>
-
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-
-                                                    <td class="value">2</td>
-                                                    <td class="value">1</td>
-                                                    <td class="value">1</td>
-                                                    <td class="value">4</td>
-
-                                                    <td class="value">0</td>
-                                                    <td class="value">1</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value">1</td>
-
-                                                    <td class="value">1</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value">1</td>
-
-                                                    <td class="value">1</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value">1</td>
-                                                    <td class="value">2</td>
-
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-
-                                                    <td class="value">0</td>
-                                                    <td class="value">1</td>
-                                                    <td class="value">1</td>
-                                                    <td class="value">2</td>
-
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-
-                                                    <td class="value">2</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value">1</td>
-                                                    <td class="value">3</td>
-
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-                                                    <td class="value">0</td>
-
-                                                </tr>
-
-                                            </tbody>
-
-                                        </table>
-
                                     </div>
-
                                 </div>
-
                             </div>
 
                         </div>
@@ -555,6 +199,187 @@
                     </div>
 
                 </main>
+
+                <script>
+                    // Types de congés : clé renvoyée par l'API → libellé affiché
+                    const LEAVE_TYPES = [
+                        { key: 'Local_Leave_AMD', label: 'Local Leave' },
+                        { key: 'Permission_AMD', label: 'Permission' },
+                        { key: 'Indisponibilite_AMD', label: 'Indisponibilite' }
+                    ];
+                    const FIELDS = ['DM', 'DNM', 'IND', 'SUBTOTAL'];
+                    const FIELD_LABELS = { DM: 'DM', DNM: 'DNM', IND: 'IND', SUBTOTAL: 'SUB' };
+                    const START_COL_WIDTH = 150;
+                    const VALUE_COL_WIDTH = 30;
+
+                    const table = document.getElementById('leaveTable');
+                    const statusEl = document.getElementById('reportStatus');
+
+                    // petit helper pour créer un élément
+                    function el(tag, className, text) {
+                        const e = document.createElement(tag);
+                        if (className) e.className = className;
+                        if (text !== undefined) e.textContent = text;
+                        return e;
+                    }
+
+                    // '2026-10-01' → '01/10/2026'
+                    function formatDate(iso) {
+                        const [y, m, d] = iso.split('-');
+                        return `${d}/${m}/${y}`;
+                    }
+
+                    function renderTable(data) {
+                        const dates = Object.keys(data).sort();
+
+                        table.innerHTML = '';
+
+                        if (dates.length === 0) {
+                            statusEl.textContent = 'Aucune donnée pour cette période.';
+                            return;
+                        }
+                        statusEl.textContent = '';
+
+                        // largeur de la table = 150 + nbDates * 4 * 30
+                        const totalWidth = START_COL_WIDTH + dates.length * FIELDS.length * VALUE_COL_WIDTH;
+                        table.style.setProperty('width', totalWidth + 'px', 'important');
+
+                        // ----- COLGROUP -----
+                        const colgroup = el('colgroup');
+                        colgroup.appendChild(el('col', 'col-start'));
+                        dates.forEach(() => {
+                            FIELDS.forEach(() => colgroup.appendChild(el('col', 'col-value')));
+                        });
+                        table.appendChild(colgroup);
+
+                        // ----- THEAD -----
+                        const thead = el('thead');
+
+                        const trDates = el('tr');
+                        const thType = el('th', 'start-col', 'LEAVE TYPE');
+                        thType.rowSpan = 2;
+                        trDates.appendChild(thType);
+                        dates.forEach(date => {
+                            const th = el('th', 'date', formatDate(date));
+                            th.colSpan = FIELDS.length;
+                            trDates.appendChild(th);
+                        });
+                        thead.appendChild(trDates);
+
+                        const trFields = el('tr');
+                        dates.forEach(() => {
+                            FIELDS.forEach(f => {
+                                const cls = 'value type' + (f === 'SUBTOTAL' ? ' subtotal' : '');
+                                trFields.appendChild(el('th', cls, FIELD_LABELS[f]));
+                            });
+                        });
+                        thead.appendChild(trFields);
+                        table.appendChild(thead);
+
+                        // ----- TBODY -----
+                        const tbody = el('tbody');
+
+                        // cumul pour la ligne TOTAL : totals[date][champ]
+                        const totals = {};
+                        dates.forEach(d => {
+                            totals[d] = { DM: 0, DNM: 0, IND: 0, SUBTOTAL: 0 };
+                        });
+
+                        LEAVE_TYPES.forEach(({ key, label }) => {
+                            const tr = el('tr');
+                            tr.appendChild(el('td', 'start-col', label));
+
+                            dates.forEach(date => {
+                                const row = (data[date] && data[date][key]) || {};
+                                FIELDS.forEach(f => {
+                                    const value = Number(row[f]) || 0;
+                                    totals[date][f] += value;
+                                    const cls = 'value' + (f === 'SUBTOTAL' ? ' subtotal' : '');
+                                    tr.appendChild(el('td', cls, value));
+                                });
+                            });
+                            tbody.appendChild(tr);
+                        });
+
+                        // ligne TOTAL
+                        const trTotal = el('tr', 'total');
+                        trTotal.appendChild(el('td', 'start-col', 'TOTAL'));
+                        dates.forEach(date => {
+                            FIELDS.forEach(f => {
+                                trTotal.appendChild(el('td', 'value', totals[date][f]));
+                            });
+                        });
+                        tbody.appendChild(trTotal);
+
+                        table.appendChild(tbody);
+                    }
+
+                    async function loadPreview() {
+                        const startDate = document.getElementById('startDate').value;
+                        const endDate = document.getElementById('endDate').value;
+
+                        if (!startDate || !endDate) {
+                            statusEl.textContent = 'Veuillez renseigner les deux dates.';
+                            return;
+                        }
+                        if (startDate > endDate) {
+                            statusEl.textContent = 'La date de début doit être avant la date de fin.';
+                            return;
+                        }
+
+                        statusEl.textContent = 'Chargement...';
+                        table.innerHTML = '';
+
+                        try {
+                            const url = `/leave/global-report/preview?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}`;
+                            const response = await fetch(url);
+                            if (!response.ok) throw new Error('Erreur HTTP ' + response.status);
+                            const data = await response.json();
+                            renderTable(data);
+                        } catch (err) {
+                            console.error(err);
+                            statusEl.textContent = 'Erreur lors du chargement du rapport.';
+                        }
+                    }
+
+                    const startInput = document.getElementById('startDate');
+                    const endInput = document.getElementById('endDate');
+
+                    // Synchronise le min de la date de fin avec la date de début
+                    function syncEndMin() {
+                        endInput.min = startInput.value;
+
+                        // Si la date de fin est devenue antérieure au début, on la remonte
+                        if (startInput.value && endInput.value && endInput.value < startInput.value) {
+                            endInput.value = startInput.value;
+                        }
+                    }
+
+                    startInput.addEventListener('change', () => {
+                        syncEndMin();
+                        loadPreview();
+                    });
+
+                    endInput.addEventListener('change', loadPreview);
+                    // Date locale → 'YYYY-MM-DD' (sans passer par toISOString, voir remarque)
+                    function toInputDate(date) {
+                        const y = date.getFullYear();
+                        const m = String(date.getMonth() + 1).padStart(2, '0');
+                        const d = String(date.getDate()).padStart(2, '0');
+                        return `${y}-${m}-${d}`;
+                    }
+
+                    // Valeurs par défaut : 1er et dernier jour du mois en cours
+                    const now = new Date();
+                    startInput.value = toInputDate(new Date(now.getFullYear(), now.getMonth(), 1));
+                    endInput.value = toInputDate(new Date(now.getFullYear(), now.getMonth() + 1, 0));
+                    // Initialisation
+                    syncEndMin();
+                    loadPreview();
+
+                    // chargement initial avec les dates par défaut
+                    // loadPreview();
+                </script>
 
 
                 <%- include('partials/footer.ejs') %>

@@ -3058,6 +3058,27 @@ export class LeaveService {
     const workbook = new ExcelJS.Workbook();
 
     const worksheet = workbook.addWorksheet('Global Report');
+
+    // Police par défaut
+    worksheet.properties.defaultRowHeight = 24;
+
+    // Désactiver les quadrillages
+    worksheet.views = [
+      {
+        showGridLines: false,
+      },
+    ];
+
+    // Police par défaut pour toute la feuille
+    worksheet.eachRow({ includeEmpty: true }, (row) => {
+      row.eachCell({ includeEmpty: true }, (cell) => {
+        cell.font = {
+          name: 'Calibri Light',
+          size: 14,
+        };
+      });
+    });
+
     const {
       dates,
       leaveTypes,
@@ -3078,24 +3099,10 @@ export class LeaveService {
 
     let column = 3; // C
 
-    /*
-     * On crée les colonnes pour chaque date.
-     *
-     * Exemple :
-     *
-     * C = DM
-     * D = DNM
-     * E = IND
-     * F = SUBTOTAL
-     *
-     * G = DM
-     * H = DNM
-     * I = IND
-     * J = SUBTOTAL
-     */
-
     for (const date of dates) {
       const startColumn = column;
+      const d = new Date(date);
+      d.setDate(d.getDate() + 1)
 
       worksheet.mergeCells(
         2,
@@ -3106,7 +3113,7 @@ export class LeaveService {
 
       const dateCell = worksheet.getCell(2, startColumn);
 
-      dateCell.value = date;
+      dateCell.value = d;
 
       dateCell.numFmt = 'dd/mm/yyyy';
 
@@ -3230,7 +3237,26 @@ export class LeaveService {
      */
 
     const lastColumn = 2 + dates.length * 4;
+    // Titre du rapport
+    worksheet.mergeCells(1, 2, 1, lastColumn);
 
+    const titleCell = worksheet.getCell('B1');
+
+    titleCell.value = 'B-LEAVE GLOBAL REPORT';
+
+    titleCell.font = {
+      name: 'Calibri Light',
+      size: 18,
+      bold: true,
+    };
+
+    titleCell.alignment = {
+      horizontal: 'center',
+      vertical: 'middle',
+    };
+
+    // Hauteur de la ligne du titre
+    worksheet.getRow(1).height = 36;
     /*
      * Largeurs
      */
@@ -3329,9 +3355,23 @@ export class LeaveService {
         state: 'frozen',
         xSplit: 2,
         ySplit: 3,
+        showGridLines: false,
       },
     ];
 
+    // Police générale : Calibri Light, taille 14
+    worksheet.eachRow({ includeEmpty: true }, (row) => {
+      row.eachCell({ includeEmpty: true }, (cell) => {
+        const isTitle = cell.address === 'B1';
+
+        cell.font = {
+          name: 'Calibri Light',
+          size: isTitle ? 18 : 14,
+          bold: isTitle || cell.font?.bold === true,
+          italic: cell.font?.italic,
+        };
+      });
+    });
     /*
      * -----------------------------------------
      * DOWNLOAD

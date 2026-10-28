@@ -428,10 +428,22 @@ export class LeaveController {
     res.send(buffer);
   }
 
+  private sumYearMonth(year: number, month: number): string {
+    const sum = '' + year + '-' + month.toString().padStart(2, "0");
+    return sum;
+  }
+
   @Get('leave-review')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.PAYROLL, UserRole.MANAGER, UserRole.PRODUCTION_MANAGER)
   @Render('leave-review')
   async getLeaveReview() {
-    return { title: "Leave preview" };
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const defaultDate = this.sumYearMonth(year, month)
+    const globalLeaves = await this.leaveService.getGlobalLeavesPlanningReport(year, month)
+    return { title: "Leave preview", globalLeaves, defaultDate };
   }
 
   @Get('range')
